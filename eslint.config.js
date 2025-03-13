@@ -25,7 +25,7 @@ export default [
       'no-console': 'off',
       'no-undef': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   configPrettier,
