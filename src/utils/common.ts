@@ -9,9 +9,8 @@ export const getPagination = ({
 }) => {
   const limit = size;
   const offset = (page - 1) * size;
-  eturn { offset, limit };
+  return { offset, limit };
 };
-
 
 // Reusable function to get paginated data
 export async function getPaginatedData<T>(
