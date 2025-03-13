@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { ExpressError } from '../types';
 
 interface ResponseData {
   res: Response;
@@ -9,7 +10,7 @@ interface ResponseData {
 
 interface ThrowErr {
   res: Response;
-  error: any;
+  error: ExpressError;
   status: number;
   message: string;
 }

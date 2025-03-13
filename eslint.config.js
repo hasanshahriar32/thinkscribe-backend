@@ -22,8 +22,10 @@ export default [
     rules: {
       ...ts.configs.recommended.rules,
       'prettier/prettier': 'error',
-      'no-console': 'warn',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      'no-console': 'off',
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
     },
   },
   configPrettier,

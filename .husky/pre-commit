@@ -1,4 +1,5 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npm run lint
+echo "Running ESLint..."
+npm run lint || { echo "❌ Lint failed. Aborting commit."; exit 1; }

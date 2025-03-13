@@ -1,8 +1,11 @@
 import dotenv from 'dotenv';
+import knex from 'knex';
 
+// Load environment variables from .env file
 dotenv.config();
 
-const db = require('knex')({
+// Create the knex instance using the environment variables
+const db = knex({
   client: 'mysql2',
   connection: {
     host: process.env.DB_HOST,
