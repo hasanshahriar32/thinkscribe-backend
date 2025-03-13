@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { responseData, throwErr } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import { getActions } from './rbac.service';
+import { ExpressError } from '../../types';
 
 export async function getAllActions(req: Request, res: Response) {
   try {

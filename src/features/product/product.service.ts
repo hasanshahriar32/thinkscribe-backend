@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 import db from '../../db/db';
-import { getPagination } from '../../utils/common';
+import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types';
 
 export async function getProducts(filters: ListQuery) {
@@ -14,6 +14,7 @@ export async function getProducts(filters: ListQuery) {
     .select('id', 'name', 'price', 'is_deleted')
     .limit(pagination.limit)
     .offset(pagination.offset);
+  const totalCountQuery = db.table('product').count('* as count');
 
   if (filters.sort) {
     query.orderBy(filters.sort, filters.order || 'asc');
@@ -23,11 +24,10 @@ export async function getProducts(filters: ListQuery) {
 
   if (filters.keyword) {
     query.whereILike('name', `%${filters.keyword}%`);
+    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
   }
 
-  // filter queries
-
-  return query;
+  return getPaginatedData(query, totalCountQuery, filters, pagination);
 }
 
 export async function getProduct(id: string | number) {
@@ -77,5 +77,3 @@ export async function getExistingProduct(data: Record<string, unknown>) {
     .where(data);
   return product[0] || null;
 }
-
-export async function getTotalCountProduct(filters: Record<string, unknown>) {}
