@@ -1,24 +1,36 @@
-import { NextFunction, Request, Response } from 'express';
-import { getUser } from './auth.service';
+import { NextFunction, Request, response, Response } from 'express';
+import {
+  getAccessToken,
+  getRefreshToken,
+  getUser,
+  verifyPassword,
+} from './auth.service';
+import { AppError, responseData } from '../../utils/http';
+import { MESSAGES } from '../../configs/messages';
 
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {
-    // get one user
     const user = await getUser(req.body.username);
+    if (!user) throw new AppError('User Not Found!', 400);
 
-    // throw err if no user
+    const isCorrectPassword = await verifyPassword(
+      user.password,
+      req.body.password
+    );
+    if (!isCorrectPassword) throw new AppError('Incorrect Password!', 400);
+    delete user.password;
 
-    // verify password
+    const accessToken = await getAccessToken(user);
+    const refreshToken = await getRefreshToken({ id: user.id });
 
-    // throw err if wrong password
-
-    // generate access token
-
-    // generate refresh token
-
-    res.send({ message: 'Signup successfully!' });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.CREATE,
+      data: { accessToken, refreshToken, ...user },
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error processing sale' });
+    next(error);
   }
 }
 

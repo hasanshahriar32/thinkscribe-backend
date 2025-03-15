@@ -1,20 +1,26 @@
-import { Knex } from 'knex';
 import db from '../../db/db';
-import { getPagination } from '../../utils/common';
-import { ListQuery } from '../../types';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
+const EXPIRATION_TIME = '1h'; // Token expires in 1 hour
 
 export async function getUser(username: string) {
   const user = await db
     .table('user')
-    .select('id', 'username', 'password', 'is_deleted')
+    .select('id', 'username', 'password')
     .where('username', username);
   return user[0] || null;
 }
 
-export async function getAccessToken() {}
+export async function getAccessToken(payload: Record<string, unknown>) {
+  return jwt.sign(payload, SECRET_KEY, { expiresIn: EXPIRATION_TIME });
+}
 
-export async function getRefreshToken() {}
+export async function getRefreshToken(payload: Record<string, unknown>) {
+  return jwt.sign(payload, SECRET_KEY, { expiresIn: EXPIRATION_TIME });
+}
 
-export async function hashPassword() {}
-
-export async function verifyPassword() {}
+export async function verifyPassword(hashedPassword: string, password: string) {
+  return bcrypt.compare(password, hashedPassword);
+}
