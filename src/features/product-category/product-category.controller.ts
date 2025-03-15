@@ -2,19 +2,22 @@ import { Request, Response } from 'express';
 import { responseData, throwErr } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
-  createProduct,
-  deleteProduct,
-  getProduct,
-  getProducts,
-  updateProduct,
-} from './product.service';
+  createProductCategory,
+  deleteProductCategory,
+  getProductCategory,
+  getProductCategories,
+  updateProductCategory,
+  getExistingProductCategory,
+} from './product-category.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types';
 
-export async function getAllProducts(req: Request, res: Response) {
+export async function getAllProductCategories(req: Request, res: Response) {
   try {
-    const result = await getProducts(req.query as unknown as ListQuery);
+    const result = await getProductCategories(
+      req.query as unknown as ListQuery
+    );
 
     responseData({
       res,
@@ -32,9 +35,9 @@ export async function getAllProducts(req: Request, res: Response) {
   }
 }
 
-export async function getOneProduct(req: Request, res: Response) {
+export async function getOneProductCategory(req: Request, res: Response) {
   try {
-    const product = await getProduct(req.params.id);
+    const product = await getProductCategory(req.params.id);
 
     responseData({
       res,
@@ -52,15 +55,14 @@ export async function getOneProduct(req: Request, res: Response) {
   }
 }
 
-export async function createOneProduct(req: Request, res: Response) {
+export async function createOneProductCategory(req: Request, res: Response) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
-      price: req.body.price,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
     };
-    const createdProduct = await createProduct(payload, trx);
+    const createdProductCategory = await createProductCategory(payload, trx);
 
     await trx.commit();
 
@@ -68,7 +70,7 @@ export async function createOneProduct(req: Request, res: Response) {
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: createdProduct,
+      data: createdProductCategory,
     });
   } catch (error) {
     await trx.rollback();
@@ -81,15 +83,14 @@ export async function createOneProduct(req: Request, res: Response) {
   }
 }
 
-export async function updateOneProduct(req: Request, res: Response) {
+export async function updateOneProductCategory(req: Request, res: Response) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
-      price: req.body.price,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
     };
-    const updatedProduct = await updateProduct(
+    const updatedProductCategory = await updateProductCategory(
       {
         id: req.params.id,
         data: payload,
@@ -103,7 +104,7 @@ export async function updateOneProduct(req: Request, res: Response) {
       res,
       status: 200,
       message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedProduct,
+      data: updatedProductCategory,
     });
   } catch (error) {
     await trx.rollback();
@@ -116,10 +117,10 @@ export async function updateOneProduct(req: Request, res: Response) {
   }
 }
 
-export async function deleteOneProduct(req: Request, res: Response) {
+export async function deleteOneProductCategory(req: Request, res: Response) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProduct = await deleteProduct(req.params.id);
+    // const deletedProductCategory = await deleteProductCategory(req.params.id);
 
     await trx.commit();
 
@@ -127,7 +128,7 @@ export async function deleteOneProduct(req: Request, res: Response) {
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: deletedProduct,
+      data: null,
     });
   } catch (error) {
     await trx.rollback();

@@ -11,7 +11,16 @@ export async function getProducts(filters: ListQuery) {
 
   const query = db
     .table('product')
-    .select('id', 'name', 'price', 'is_deleted')
+    .select(
+      'product.id',
+      'product.name',
+      'product.price',
+      'product.is_deleted',
+      db.raw(
+        `JSON_OBJECT('id', product_category.id, 'name', product_category.name) as category`
+      )
+    )
+    .leftJoin('product_category', 'product_category.id', 'product.category_id')
     .limit(pagination.limit)
     .offset(pagination.offset);
   const totalCountQuery = db.table('product').count('* as count');
@@ -19,12 +28,12 @@ export async function getProducts(filters: ListQuery) {
   if (filters.sort) {
     query.orderBy(filters.sort, filters.order || 'asc');
   } else {
-    query.orderBy('created_at', 'desc');
+    query.orderBy('product.created_at', 'desc');
   }
 
   if (filters.keyword) {
-    query.whereILike('name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
+    query.whereILike('product.name', `%${filters.keyword}%`);
+    totalCountQuery.whereILike('product.name', `%${filters.keyword}%`);
   }
 
   return getPaginatedData(query, totalCountQuery, filters, pagination);

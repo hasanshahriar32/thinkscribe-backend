@@ -58,6 +58,7 @@ export async function createOneProduct(req: Request, res: Response) {
     const payload = {
       name: req.body.name,
       price: req.body.price,
+      category_id: req.body.category_id,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
     };
     const createdProduct = await createProduct(payload, trx);
@@ -87,6 +88,7 @@ export async function updateOneProduct(req: Request, res: Response) {
     const payload = {
       name: req.body.name,
       price: req.body.price,
+      category_id: req.body.category_id,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
     };
     const updatedProduct = await updateProduct(

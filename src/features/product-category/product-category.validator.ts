@@ -18,7 +18,6 @@ const validator = {
   create: {
     body: Joi.object({
       name: Joi.string().required(),
-      price: Joi.number().required(),
     }),
   },
   update: {
@@ -27,7 +26,6 @@ const validator = {
     }),
     body: Joi.object({
       name: Joi.string().required(),
-      price: Joi.number().required(),
     }),
   },
   delete: {
