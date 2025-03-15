@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { MESSAGES } from '../configs/messages';
 
 interface ResponseData {
   res: Response;
@@ -27,11 +28,17 @@ export const responseData = ({
   });
 };
 
-export const throwErr = ({ res, error, status = 500, message }: ThrowErr) => {
-  console.log(error);
+export class AppError extends Error {
+  status: string | number;
+  constructor(message: string, status: number | string) {
+    super(message);
+    this.status = status;
+  }
+}
 
-  res.status(status).json({
-    status,
-    message,
+export const throwErr = ({ res, error }: ThrowErr) => {
+  res.status(error.status || 500).json({
+    status: error.status,
+    message: error.message || MESSAGES.ERROR.SERVER,
   });
 };

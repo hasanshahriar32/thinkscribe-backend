@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { responseData, throwErr } from '../../utils/http';
+import { NextFunction, Request, Response } from 'express';
+import { AppError, responseData, throwErr } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
   createProductCategory,
@@ -13,7 +13,11 @@ import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types';
 
-export async function getAllProductCategories(req: Request, res: Response) {
+export async function getAllProductCategories(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const result = await getProductCategories(
       req.query as unknown as ListQuery
@@ -26,16 +30,15 @@ export async function getAllProductCategories(req: Request, res: Response) {
       data: result,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function getOneProductCategory(req: Request, res: Response) {
+export async function getOneProductCategory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const product = await getProductCategory(req.params.id);
 
@@ -46,16 +49,15 @@ export async function getOneProductCategory(req: Request, res: Response) {
       data: product,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function createOneProductCategory(req: Request, res: Response) {
+export async function createOneProductCategory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
@@ -74,16 +76,15 @@ export async function createOneProductCategory(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function updateOneProductCategory(req: Request, res: Response) {
+export async function updateOneProductCategory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
@@ -108,19 +109,25 @@ export async function updateOneProductCategory(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function deleteOneProductCategory(req: Request, res: Response) {
+export async function deleteOneProductCategory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    // const deletedProductCategory = await deleteProductCategory(req.params.id);
+    const isExistedProductCategory = await getExistingProductCategory({
+      id: req.params.id,
+    });
+
+    if (!isExistedProductCategory)
+      throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+
+    const deletedProductCategory = await deleteProductCategory(req.params.id);
 
     await trx.commit();
 
@@ -128,15 +135,10 @@ export async function deleteOneProductCategory(req: Request, res: Response) {
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: null,
+      data: deletedProductCategory,
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }

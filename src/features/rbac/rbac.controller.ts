@@ -1,10 +1,14 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { responseData, throwErr } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import { getActions } from './rbac.service';
 import { ExpressError } from '../../types';
 
-export async function getAllActions(req: Request, res: Response) {
+export async function getAllActions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const result = await getActions();
 
@@ -15,11 +19,6 @@ export async function getAllActions(req: Request, res: Response) {
       data: result,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }

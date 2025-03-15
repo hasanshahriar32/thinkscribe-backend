@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { responseData, throwErr } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
@@ -13,7 +13,11 @@ import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types';
 
-export async function getAllUsers(req: Request, res: Response) {
+export async function getAllUsers(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const result = await getUsers(req.query as unknown as ListQuery);
 
@@ -24,16 +28,15 @@ export async function getAllUsers(req: Request, res: Response) {
       data: result,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function getOneUser(req: Request, res: Response) {
+export async function getOneUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const product = await getUser(req.params.id);
 
@@ -44,16 +47,15 @@ export async function getOneUser(req: Request, res: Response) {
       data: product,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function createOneUser(req: Request, res: Response) {
+export async function createOneUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const password = await hashPassword(req.body.password);
@@ -83,16 +85,15 @@ export async function createOneUser(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function updateOneUser(req: Request, res: Response) {
+export async function updateOneUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
@@ -118,16 +119,15 @@ export async function updateOneUser(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function deleteOneUser(req: Request, res: Response) {
+export async function deleteOneUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const deletedUser = await deleteUser(req.params.id);
@@ -142,11 +142,6 @@ export async function deleteOneUser(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }

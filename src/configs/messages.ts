@@ -13,5 +13,6 @@ export const MESSAGES = {
     SERVER: '',
     NOT_FOUND: '',
     NO_PERMISSION: '',
+    BAD_REQUEST: 'Invalid Request!',
   },
 } as const;

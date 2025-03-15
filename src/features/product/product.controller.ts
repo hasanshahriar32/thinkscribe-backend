@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { responseData, throwErr } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
@@ -12,7 +12,11 @@ import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types';
 
-export async function getAllProducts(req: Request, res: Response) {
+export async function getAllProducts(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const result = await getProducts(req.query as unknown as ListQuery);
 
@@ -23,16 +27,15 @@ export async function getAllProducts(req: Request, res: Response) {
       data: result,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function getOneProduct(req: Request, res: Response) {
+export async function getOneProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const product = await getProduct(req.params.id);
 
@@ -43,16 +46,15 @@ export async function getOneProduct(req: Request, res: Response) {
       data: product,
     });
   } catch (error) {
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function createOneProduct(req: Request, res: Response) {
+export async function createOneProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
@@ -73,16 +75,15 @@ export async function createOneProduct(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function updateOneProduct(req: Request, res: Response) {
+export async function updateOneProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
@@ -109,16 +110,15 @@ export async function updateOneProduct(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }
 
-export async function deleteOneProduct(req: Request, res: Response) {
+export async function deleteOneProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const trx: Knex.Transaction = await db.transaction();
   try {
     const deletedProduct = await deleteProduct(req.params.id);
@@ -133,11 +133,6 @@ export async function deleteOneProduct(req: Request, res: Response) {
     });
   } catch (error) {
     await trx.rollback();
-    throwErr({
-      res,
-      error,
-      status: 500,
-      message: 'Internal Server Error',
-    });
+    next(error);
   }
 }

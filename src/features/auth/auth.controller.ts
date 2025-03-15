@@ -1,8 +1,10 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { getUser } from './auth.service';
 
-export async function login(req: Request, res: Response) {
+export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     // get one user
+    const user = await getUser(req.body.username);
 
     // throw err if no user
 
@@ -20,7 +22,11 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-export async function refreshToken(req: Request, res: Response) {
+export async function refreshToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     res.send({ message: 'Signup successfully!' });
   } catch (error) {
