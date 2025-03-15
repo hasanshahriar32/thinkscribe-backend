@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { responseData, throwErr } from '../../utils/http';
+import { responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
   createProduct,

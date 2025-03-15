@@ -35,10 +35,3 @@ export class AppError extends Error {
     this.status = status;
   }
 }
-
-export const throwErr = ({ res, error }: ThrowErr) => {
-  res.status(error.status || 500).json({
-    status: error.status,
-    message: error.message || MESSAGES.ERROR.SERVER,
-  });
-};
