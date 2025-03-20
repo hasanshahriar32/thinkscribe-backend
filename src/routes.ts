@@ -8,6 +8,7 @@ import moduleRoutes from './features/module/module.route';
 import channelRoutes from './features/channel/channel.route';
 import roleRoutes from './features/role/role.route';
 import subModuleRoutes from './features/sub-module/sub-module.route';
+import actionRoutes from './features/action/action.route';
 
 const routes = Router();
 
@@ -19,6 +20,7 @@ routes.use('/api', verifyToken, moduleRoutes);
 routes.use('/api', verifyToken, subModuleRoutes);
 routes.use('/api', verifyToken, channelRoutes);
 routes.use('/api', verifyToken, roleRoutes);
+routes.use('/api', verifyToken, actionRoutes);
 routes.use('/api', verifyToken, productCategoryRoutes);
 routes.use('/api', verifyToken, productRoutes);
 routes.use('/api', verifyToken, userRoutes);

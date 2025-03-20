@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 const validator = {
-  select: {
+  moduleSelect: {
     query: Joi.object({
       keyword: Joi.string().allow('').optional(),
       size: Joi.number().required(),
@@ -10,29 +10,25 @@ const validator = {
       order: Joi.string().valid('asc', 'desc').optional(),
     }),
   },
-  detail: {
+  moduleDetail: {
     params: Joi.object({
       id: Joi.string().required(),
     }),
   },
-  create: {
+  moduleCreate: {
     body: Joi.object({
       name: Joi.string().required(),
-      category_id: Joi.string().required(),
-      price: Joi.number().required(),
     }),
   },
-  update: {
+  moduleUpdate: {
     params: Joi.object({
       id: Joi.string().required(),
     }),
     body: Joi.object({
       name: Joi.string().required(),
-      price: Joi.number().required(),
-      category_id: Joi.string().required(),
     }),
   },
-  delete: {
+  moduleDelete: {
     params: Joi.object({
       id: Joi.string().required(),
     }),

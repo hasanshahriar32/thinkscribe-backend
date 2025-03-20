@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import validator from './sub-module.validator';
+import { validateRequest } from '../../middlewares/validation';
 import {
   createOneSubModule,
   deleteOneSubModule,
@@ -6,34 +8,32 @@ import {
   getOneSubModule,
   updateOneSubModule,
 } from './sub-module.controller';
-import { validateRequest } from '../../middlewares/validation';
-import validator from './sub-module.validator';
 
 const subModuleRoutes = Router();
 
 subModuleRoutes.get(
   '/sub-modules',
-  validateRequest(validator.moduleSelect),
+  validateRequest(validator.select),
   getAllSubModules
 );
 subModuleRoutes.get(
   '/sub-modules/:id',
-  validateRequest(validator.moduleDetail),
+  validateRequest(validator.detail),
   getOneSubModule
 );
 subModuleRoutes.post(
   '/sub-modules',
-  validateRequest(validator.moduleCreate),
+  validateRequest(validator.create),
   createOneSubModule
 );
 subModuleRoutes.patch(
   '/sub-modules/:id',
-  validateRequest(validator.moduleUpdate),
+  validateRequest(validator.update),
   updateOneSubModule
 );
 subModuleRoutes.delete(
   '/sub-modules/:id',
-  validateRequest(validator.moduleDelete),
+  validateRequest(validator.delete),
   deleteOneSubModule
 );
 

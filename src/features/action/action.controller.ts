@@ -2,24 +2,24 @@ import { NextFunction, Request, Response } from 'express';
 import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
-  createSubModule,
-  deleteSubModule,
-  getExistingSubModule,
-  getSubModule,
-  getSubModules,
-  updateSubModule,
-} from './sub-module.service';
+  createAction,
+  deleteAction,
+  getAction,
+  getActions,
+  updateAction,
+  getExistingAction,
+} from './action.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
 
-export async function getAllSubModules(
+export async function getAllActions(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const result = await getSubModules(req.query as unknown as ListQuery);
+    const result = await getActions(req.query as unknown as ListQuery);
 
     responseData({
       res,
@@ -32,13 +32,13 @@ export async function getAllSubModules(
   }
 }
 
-export async function getOneSubModule(
+export async function getOneAction(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const product = await getSubModule(req.params.id);
+    const product = await getAction(req.params.id);
 
     responseData({
       res,
@@ -51,26 +51,24 @@ export async function getOneSubModule(
   }
 }
 
-export async function createOneSubModule(
+export async function createOneAction(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const existingSubModule = await getExistingSubModule({
+    const existingAction = await getExistingAction({
       name: req.body.name,
     });
-    if (existingSubModule)
+    if (existingAction)
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
       name: req.body.name,
-      price: req.body.price,
-      category_id: req.body.category_id,
       created_by: req.body.user.id,
     };
-    const createdSubModule = await createSubModule(payload, trx);
+    const createdAction = await createAction(payload, trx);
 
     await trx.commit();
 
@@ -78,7 +76,7 @@ export async function createOneSubModule(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: createdSubModule,
+      data: createdAction,
     });
   } catch (error) {
     await trx.rollback();
@@ -86,7 +84,7 @@ export async function createOneSubModule(
   }
 }
 
-export async function updateOneSubModule(
+export async function updateOneAction(
   req: Request,
   res: Response,
   next: NextFunction
@@ -95,11 +93,9 @@ export async function updateOneSubModule(
   try {
     const payload = {
       name: req.body.name,
-      price: req.body.price,
-      category_id: req.body.category_id,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
     };
-    const updatedSubModule = await updateSubModule(
+    const updatedAction = await updateAction(
       {
         id: req.params.id,
         data: payload,
@@ -113,7 +109,7 @@ export async function updateOneSubModule(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedSubModule,
+      data: updatedAction,
     });
   } catch (error) {
     await trx.rollback();
@@ -121,14 +117,20 @@ export async function updateOneSubModule(
   }
 }
 
-export async function deleteOneSubModule(
+export async function deleteOneAction(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedSubModule = await deleteSubModule(req.params.id);
+    const isExistedAction = await getExistingAction({
+      id: req.params.id,
+    });
+
+    if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+
+    const deletedAction = await deleteAction(req.params.id);
 
     await trx.commit();
 
@@ -136,7 +138,7 @@ export async function deleteOneSubModule(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: deletedSubModule,
+      data: deletedAction,
     });
   } catch (error) {
     await trx.rollback();
