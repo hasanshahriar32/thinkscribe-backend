@@ -11,29 +11,25 @@ import validator from './module.validator';
 
 const moduleRoutes = Router();
 
-moduleRoutes.get(
-  '/modules',
-  validateRequest(validator.moduleSelect),
-  getAllModules
-);
+moduleRoutes.get('/modules', validateRequest(validator.select), getAllModules);
 moduleRoutes.get(
   '/modules/:id',
-  validateRequest(validator.moduleDetail),
+  validateRequest(validator.detail),
   getOneModule
 );
 moduleRoutes.post(
   '/modules',
-  validateRequest(validator.moduleCreate),
+  validateRequest(validator.create),
   createOneModule
 );
 moduleRoutes.patch(
   '/modules/:id',
-  validateRequest(validator.moduleUpdate),
+  validateRequest(validator.update),
   updateOneModule
 );
 moduleRoutes.delete(
   '/modules/:id',
-  validateRequest(validator.moduleDelete),
+  validateRequest(validator.delete),
   deleteOneModule
 );
 

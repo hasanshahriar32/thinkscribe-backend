@@ -13,27 +13,27 @@ const channelRoutes = Router();
 
 channelRoutes.get(
   '/channels',
-  validateRequest(validator.moduleSelect),
+  validateRequest(validator.select),
   getAllChannels
 );
 channelRoutes.get(
   '/channels/:id',
-  validateRequest(validator.moduleDetail),
+  validateRequest(validator.detail),
   getOneChannel
 );
 channelRoutes.post(
   '/channels',
-  validateRequest(validator.moduleCreate),
+  validateRequest(validator.create),
   createOneChannel
 );
 channelRoutes.patch(
   '/channels/:id',
-  validateRequest(validator.moduleUpdate),
+  validateRequest(validator.update),
   updateOneChannel
 );
 channelRoutes.delete(
   '/channels/:id',
-  validateRequest(validator.moduleDelete),
+  validateRequest(validator.delete),
   deleteOneChannel
 );
 
