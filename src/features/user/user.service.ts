@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 import bcrypt from 'bcrypt';
 import db from '../../db/db';
 import { getPagination } from '../../utils/common';
-import { ListQuery } from '../../types';
+import { ListQuery } from '../../types/types';
 
 export async function getUsers(filters: ListQuery) {
   const pagination = getPagination({

@@ -1,16 +1,25 @@
 import { NextFunction, Request, Response } from 'express';
-import { responseData } from '../../utils/http';
+import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
-import { getActions } from './rbac.service';
-import { ExpressError } from '../../types';
+import {
+  createModule,
+  deleteModule,
+  getModule,
+  getModules,
+  updateModule,
+  getExistingModule,
+} from './rbac.service';
+import db from '../../db/db';
+import { Knex } from 'knex';
+import { ListQuery } from '../../types/types';
 
-export async function getAllActions(
+export async function getAllModules(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const result = await getActions();
+    const result = await getModules(req.query as unknown as ListQuery);
 
     responseData({
       res,
@@ -19,6 +28,114 @@ export async function getAllActions(
       data: result,
     });
   } catch (error) {
+    next(error);
+  }
+}
+
+export async function getOneModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const product = await getModule(req.params.id);
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.RETRIVE,
+      data: product,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createOneModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const payload = {
+      name: req.body.name,
+      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+    };
+    const createdModule = await createModule(payload, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.CREATE,
+      data: createdModule,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function updateOneModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const payload = {
+      name: req.body.name,
+      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+    };
+    const updatedModule = await updateModule(
+      {
+        id: req.params.id,
+        data: payload,
+      },
+      trx
+    );
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.UPDATE,
+      data: updatedModule,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function deleteOneModule(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const isExistedModule = await getExistingModule({
+      id: req.params.id,
+    });
+
+    if (!isExistedModule) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+
+    const deletedModule = await deleteModule(req.params.id);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: deletedModule,
+    });
+  } catch (error) {
+    await trx.rollback();
     next(error);
   }
 }

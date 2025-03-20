@@ -1,4 +1,4 @@
-import { ListQuery } from '../types';
+import { ListQuery } from '../types/types';
 
 export const getPagination = ({
   page,

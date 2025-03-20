@@ -3,6 +3,7 @@ import {
   getAccessToken,
   getRefreshToken,
   getUser,
+  getUserPermissions,
   verifyPassword,
 } from './auth.service';
 import { AppError, responseData } from '../../utils/http';
@@ -23,12 +24,18 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     const accessToken = await getAccessToken(user);
     const refreshToken = await getRefreshToken({ id: user.id });
+    const userPermissions = await getUserPermissions({ id: user.id });
 
     responseData({
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: { accessToken, refreshToken, ...user },
+      data: {
+        accessToken,
+        refreshToken,
+        ...user,
+        permissions: userPermissions,
+      },
     });
   } catch (error) {
     next(error);

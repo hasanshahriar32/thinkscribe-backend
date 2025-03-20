@@ -25,7 +25,7 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
         throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
       }
 
-      req.body = { ...req.body, user: decoded }; // Attach decoded payload to req.body.user
+      req.body.user = decoded; // Attach decoded payload to req.user
       next();
     }
   );
@@ -52,7 +52,7 @@ export function verifyRefreshToken(
         throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
       }
 
-      req.body = { ...req.body, user: decoded }; // Attach decoded payload to req.body.user
+      req.body.user = decoded; // Attach decoded payload to req.user
       next();
     }
   );

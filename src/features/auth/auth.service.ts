@@ -12,6 +12,14 @@ export async function getUser(conds: Record<string, unknown>) {
   return user[0] || null;
 }
 
+export async function getUserPermissions(conds: Record<string, unknown>) {
+  const user = await db
+    .table('user')
+    .select('id', 'username', 'password')
+    .where(conds);
+  return user[0] || null;
+}
+
 export async function getAccessToken(payload: Record<string, unknown>) {
   return jwt.sign(payload, process.env.JWT_SECRET || 'smsk-jwt-secret', {
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',

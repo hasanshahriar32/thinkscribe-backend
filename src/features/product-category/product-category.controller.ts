@@ -11,7 +11,7 @@ import {
 } from './product-category.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
-import { ListQuery } from '../../types';
+import { ListQuery } from '../../types/types';
 
 export async function getAllProductCategories(
   req: Request,

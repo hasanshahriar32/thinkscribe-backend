@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
 import db from '../../db/db';
 import { getPaginatedData, getPagination } from '../../utils/common';
-import { ListQuery } from '../../types';
+import { ListQuery } from '../../types/types';
 
 export async function getProductCategories(filters: ListQuery) {
   const pagination = getPagination({

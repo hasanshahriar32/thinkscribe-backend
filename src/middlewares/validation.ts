@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Schema } from 'joi';
+import { AppError } from '../utils/http';
 
 interface ValidationSchemas {
   body?: Schema;
@@ -11,10 +12,18 @@ export const validateRequest = (schemas: ValidationSchemas) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     // Validate body
     if (schemas.body) {
-      const { error } = schemas.body.validate(req.body);
+      // Clone the request body to avoid mutating the original request
+      const bodyToValidate = { ...req.body };
+
+      // If the user object is optional and not present, remove it from the validation
+      if (bodyToValidate.user) {
+        delete bodyToValidate.user;
+      }
+
+      // Validate the modified body
+      const { error } = schemas.body.validate(bodyToValidate);
       if (error) {
-        res.status(400).json({ message: error.details[0].message });
-        return;
+        throw new AppError(error.details[0].message, 400);
       }
     }
 
@@ -22,8 +31,7 @@ export const validateRequest = (schemas: ValidationSchemas) => {
     if (schemas.query) {
       const { error } = schemas.query.validate(req.query);
       if (error) {
-        res.status(400).json({ message: error.details[0].message });
-        return;
+        throw new AppError(error.details[0].message, 400);
       }
     }
 
@@ -31,8 +39,7 @@ export const validateRequest = (schemas: ValidationSchemas) => {
     if (schemas.params) {
       const { error } = schemas.params.validate(req.params);
       if (error) {
-        res.status(400).json({ message: error.details[0].message });
-        return;
+        throw new AppError(error.details[0].message, 400);
       }
     }
 
