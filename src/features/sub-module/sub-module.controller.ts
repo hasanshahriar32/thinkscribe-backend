@@ -2,24 +2,24 @@ import { NextFunction, Request, Response } from 'express';
 import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
-  createModule,
-  deleteModule,
-  getModule,
-  getModules,
-  updateModule,
-  getExistingModule,
-} from './rbac.service';
+  createSubModule,
+  deleteSubModule,
+  getSubModule,
+  getSubModules,
+  updateSubModule,
+  getExistingSubModule,
+} from './sub-module.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
 
-export async function getAllModules(
+export async function getAllSubModules(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const result = await getModules(req.query as unknown as ListQuery);
+    const result = await getSubModules(req.query as unknown as ListQuery);
 
     responseData({
       res,
@@ -32,13 +32,13 @@ export async function getAllModules(
   }
 }
 
-export async function getOneModule(
+export async function getOneSubModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const product = await getModule(req.params.id);
+    const product = await getSubModule(req.params.id);
 
     responseData({
       res,
@@ -51,24 +51,24 @@ export async function getOneModule(
   }
 }
 
-export async function createOneModule(
+export async function createOneSubModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const existingModule = await getExistingModule({
+    const existingSubModule = await getExistingSubModule({
       name: req.body.name,
     });
-    if (existingModule)
+    if (existingSubModule)
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
       name: req.body.name,
       created_by: req.body.user.id,
     };
-    const createdModule = await createModule(payload, trx);
+    const createdSubModule = await createSubModule(payload, trx);
 
     await trx.commit();
 
@@ -76,7 +76,7 @@ export async function createOneModule(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: createdModule,
+      data: createdSubModule,
     });
   } catch (error) {
     await trx.rollback();
@@ -84,7 +84,7 @@ export async function createOneModule(
   }
 }
 
-export async function updateOneModule(
+export async function updateOneSubModule(
   req: Request,
   res: Response,
   next: NextFunction
@@ -95,7 +95,7 @@ export async function updateOneModule(
       name: req.body.name,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
     };
-    const updatedModule = await updateModule(
+    const updatedSubModule = await updateSubModule(
       {
         id: req.params.id,
         data: payload,
@@ -109,7 +109,7 @@ export async function updateOneModule(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedModule,
+      data: updatedSubModule,
     });
   } catch (error) {
     await trx.rollback();
@@ -117,20 +117,21 @@ export async function updateOneModule(
   }
 }
 
-export async function deleteOneModule(
+export async function deleteOneSubModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedModule = await getExistingModule({
+    const isExistedSubModule = await getExistingSubModule({
       id: req.params.id,
     });
 
-    if (!isExistedModule) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedSubModule)
+      throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedModule = await deleteModule(req.params.id);
+    const deletedSubModule = await deleteSubModule(req.params.id);
 
     await trx.commit();
 
@@ -138,7 +139,7 @@ export async function deleteOneModule(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: deletedModule,
+      data: deletedSubModule,
     });
   } catch (error) {
     await trx.rollback();
