@@ -60,6 +60,12 @@ export async function createOneProductCategory(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
+    const existingProductCategory = await getExistingProductCategory({
+      name: req.body.name,
+    });
+    if (existingProductCategory)
+      throw new AppError(`${req.body.name} is already existed!`, 400);
+
     const payload = {
       name: req.body.name,
       created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',

@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { responseData } from '../../utils/http';
+import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
   createProduct,
   deleteProduct,
+  getExistingProduct,
   getProduct,
   getProducts,
   updateProduct,
@@ -57,11 +58,15 @@ export async function createOneProduct(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
+    const existingProduct = await getExistingProduct({ name: req.body.name });
+    if (existingProduct)
+      throw new AppError(`${req.body.name} is already existed!`, 400);
+
     const payload = {
       name: req.body.name,
       price: req.body.price,
       category_id: req.body.category_id,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      created_by: req.body.user.id,
     };
     const createdProduct = await createProduct(payload, trx);
 

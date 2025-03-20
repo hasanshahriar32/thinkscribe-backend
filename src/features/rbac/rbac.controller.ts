@@ -58,9 +58,15 @@ export async function createOneModule(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
+    const existingModule = await getExistingModule({
+      name: req.body.name,
+    });
+    if (existingModule)
+      throw new AppError(`${req.body.name} is already existed!`, 400);
+
     const payload = {
       name: req.body.name,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      created_by: req.body.user.id,
     };
     const createdModule = await createModule(payload, trx);
 
