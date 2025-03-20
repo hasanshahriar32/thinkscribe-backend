@@ -66,8 +66,8 @@ export async function createOneSubModule(
 
     const payload = {
       name: req.body.name,
-      price: req.body.price,
-      category_id: req.body.category_id,
+      module_id: req.body.module_id,
+      channel_id: req.body.channel_id,
       created_by: req.body.user.id,
     };
     const createdSubModule = await createSubModule(payload, trx);

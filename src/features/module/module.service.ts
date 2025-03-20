@@ -11,7 +11,14 @@ export async function getModules(filters: ListQuery) {
 
   const query = db
     .table('module')
-    .select('id', 'name', 'is_deleted')
+    .select(
+      'module.id',
+      'module.name',
+      'module.is_deleted',
+      'channel.name as channel',
+      `channel.id as channel_id`
+    )
+    .leftJoin('channel', 'channel.id', 'module.channel_id')
     .limit(pagination.limit)
     .offset(pagination.offset);
   const totalCountQuery = db.table('module').count('* as count');
@@ -19,12 +26,12 @@ export async function getModules(filters: ListQuery) {
   if (filters.sort) {
     query.orderBy(filters.sort, filters.order || 'asc');
   } else {
-    query.orderBy('created_at', 'desc');
+    query.orderBy('module.created_at', 'desc');
   }
 
   if (filters.keyword) {
-    query.whereILike('name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
+    query.whereILike('module.name', `%${filters.keyword}%`);
+    totalCountQuery.whereILike('module.name', `%${filters.keyword}%`);
   }
 
   return getPaginatedData(query, totalCountQuery, filters, pagination);
