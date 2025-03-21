@@ -97,7 +97,7 @@ export async function updateOneSubModule(
       name: req.body.name,
       price: req.body.price,
       category_id: req.body.category_id,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      updated_by: req.body.user.id,
     };
     const updatedSubModule = await updateSubModule(
       {

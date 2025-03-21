@@ -68,7 +68,7 @@ export async function createOneProductCategory(
 
     const payload = {
       name: req.body.name,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      created_by: req.body.user.id,
     };
     const createdProductCategory = await createProductCategory(payload, trx);
 
@@ -95,7 +95,7 @@ export async function updateOneProductCategory(
   try {
     const payload = {
       name: req.body.name,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      updated_by: req.body.user.id,
     };
     const updatedProductCategory = await updateProductCategory(
       {

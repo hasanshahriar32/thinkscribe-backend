@@ -93,7 +93,7 @@ export async function updateOneRole(
   try {
     const payload = {
       name: req.body.name,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      updated_by: req.body.user.id,
     };
     const updatedRole = await updateRole(
       {

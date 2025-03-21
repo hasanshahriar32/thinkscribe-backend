@@ -64,7 +64,6 @@ export async function createOnePermission(
       sub_module_id: req.body.sub_module_id,
       role_id: req.body.role_id,
       action_id: req.body.action_id,
-      created_by: req.body.user.id,
     });
     if (existingPermission)
       throw new AppError(`${req.body.name} is already existed!`, 400);
@@ -102,7 +101,7 @@ export async function updateOnePermission(
   try {
     const payload = {
       name: req.body.name,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      updated_by: req.body.user.id,
     };
     const updatedPermission = await updatePermission(
       {

@@ -71,7 +71,7 @@ export async function createOneUser(
       address1: req.body.address1,
       address2: req.body.address2,
       img: req.body.img,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      created_by: req.body.user.id,
     };
     const createdUser = await createUser(payload, trx);
 
@@ -99,7 +99,7 @@ export async function updateOneUser(
     const payload = {
       name: req.body.name,
       price: req.body.price,
-      created_by: 'ab546ce6-f5f2-11ef-9bc1-32adce0096f0',
+      updated_by: req.body.user.id,
     };
     const updatedUser = await updateUser(
       {
