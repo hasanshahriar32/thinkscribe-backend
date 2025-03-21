@@ -12,7 +12,7 @@ export async function getUsers(filters: ListQuery) {
 
   const query = db
     .table('user')
-    .select('id', 'username', 'email', 'phone1')
+    .select('id', 'username', 'phone1', 'email', 'is_deleted', 'role_id')
     .limit(pagination.limit)
     .offset(pagination.offset);
 
