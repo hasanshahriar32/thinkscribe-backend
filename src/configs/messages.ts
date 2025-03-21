@@ -12,7 +12,7 @@ export const MESSAGES = {
     RETRIVE: '',
     SERVER: '',
     USER_NOT_FOUND: 'User Not Found!',
-    NO_PERMISSION: '',
+    NO_PERMISSION: 'You have no permission to access this resource!',
     BAD_REQUEST: 'Invalid Request!',
     INVALID_CREDENTIAL: 'Invalid Credential!',
     UNAUTHORIZED: 'Unauthorized Access!',

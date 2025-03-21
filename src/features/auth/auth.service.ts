@@ -8,14 +8,16 @@ export async function getUser(conds: Record<string, unknown>) {
   const user = await db
     .table('user')
     .select(
-      'id',
-      'username',
-      'password',
-      'phone1',
-      'email',
-      'is_deleted',
-      'role_id'
+      'user.id',
+      'user.username',
+      'user.password',
+      'user.phone1',
+      'user.email',
+      'user.is_deleted',
+      'user.role_id',
+      'role.name as role'
     )
+    .leftJoin('role', 'role.id', 'user.role_id')
     .where(conds);
   return user[0] || null;
 }
@@ -24,21 +26,19 @@ export async function getPermissionsByRole(roleId: string) {
   const permissions = await db
     .table('permission')
     .select(
-      'permission.id',
-      'permission.is_deleted',
-      'permission.channel_id',
-      'channel.name as channel',
       'permission.module_id',
       'module.name as module',
       'permission.sub_module_id',
       'sub_module.name as sub_module',
       'permission.role_id',
       'role.name as role',
+      'permission.channel_id',
+      'channel.name as channel',
       db.raw(`
-        JSON_ARRAYAGG(
-          JSON_OBJECT('id', action.id, 'name', action.name)
-        ) as actions
-      `)
+      JSON_ARRAYAGG(
+        JSON_OBJECT('id', action.id, 'name', action.name)
+      ) as actions
+    `)
     )
     .leftJoin('channel', 'channel.id', 'permission.channel_id')
     .leftJoin('module', 'module.id', 'permission.module_id')
@@ -47,16 +47,16 @@ export async function getPermissionsByRole(roleId: string) {
     .leftJoin('action', 'action.id', 'permission.action_id')
     .where('permission.role_id', '=', roleId)
     .groupBy(
-      'permission.id',
-      'permission.channel_id',
       'permission.module_id',
+      'module.name',
       'permission.sub_module_id',
+      'sub_module.name',
       'permission.role_id',
-      'channel.id',
-      'module.id',
-      'sub_module.id',
-      'role.id'
+      'role.name',
+      'permission.channel_id',
+      'channel.name'
     );
+
   return permissions;
 }
 
