@@ -12,12 +12,40 @@ export async function getUser(conds: Record<string, unknown>) {
   return user[0] || null;
 }
 
-export async function getUserPermissions(conds: Record<string, unknown>) {
-  const user = await db
-    .table('user')
-    .select('id', 'username', 'password')
-    .where(conds);
-  return user[0] || null;
+export async function getPermissionsByRole(roleId: string) {
+  const permissions = await db
+    .table('permission')
+    .select(
+      'permission.id',
+      'permission.is_deleted',
+      'permission.channel_id',
+      'permission.module_id',
+      'permission.sub_module_id',
+      'permission.role_id',
+      db.raw(`
+        JSON_ARRAYAGG(
+          JSON_OBJECT('id', action.id, 'name', action.name)
+        ) as actions
+      `)
+    )
+    .leftJoin('channel', 'channel.id', 'permission.channel_id')
+    .leftJoin('module', 'module.id', 'permission.module_id')
+    .leftJoin('sub_module', 'sub_module.id', 'permission.sub_module_id')
+    .leftJoin('role', 'role.id', 'permission.role_id')
+    .leftJoin('action', 'action.id', 'permission.action_id')
+    .where('permission.role_id', '=', roleId)
+    .groupBy(
+      'permission.id',
+      'permission.channel_id',
+      'permission.module_id',
+      'permission.sub_module_id',
+      'permission.role_id',
+      'channel.id',
+      'module.id',
+      'sub_module.id',
+      'role.id'
+    );
+  return permissions;
 }
 
 export async function getAccessToken(payload: Record<string, unknown>) {

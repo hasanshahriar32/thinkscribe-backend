@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import {
   getAccessToken,
+  getPermissionsByRole,
   getRefreshToken,
   getUser,
-  getUserPermissions,
   verifyPassword,
 } from './auth.service';
 import { AppError, responseData } from '../../utils/http';
@@ -24,7 +24,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     const accessToken = await getAccessToken(user);
     const refreshToken = await getRefreshToken({ id: user.id });
-    const userPermissions = await getUserPermissions({ id: user.id });
+    const userPermissions = await getPermissionsByRole(user.role_id);
 
     responseData({
       res,

@@ -9,7 +9,7 @@ import helmet from 'helmet';
 const app = express();
 app.use(helmet());
 app.use(cors());
-app.use(morgan('combined'));
+app.use(morgan(':date[iso] :method :url'));
 app.use(express.json());
 app.use(cookieParser());
 
