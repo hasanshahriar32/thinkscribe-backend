@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { AppError, responseData } from '../../utils/http';
-import { MESSAGES } from '../../configs/messages';
+import { AppError, responseData } from '../../../utils/http';
+import { MESSAGES } from '../../../configs/messages';
 import {
   createChannel,
   deleteChannel,
@@ -8,10 +8,14 @@ import {
   getChannels,
   updateChannel,
   getExistingChannel,
+  createMultiChannels,
+  deleteMultiChannels,
+  softDeleteChannel,
+  softDeleteMultiChannels,
 } from './channel.service';
-import db from '../../db/db';
+import db from '../../../db/db';
 import { Knex } from 'knex';
-import { ListQuery } from '../../types/types';
+import { ListQuery } from '../../../types/types';
 
 export async function getAllChannels(
   req: Request,
@@ -84,6 +88,33 @@ export async function createOneChannel(
   }
 }
 
+export async function createChannels(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const payload = req.body.channel.map((action: Record<string, unknown>) => ({
+      name: action.name,
+      created_by: req.body.user.id,
+    }));
+    await createMultiChannels(payload, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.CREATE,
+      data: null,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
 export async function updateOneChannel(
   req: Request,
   res: Response,
@@ -139,6 +170,81 @@ export async function deleteOneChannel(
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
       data: deletedChannel,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function deleteChannels(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    await deleteMultiChannels(req.body.ids, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function softDeleteOneChannel(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const isExistedChannel = await getExistingChannel({
+      id: req.params.id,
+    });
+
+    if (!isExistedChannel) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+
+    const deletedChannel = await softDeleteChannel(req.params.id);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: deletedChannel,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function softDeleteChannels(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    await softDeleteMultiChannels(req.body.ids, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
     });
   } catch (error) {
     await trx.rollback();

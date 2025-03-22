@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
-import db from '../../db/db';
-import { getPaginatedData, getPagination } from '../../utils/common';
-import { ListQuery } from '../../types/types';
+import db from '../../../db/db';
+import { getPaginatedData, getPagination } from '../../../utils/common';
+import { ListQuery } from '../../../types/types';
 
 export async function getRoles(filters: ListQuery) {
   const pagination = getPagination({
@@ -12,6 +12,7 @@ export async function getRoles(filters: ListQuery) {
   const query = db
     .table('role')
     .select('id', 'name', 'is_deleted')
+    .where('is_deleted', 0)
     .limit(pagination.limit)
     .offset(pagination.offset);
   const totalCountQuery = db.table('role').count('* as count');
@@ -49,6 +50,18 @@ export async function createRole(
   return query;
 }
 
+export async function createMultiRoles(
+  data: Record<string, unknown>[],
+  trx?: Knex.Transaction
+) {
+  console.log('DATA', data);
+  const query = db.table('role').insert(data);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
 export async function updateRole(
   {
     id,
@@ -66,8 +79,45 @@ export async function updateRole(
   return query;
 }
 
-export async function deleteRole(id: string | number) {
-  return db.table('role').where('id', id).del();
+export async function deleteRole(id: string | number, trx?: Knex.Transaction) {
+  const query = db.table('role').where('id', id).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function deleteMultiRoles(ids: string[], trx?: Knex.Transaction) {
+  const query = db.table('role').whereIn('id', ids).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteRole(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('role').update({ is_deleted: true }).where('id', id);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteMultiRoles(
+  ids: string[] | number[],
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('role')
+    .update({ is_deleted: true })
+    .whereIn('id', ids);
+
+  if (trx) query.transacting(trx);
+
+  return query;
 }
 
 export async function getExistingRole(data: Record<string, unknown>) {

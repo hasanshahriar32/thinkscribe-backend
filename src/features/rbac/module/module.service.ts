@@ -1,9 +1,9 @@
 import { Knex } from 'knex';
-import db from '../../db/db';
-import { getPaginatedData, getPagination } from '../../utils/common';
-import { ListQuery } from '../../types/types';
+import db from '../../../db/db';
+import { getPaginatedData, getPagination } from '../../../utils/common';
+import { ListQuery } from '../../../types/types';
 
-export async function getModules(filters: ListQuery) {
+export async function getModules(filters: ListQuery & { channel_id: string }) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
@@ -15,9 +15,9 @@ export async function getModules(filters: ListQuery) {
       'module.id',
       'module.name',
       'module.is_deleted',
-      'channel.name as channel',
-      `channel.id as channel_id`
+      db.raw(`JSON_OBJECT('id', channel.id, 'name', channel.name) as channel`)
     )
+    .where('module.is_deleted', 0)
     .leftJoin('channel', 'channel.id', 'module.channel_id')
     .limit(pagination.limit)
     .offset(pagination.offset);
@@ -32,6 +32,11 @@ export async function getModules(filters: ListQuery) {
   if (filters.keyword) {
     query.whereILike('module.name', `%${filters.keyword}%`);
     totalCountQuery.whereILike('module.name', `%${filters.keyword}%`);
+  }
+
+  if (filters.channel_id) {
+    query.whereILike('module.channel_id', `${filters.channel_id}`);
+    totalCountQuery.whereILike('module.channel_id', `${filters.channel_id}`);
   }
 
   return getPaginatedData(query, totalCountQuery, filters, pagination);
@@ -56,6 +61,18 @@ export async function createModule(
   return query;
 }
 
+export async function createMultiModules(
+  data: Record<string, unknown>[],
+  trx?: Knex.Transaction
+) {
+  console.log('DATA', data);
+  const query = db.table('module').insert(data);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
 export async function updateModule(
   {
     id,
@@ -73,8 +90,51 @@ export async function updateModule(
   return query;
 }
 
-export async function deleteModule(id: string | number) {
-  return db.table('module').where('id', id).del();
+export async function deleteModule(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('module').where('id', id).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function deleteMultiModules(
+  ids: string[],
+  trx?: Knex.Transaction
+) {
+  const query = db.table('module').whereIn('id', ids).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteModule(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('module').update({ is_deleted: true }).where('id', id);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteMultiModules(
+  ids: string[] | number[],
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('module')
+    .update({ is_deleted: true })
+    .whereIn('id', ids);
+
+  if (trx) query.transacting(trx);
+
+  return query;
 }
 
 export async function getExistingModule(data: Record<string, unknown>) {

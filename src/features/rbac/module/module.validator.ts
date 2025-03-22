@@ -8,6 +8,7 @@ const validator = {
       page: Joi.number().required(),
       sort: Joi.string().optional(),
       order: Joi.string().valid('asc', 'desc').optional(),
+      channel_id: Joi.string().optional(),
     }),
   },
   detail: {
@@ -18,6 +19,17 @@ const validator = {
   create: {
     body: Joi.object({
       name: Joi.string().required(),
+      channel_id: Joi.string().required(),
+    }),
+  },
+  createMulti: {
+    body: Joi.object({
+      modules: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          channel_id: Joi.string().required(),
+        })
+      ),
     }),
   },
   update: {
@@ -26,11 +38,17 @@ const validator = {
     }),
     body: Joi.object({
       name: Joi.string().required(),
+      channel_id: Joi.string().required(),
     }),
   },
   delete: {
     params: Joi.object({
       id: Joi.string().required(),
+    }),
+  },
+  deleteMulti: {
+    body: Joi.object({
+      ids: Joi.array().items(Joi.string().required()),
     }),
   },
 } as const;

@@ -18,8 +18,15 @@ const validator = {
   create: {
     body: Joi.object({
       name: Joi.string().required(),
-      module_id: Joi.string().required(),
-      channel_id: Joi.string().required(),
+    }),
+  },
+  createMulti: {
+    body: Joi.object({
+      channels: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+        })
+      ),
     }),
   },
   update: {
@@ -28,13 +35,16 @@ const validator = {
     }),
     body: Joi.object({
       name: Joi.string().required(),
-      module_id: Joi.string().required(),
-      channel_id: Joi.string().required(),
     }),
   },
   delete: {
     params: Joi.object({
       id: Joi.string().required(),
+    }),
+  },
+  deleteMulti: {
+    body: Joi.object({
+      ids: Joi.array().items(Joi.string().required()),
     }),
   },
 } as const;

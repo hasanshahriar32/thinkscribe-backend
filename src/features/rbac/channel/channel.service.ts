@@ -1,21 +1,21 @@
 import { Knex } from 'knex';
-import db from '../../db/db';
-import { getPaginatedData, getPagination } from '../../utils/common';
-import { ListQuery } from '../../types/types';
+import db from '../../../db/db';
+import { getPaginatedData, getPagination } from '../../../utils/common';
+import { ListQuery } from '../../../types/types';
 
-export async function getActions(filters: ListQuery) {
+export async function getChannels(filters: ListQuery) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
   });
 
   const query = db
-    .table('action')
+    .table('channel')
     .select('id', 'name', 'is_deleted')
     .where('is_deleted', 0)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('action').count('* as count');
+  const totalCountQuery = db.table('channel').count('* as count');
 
   if (filters.sort) {
     query.orderBy(filters.sort, filters.order || 'asc');
@@ -31,38 +31,38 @@ export async function getActions(filters: ListQuery) {
   return getPaginatedData(query, totalCountQuery, filters, pagination);
 }
 
-export async function getAction(id: string | number) {
-  const action = await db
-    .table('action')
+export async function getChannel(id: string | number) {
+  const channel = await db
+    .table('channel')
     .select('id', 'name', 'is_deleted')
     .where('id', id);
-  return action[0] || null;
+  return channel[0] || null;
 }
 
-export async function createAction(
+export async function createChannel(
   data: Record<string, unknown>,
   trx?: Knex.Transaction
 ) {
-  const query = db.table('action').insert(data);
+  const query = db.table('channel').insert(data);
 
   if (trx) query.transacting(trx);
 
   return query;
 }
 
-export async function createMultiActions(
+export async function createMultiChannels(
   data: Record<string, unknown>[],
   trx?: Knex.Transaction
 ) {
   console.log('DATA', data);
-  const query = db.table('action').insert(data);
+  const query = db.table('channel').insert(data);
 
   if (trx) query.transacting(trx);
 
   return query;
 }
 
-export async function updateAction(
+export async function updateChannel(
   {
     id,
     data,
@@ -72,52 +72,55 @@ export async function updateAction(
   },
   trx?: Knex.Transaction
 ) {
-  const query = db.table('action').update(data).where('id', id);
+  const query = db.table('channel').update(data).where('id', id);
 
   if (trx) query.transacting(trx);
 
   return query;
 }
 
-export async function deleteAction(
+export async function deleteChannel(
   id: string | number,
   trx?: Knex.Transaction
 ) {
-  const query = db.table('action').where('id', id).del();
+  const query = db.table('channel').where('id', id).del();
 
   if (trx) query.transacting(trx);
 
   return query;
 }
 
-export async function deleteMultiActions(
+export async function deleteMultiChannels(
   ids: string[],
   trx?: Knex.Transaction
 ) {
-  const query = db.table('action').whereIn('id', ids).del();
+  const query = db.table('channel').whereIn('id', ids).del();
 
   if (trx) query.transacting(trx);
 
   return query;
 }
 
-export async function softDeleteAction(
+export async function softDeleteChannel(
   id: string | number,
   trx?: Knex.Transaction
 ) {
-  const query = db.table('action').update({ is_deleted: true }).where('id', id);
+  const query = db
+    .table('channel')
+    .update({ is_deleted: true })
+    .where('id', id);
 
   if (trx) query.transacting(trx);
 
   return query;
 }
 
-export async function softDeleteMultiActions(
+export async function softDeleteMultiChannels(
   ids: string[] | number[],
   trx?: Knex.Transaction
 ) {
   const query = db
-    .table('action')
+    .table('channel')
     .update({ is_deleted: true })
     .whereIn('id', ids);
 
@@ -126,10 +129,10 @@ export async function softDeleteMultiActions(
   return query;
 }
 
-export async function getExistingAction(data: Record<string, unknown>) {
-  const action = await db
-    .table('action')
+export async function getExistingChannel(data: Record<string, unknown>) {
+  const channel = await db
+    .table('channel')
     .select('id', 'name', 'is_deleted')
     .where(data);
-  return action[0] || null;
+  return channel[0] || null;
 }

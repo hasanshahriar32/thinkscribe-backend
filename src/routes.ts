@@ -4,12 +4,12 @@ import productRoutes from './features/product/product.route';
 import userRoutes from './features/user/user.route';
 import productCategoryRoutes from './features/product-category/product-category.route';
 import { verifyToken } from './middlewares/jwt';
-import moduleRoutes from './features/module/module.route';
-import channelRoutes from './features/channel/channel.route';
-import roleRoutes from './features/role/role.route';
-import subModuleRoutes from './features/sub-module/sub-module.route';
-import actionRoutes from './features/action/action.route';
+import actionRoutes from './features/rbac/action/action.route';
 import permissionRoutes from './features/permission/permission.route';
+import roleRoutes from './features/rbac/role/role.route';
+import channelRoutes from './features/rbac/channel/channel.route';
+import moduleRoutes from './features/rbac/module/module.route';
+import subModuleRoutes from './features/rbac/sub-module/sub-module.route';
 
 const routes = Router();
 

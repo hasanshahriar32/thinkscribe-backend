@@ -10,7 +10,7 @@ import {
   softDeleteOneAction,
   updateOneAction,
 } from './action.controller';
-import { validateRequest } from '../../middlewares/validation';
+import { validateRequest } from '../../../middlewares/validation';
 import validator from './action.validator';
 
 const actionRoutes = Router();

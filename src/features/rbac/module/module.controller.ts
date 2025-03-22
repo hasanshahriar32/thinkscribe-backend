@@ -1,29 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
-import { AppError, responseData } from '../../utils/http';
-import { MESSAGES } from '../../configs/messages';
+import { AppError, responseData } from '../../../utils/http';
+import { MESSAGES } from '../../../configs/messages';
 import {
-  createAction,
-  deleteAction,
-  getAction,
-  getActions,
-  updateAction,
-  getExistingAction,
-  createMultiActions,
-  deleteMultiActions,
-  softDeleteAction,
-  softDeleteMultiActions,
-} from './action.service';
-import db from '../../db/db';
+  createModule,
+  deleteModule,
+  getModule,
+  getModules,
+  updateModule,
+  getExistingModule,
+  createMultiModules,
+  deleteMultiModules,
+  softDeleteModule,
+  softDeleteMultiModules,
+} from './module.service';
+import db from '../../../db/db';
 import { Knex } from 'knex';
-import { ListQuery } from '../../types/types';
+import { ListQuery } from '../../../types/types';
 
-export async function getAllActions(
+export async function getAllModules(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const result = await getActions(req.query as unknown as ListQuery);
+    const result = await getModules(
+      req.query as unknown as ListQuery & { channel_id: string }
+    );
 
     responseData({
       res,
@@ -36,13 +38,13 @@ export async function getAllActions(
   }
 }
 
-export async function getOneAction(
+export async function getOneModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const product = await getAction(req.params.id);
+    const product = await getModule(req.params.id);
 
     responseData({
       res,
@@ -55,24 +57,26 @@ export async function getOneAction(
   }
 }
 
-export async function createOneAction(
+export async function createOneModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const existingAction = await getExistingAction({
+    const existingModule = await getExistingModule({
       name: req.body.name,
+      channel_id: req.body.channel_id,
     });
-    if (existingAction)
+    if (existingModule)
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
       name: req.body.name,
+      channel_id: req.body.channel_id,
       created_by: req.body.user.id,
     };
-    const createdAction = await createAction(payload, trx);
+    const createdModule = await createModule(payload, trx);
 
     await trx.commit();
 
@@ -80,7 +84,7 @@ export async function createOneAction(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: createdAction,
+      data: createdModule,
     });
   } catch (error) {
     await trx.rollback();
@@ -88,18 +92,19 @@ export async function createOneAction(
   }
 }
 
-export async function createActions(
+export async function createModules(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const payload = req.body.actions.map((action: Record<string, unknown>) => ({
-      name: action.name,
+    const payload = req.body.modules.map((module: Record<string, unknown>) => ({
+      name: module.name,
+      channel_id: module.channel_id,
       created_by: req.body.user.id,
     }));
-    await createMultiActions(payload, trx);
+    await createMultiModules(payload, trx);
 
     await trx.commit();
 
@@ -115,7 +120,7 @@ export async function createActions(
   }
 }
 
-export async function updateOneAction(
+export async function updateOneModule(
   req: Request,
   res: Response,
   next: NextFunction
@@ -124,9 +129,10 @@ export async function updateOneAction(
   try {
     const payload = {
       name: req.body.name,
+      channel_id: req.body.channel_id,
       updated_by: req.body.user.id,
     };
-    const updatedAction = await updateAction(
+    const updatedModule = await updateModule(
       {
         id: req.params.id,
         data: payload,
@@ -140,7 +146,7 @@ export async function updateOneAction(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedAction,
+      data: updatedModule,
     });
   } catch (error) {
     await trx.rollback();
@@ -148,20 +154,20 @@ export async function updateOneAction(
   }
 }
 
-export async function deleteOneAction(
+export async function deleteOneModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedAction = await getExistingAction({
+    const isExistedModule = await getExistingModule({
       id: req.params.id,
     });
 
-    if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedModule) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedAction = await deleteAction(req.params.id);
+    const deletedModule = await deleteModule(req.params.id);
 
     await trx.commit();
 
@@ -169,7 +175,7 @@ export async function deleteOneAction(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: deletedAction,
+      data: deletedModule,
     });
   } catch (error) {
     await trx.rollback();
@@ -177,14 +183,14 @@ export async function deleteOneAction(
   }
 }
 
-export async function deleteActions(
+export async function deleteModules(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiActions(req.body.ids, trx);
+    await deleteMultiModules(req.body.ids, trx);
 
     await trx.commit();
 
@@ -200,20 +206,20 @@ export async function deleteActions(
   }
 }
 
-export async function softDeleteOneAction(
+export async function softDeleteOneModule(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedAction = await getExistingAction({
+    const isExistedModule = await getExistingModule({
       id: req.params.id,
     });
 
-    if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedModule) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedAction = await softDeleteAction(req.params.id);
+    const deletedModule = await softDeleteModule(req.params.id);
 
     await trx.commit();
 
@@ -221,7 +227,7 @@ export async function softDeleteOneAction(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: deletedAction,
+      data: deletedModule,
     });
   } catch (error) {
     await trx.rollback();
@@ -229,14 +235,14 @@ export async function softDeleteOneAction(
   }
 }
 
-export async function softDeleteActions(
+export async function softDeleteModules(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await softDeleteMultiActions(req.body.ids, trx);
+    await softDeleteMultiModules(req.body.ids, trx);
 
     await trx.commit();
 
