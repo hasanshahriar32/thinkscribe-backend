@@ -1,18 +1,10 @@
 import { Response } from 'express';
-import { MESSAGES } from '../configs/messages';
 
 interface ResponseData {
   res: Response;
   status: number;
   message: string;
   data: any;
-}
-
-interface ThrowErr {
-  res: Response;
-  error: any;
-  status: number;
-  message: string;
 }
 
 export const responseData = ({

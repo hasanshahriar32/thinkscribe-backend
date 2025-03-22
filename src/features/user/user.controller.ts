@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { responseData } from '../../utils/http';
+import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
   createUser,
@@ -58,6 +58,10 @@ export async function createOneUser(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
+    if (!req.file) {
+      throw new AppError(`File is required!`, 400);
+    }
+
     const password = await hashPassword(req.body.password);
     const payload = {
       username: req.body.username,
