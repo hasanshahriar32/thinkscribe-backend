@@ -27,7 +27,7 @@ const validator = {
       password: Joi.string().trim().min(6).required(),
       address1: Joi.string().trim().required(),
       address2: Joi.string().trim().allow('').optional(),
-      img: Joi.string().trim().allow('').optional(),
+      file: Joi.any().required(),
     }),
   },
   update: {
@@ -45,7 +45,7 @@ const validator = {
       password: Joi.string().trim().min(6).required(),
       address1: Joi.string().trim().required(),
       address2: Joi.string().trim().allow('').optional(),
-      img: Joi.string().trim().allow('').optional(),
+      file: Joi.any().required(),
     }),
   },
   delete: {

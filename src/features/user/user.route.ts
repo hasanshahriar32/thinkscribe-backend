@@ -16,8 +16,8 @@ userRoutes.get('/users', validateRequest(validator.select), getAllUsers);
 userRoutes.get('/users/:id', validateRequest(validator.detail), getOneUser);
 userRoutes.post(
   '/users',
-  validateRequest(validator.create),
   upload.single('file'),
+  validateRequest(validator.create),
   createOneUser
 );
 userRoutes.patch(

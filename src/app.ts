@@ -14,6 +14,11 @@ app.use(morgan(':date[iso] :method :url'));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+  console.log(req.body);
+  next();
+});
+
 // Routes
 app.use(routes);
 
