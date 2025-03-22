@@ -3,11 +3,7 @@ import Joi from 'joi';
 const validator = {
   select: {
     query: Joi.object({
-      keyword: Joi.string().allow('').optional(),
-      size: Joi.number().required(),
-      page: Joi.number().required(),
-      sort: Joi.string().optional(),
-      order: Joi.string().valid('asc', 'desc').optional(),
+      user_id: Joi.string().required(),
     }),
   },
   detail: {
@@ -33,7 +29,7 @@ const validator = {
       module_id: Joi.string().required(),
       sub_module_id: Joi.string().required(),
       role_id: Joi.string().required(),
-      action_id: Joi.string().required(),
+      actions: Joi.array().items(Joi.string()).required(),
     }),
   },
   delete: {

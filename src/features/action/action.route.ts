@@ -1,9 +1,13 @@
 import { Router } from 'express';
 import {
+  createActions,
   createOneAction,
+  deleteActions,
   deleteOneAction,
   getAllActions,
   getOneAction,
+  softDeleteActions,
+  softDeleteOneAction,
   updateOneAction,
 } from './action.controller';
 import { validateRequest } from '../../middlewares/validation';
@@ -18,9 +22,14 @@ actionRoutes.get(
   getOneAction
 );
 actionRoutes.post(
-  '/actions',
+  '/actions/create',
   validateRequest(validator.create),
   createOneAction
+);
+actionRoutes.post(
+  '/actions/create-multi',
+  validateRequest(validator.createMulti),
+  createActions
 );
 actionRoutes.patch(
   '/actions/:id',
@@ -31,6 +40,21 @@ actionRoutes.delete(
   '/actions/:id',
   validateRequest(validator.delete),
   deleteOneAction
+);
+actionRoutes.post(
+  '/actions/delete-multi',
+  validateRequest(validator.deleteMulti),
+  deleteActions
+);
+actionRoutes.delete(
+  '/actions/soft-delete/:id',
+  validateRequest(validator.delete),
+  softDeleteOneAction
+);
+actionRoutes.post(
+  '/actions/soft-delete-multi',
+  validateRequest(validator.deleteMulti),
+  softDeleteActions
 );
 
 export default actionRoutes;

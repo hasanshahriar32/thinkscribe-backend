@@ -12,6 +12,7 @@ export async function getActions(filters: ListQuery) {
   const query = db
     .table('action')
     .select('id', 'name', 'is_deleted')
+    .where('is_deleted', 0)
     .limit(pagination.limit)
     .offset(pagination.offset);
   const totalCountQuery = db.table('action').count('* as count');
@@ -49,6 +50,18 @@ export async function createAction(
   return query;
 }
 
+export async function createMultiActions(
+  data: Record<string, unknown>[],
+  trx?: Knex.Transaction
+) {
+  console.log('DATA', data);
+  const query = db.table('action').insert(data);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
 export async function updateAction(
   {
     id,
@@ -66,8 +79,51 @@ export async function updateAction(
   return query;
 }
 
-export async function deleteAction(id: string | number) {
-  return db.table('action').where('id', id).del();
+export async function deleteAction(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('action').where('id', id).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function deleteMultiActions(
+  ids: string[],
+  trx?: Knex.Transaction
+) {
+  const query = db.table('action').whereIn('id', ids).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteAction(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('action').update({ is_deleted: true }).where('id', id);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteMultiActions(
+  ids: string[] | number[],
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('action')
+    .update({ is_deleted: true })
+    .whereIn('id', ids);
+
+  if (trx) query.transacting(trx);
+
+  return query;
 }
 
 export async function getExistingAction(data: Record<string, unknown>) {

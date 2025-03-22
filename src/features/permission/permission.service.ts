@@ -1,48 +1,43 @@
 import { Knex } from 'knex';
 import db from '../../db/db';
-import { getPaginatedData, getPagination } from '../../utils/common';
-import { ListQuery } from '../../types/types';
 
-export async function getPermissions(filters: ListQuery) {
-  const pagination = getPagination({
-    page: filters.page as number,
-    size: filters.size as number,
-  });
-
-  const query = db
+export async function getPermissionsByUser(userId: string) {
+  const permissions = await db
     .table('permission')
     .select(
-      'permission.id',
-      'permission.is_deleted',
-      db.raw(`JSON_OBJECT('id', channel.id, 'name', channel.name) as channel`),
-      db.raw(`JSON_OBJECT('id', module.id, 'name', module.name) as module`),
-      db.raw(
-        `JSON_OBJECT('id', sub_module.id, 'name', sub_module.name) as sub_module`
-      ),
-      db.raw(`JSON_OBJECT('id', role.id, 'name', role.name) as role`),
-      db.raw(`JSON_OBJECT('id', action.id, 'name', action.name) as action`)
+      'permission.module_id',
+      'module.name as module',
+      'permission.sub_module_id',
+      'sub_module.name as sub_module',
+      'permission.role_id',
+      'role.name as role',
+      'permission.channel_id',
+      'channel.name as channel',
+      db.raw(`
+        JSON_ARRAYAGG(
+          JSON_OBJECT('id', action.id, 'name', action.name)
+        ) as actions
+      `)
     )
+    .leftJoin('user', 'user.role_id', 'permission.role_id')
     .leftJoin('channel', 'channel.id', 'permission.channel_id')
     .leftJoin('module', 'module.id', 'permission.module_id')
     .leftJoin('sub_module', 'sub_module.id', 'permission.sub_module_id')
     .leftJoin('role', 'role.id', 'permission.role_id')
     .leftJoin('action', 'action.id', 'permission.action_id')
-    .limit(pagination.limit)
-    .offset(pagination.offset);
-  const totalCountQuery = db.table('permission').count('* as count');
+    .where('user.id', '=', userId)
+    .groupBy(
+      'permission.module_id',
+      'module.name',
+      'permission.sub_module_id',
+      'sub_module.name',
+      'permission.role_id',
+      'role.name',
+      'permission.channel_id',
+      'channel.name'
+    );
 
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('permission.created_at', 'desc');
-  }
-
-  // if (filters.keyword) {
-  //   query.whereILike('permission.name', `%${filters.keyword}%`);
-  //   totalCountQuery.whereILike('permission.name', `%${filters.keyword}%`);
-  // }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  return permissions;
 }
 
 export async function getPermission(id: string | number) {
@@ -55,6 +50,17 @@ export async function getPermission(id: string | number) {
 
 export async function createPermission(
   data: Record<string, unknown>,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('permission').insert(data);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function createMultiPermissions(
+  data: Record<string, unknown>[],
   trx?: Knex.Transaction
 ) {
   const query = db.table('permission').insert(data);
@@ -81,8 +87,26 @@ export async function updatePermission(
   return query;
 }
 
-export async function deletePermission(id: string | number) {
-  return db.table('permission').where('id', id).del();
+export async function deletePermission(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('permission').where('id', id).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function deleteMultiPermissions(
+  role_id: string,
+  trx?: Knex.Transaction
+) {
+  const query = db.table('permission').where('role_id', role_id).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
 }
 
 export async function getExistingPermission(data: Record<string, unknown>) {

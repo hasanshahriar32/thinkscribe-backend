@@ -8,6 +8,10 @@ import {
   getActions,
   updateAction,
   getExistingAction,
+  createMultiActions,
+  deleteMultiActions,
+  softDeleteAction,
+  softDeleteMultiActions,
 } from './action.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
@@ -84,6 +88,33 @@ export async function createOneAction(
   }
 }
 
+export async function createActions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const payload = req.body.actions.map((action: Record<string, unknown>) => ({
+      name: action.name,
+      created_by: req.body.user.id,
+    }));
+    await createMultiActions(payload, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.CREATE,
+      data: null,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
 export async function updateOneAction(
   req: Request,
   res: Response,
@@ -139,6 +170,81 @@ export async function deleteOneAction(
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
       data: deletedAction,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function deleteActions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    await deleteMultiActions(req.body.ids, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function softDeleteOneAction(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const isExistedAction = await getExistingAction({
+      id: req.params.id,
+    });
+
+    if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+
+    const deletedAction = await softDeleteAction(req.params.id);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: deletedAction,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function softDeleteActions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    await softDeleteMultiActions(req.body.ids, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
     });
   } catch (error) {
     await trx.rollback();

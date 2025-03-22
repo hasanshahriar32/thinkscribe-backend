@@ -5,13 +5,15 @@ import {
   createPermission,
   deletePermission,
   getPermission,
-  getPermissions,
+  getPermissionsByUser,
   updatePermission,
   getExistingPermission,
+  deleteMultiPermissions,
+  createMultiPermissions,
 } from './permission.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
-import { ListQuery } from '../../types/types';
+import { channel } from 'diagnostics_channel';
 
 export async function getAllPermissions(
   req: Request,
@@ -19,7 +21,7 @@ export async function getAllPermissions(
   next: NextFunction
 ) {
   try {
-    const result = await getPermissions(req.query as unknown as ListQuery);
+    const result = await getPermissionsByUser(req.query.user_id as string);
 
     responseData({
       res,
@@ -99,17 +101,43 @@ export async function updateOnePermission(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const payload = {
-      name: req.body.name,
-      updated_by: req.body.user.id,
+    const hehe = {
+      role: 'role_id',
+      permissions: [
+        {
+          module_id: 'module1',
+          sub_module_id: 'sub module1',
+          channel: 'channel1',
+          actions: ['action1', 'action2'],
+        },
+        {
+          module_id: 'module2',
+          sub_module_id: 'sub module2',
+          channel: 'channel2',
+          actions: ['action1', 'action2'],
+        },
+        {
+          module_id: 'module3',
+          sub_module_id: 'sub module3',
+          channel_id: 'channel3',
+          actions: ['action1', 'action2'],
+        },
+      ],
     };
-    const updatedPermission = await updatePermission(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
+
+    await deleteMultiPermissions(req.body.role_id, trx);
+
+    const preparedMultiCreatePayload = req.body.permissions.flatMap(
+      (permission: Record<string, any>) =>
+        permission.actions.map((action_id: string | number) => ({
+          action_id,
+          role_id: req.body.role_id,
+          module_id: permission.module_id,
+          sub_module_id: permission.sub_module_id,
+          channel_id: permission.channel_id,
+        }))
     );
+    await createMultiPermissions(preparedMultiCreatePayload, trx);
 
     await trx.commit();
 
@@ -117,7 +145,7 @@ export async function updateOnePermission(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedPermission,
+      data: null,
     });
   } catch (error) {
     await trx.rollback();
