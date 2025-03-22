@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import routes from './routes';
 import { errorHandler } from './middlewares/error-handler';
 import helmet from 'helmet';
+import './cron-jobs/sample-cron';
 
 const app = express();
 app.use(helmet());
