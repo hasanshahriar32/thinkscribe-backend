@@ -5,7 +5,7 @@ import userRoutes from './features/user/user.route';
 import productCategoryRoutes from './features/product-category/product-category.route';
 import { verifyToken } from './middlewares/jwt';
 import actionRoutes from './features/rbac/action/action.route';
-import permissionRoutes from './features/permission/permission.route';
+import permissionRoutes from './features/rbac/permission/permission.route';
 import roleRoutes from './features/rbac/role/role.route';
 import channelRoutes from './features/rbac/channel/channel.route';
 import moduleRoutes from './features/rbac/module/module.route';

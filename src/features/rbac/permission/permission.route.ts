@@ -6,7 +6,7 @@ import {
   getOnePermission,
   updateOnePermission,
 } from './permission.controller';
-import { validateRequest } from '../../middlewares/validation';
+import { validateRequest } from '../../../middlewares/validation';
 import validator from './permission.validator';
 
 const permissionRoutes = Router();

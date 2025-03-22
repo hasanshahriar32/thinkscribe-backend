@@ -23,7 +23,7 @@ export const validateRequest = (schemas: ValidationSchemas) => {
       // Validate the modified body
       const { error } = schemas.body.validate(bodyToValidate);
       if (error) {
-        throw new AppError(error.details[0].message, 400);
+        throw new AppError(`${error.details[0].message} in body`, 400);
       }
     }
 
@@ -31,7 +31,7 @@ export const validateRequest = (schemas: ValidationSchemas) => {
     if (schemas.query) {
       const { error } = schemas.query.validate(req.query);
       if (error) {
-        throw new AppError(error.details[0].message, 400);
+        throw new AppError(`${error.details[0].message} in query`, 400);
       }
     }
 
@@ -39,7 +39,7 @@ export const validateRequest = (schemas: ValidationSchemas) => {
     if (schemas.params) {
       const { error } = schemas.params.validate(req.params);
       if (error) {
-        throw new AppError(error.details[0].message, 400);
+        throw new AppError(`${error.details[0].message} in params`, 400);
       }
     }
 

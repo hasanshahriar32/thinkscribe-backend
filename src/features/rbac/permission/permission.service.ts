@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import db from '../../db/db';
+import db from '../../../db/db';
 
 export async function getPermissionsByUser(userId: string) {
   const permissions = await db

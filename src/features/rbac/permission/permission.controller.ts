@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { AppError, responseData } from '../../utils/http';
-import { MESSAGES } from '../../configs/messages';
+import { AppError, responseData } from '../../../utils/http';
+import { MESSAGES } from '../../../configs/messages';
 import {
   createPermission,
   deletePermission,
@@ -11,7 +11,7 @@ import {
   deleteMultiPermissions,
   createMultiPermissions,
 } from './permission.service';
-import db from '../../db/db';
+import db from '../../../db/db';
 import { Knex } from 'knex';
 import { channel } from 'diagnostics_channel';
 

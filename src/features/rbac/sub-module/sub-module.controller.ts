@@ -102,11 +102,13 @@ export async function createSubModules(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const payload = req.body.modules.map((module: Record<string, unknown>) => ({
-      name: module.name,
-      channel_id: module.channel_id,
-      created_by: req.body.user.id,
-    }));
+    const payload = req.body.subModules.map(
+      (module: Record<string, unknown>) => ({
+        name: module.name,
+        channel_id: module.channel_id,
+        created_by: req.body.user.id,
+      })
+    );
     await createMultiSubModules(payload, trx);
 
     await trx.commit();
