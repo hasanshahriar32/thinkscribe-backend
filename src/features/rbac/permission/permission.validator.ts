@@ -21,15 +21,18 @@ const validator = {
     }),
   },
   update: {
-    params: Joi.object({
-      id: Joi.string().required(),
-    }),
     body: Joi.object({
-      channel_id: Joi.string().required(),
-      module_id: Joi.string().required(),
-      sub_module_id: Joi.string().required(),
       role_id: Joi.string().required(),
-      actions: Joi.array().items(Joi.string()).required(),
+      permissions: Joi.array()
+        .items(
+          Joi.object({
+            module_id: Joi.string().required(),
+            sub_module_id: Joi.string().required(),
+            channel_id: Joi.string().required(),
+            actions: Joi.array().items(Joi.string()).required(),
+          })
+        )
+        .required(),
     }),
   },
   delete: {

@@ -1,10 +1,7 @@
 import { Router } from 'express';
 import {
-  createOnePermission,
-  deleteOnePermission,
   getAllPermissions,
-  getOnePermission,
-  updateOnePermission,
+  updatePermissionsByRole,
 } from './permission.controller';
 import { validateRequest } from '../../../middlewares/validation';
 import validator from './permission.validator';
@@ -16,25 +13,10 @@ permissionRoutes.get(
   validateRequest(validator.select),
   getAllPermissions
 );
-permissionRoutes.get(
-  '/permissions/:id',
-  validateRequest(validator.detail),
-  getOnePermission
-);
-permissionRoutes.post(
-  '/permissions',
-  validateRequest(validator.create),
-  createOnePermission
-);
 permissionRoutes.patch(
-  '/permissions/:id',
+  '/permissions',
   validateRequest(validator.update),
-  updateOnePermission
-);
-permissionRoutes.delete(
-  '/permissions/:id',
-  validateRequest(validator.delete),
-  deleteOnePermission
+  updatePermissionsByRole
 );
 
 export default permissionRoutes;
