@@ -79,7 +79,6 @@ export async function createMultiSubModules(
   data: Record<string, unknown>[],
   trx?: Knex.Transaction
 ) {
-  console.log('DATA', data);
   const query = db.table('sub_module').insert(data);
 
   if (trx) query.transacting(trx);

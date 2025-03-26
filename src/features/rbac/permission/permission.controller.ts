@@ -5,6 +5,7 @@ import {
   getPermissionsByUser,
   deleteMultiPermissions,
   createMultiPermissions,
+  getPermissions,
 } from './permission.service';
 import db from '../../../db/db';
 import { Knex } from 'knex';
@@ -15,7 +16,7 @@ export async function getAllPermissions(
   next: NextFunction
 ) {
   try {
-    const result = await getPermissionsByUser(req.query.user_id as string);
+    const result = await getPermissions(req.query);
 
     responseData({
       res,

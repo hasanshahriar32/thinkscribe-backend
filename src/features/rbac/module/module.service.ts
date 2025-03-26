@@ -15,10 +15,17 @@ export async function getModules(filters: ListQuery & { channel_id: string }) {
       'module.id',
       'module.name',
       'module.is_deleted',
-      db.raw(`JSON_OBJECT('id', channel.id, 'name', channel.name) as channel`)
+      db.raw(`JSON_OBJECT('id', channel.id, 'name', channel.name) as channel`),
+      db.raw(
+        `JSON_ARRAYAGG(
+          JSON_OBJECT('id', sub_module.id, 'name', sub_module.name)
+        ) as sub_modules`
+      )
     )
     .where('module.is_deleted', 0)
     .leftJoin('channel', 'channel.id', 'module.channel_id')
+    .leftJoin('sub_module', 'sub_module.module_id', 'module.id')
+    .groupBy('module.id')
     .limit(pagination.limit)
     .offset(pagination.offset);
   const totalCountQuery = db.table('module').count('* as count');

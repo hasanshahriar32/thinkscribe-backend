@@ -3,7 +3,8 @@ import Joi from 'joi';
 const validator = {
   select: {
     query: Joi.object({
-      user_id: Joi.string().required(),
+      user_id: Joi.string().optional(),
+      role_id: Joi.string().optional(),
     }),
   },
   detail: {

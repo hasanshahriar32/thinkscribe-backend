@@ -21,6 +21,7 @@ const validator = {
     body: Joi.object({
       name: Joi.string().required(),
       channel_id: Joi.string().required(),
+      module_id: Joi.string().required(),
     }),
   },
   createMulti: {
@@ -29,6 +30,7 @@ const validator = {
         Joi.object({
           name: Joi.string().required(),
           channel_id: Joi.string().required(),
+          module_id: Joi.string().required(),
         })
       ),
     }),
@@ -40,6 +42,7 @@ const validator = {
     body: Joi.object({
       name: Joi.string().required(),
       channel_id: Joi.string().required(),
+      module_id: Joi.string().required(),
     }),
   },
   delete: {

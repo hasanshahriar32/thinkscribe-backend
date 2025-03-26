@@ -77,6 +77,7 @@ export async function createOneSubModule(
     const payload = {
       name: req.body.name,
       channel_id: req.body.channel_id,
+      module_id: req.body.module_id,
       created_by: req.body.user.id,
     };
     const createdSubModule = await createSubModule(payload, trx);
@@ -103,9 +104,10 @@ export async function createSubModules(
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.subModules.map(
-      (module: Record<string, unknown>) => ({
-        name: module.name,
-        channel_id: module.channel_id,
+      (subModule: Record<string, unknown>) => ({
+        name: subModule.name,
+        channel_id: subModule.channel_id,
+        module_id: subModule.module_id,
         created_by: req.body.user.id,
       })
     );

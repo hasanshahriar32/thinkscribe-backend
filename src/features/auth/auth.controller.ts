@@ -10,6 +10,7 @@ import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 
 export async function login(req: Request, res: Response, next: NextFunction) {
+  console.log(owef);
   try {
     const user = await getUser({ username: req.body.username });
     if (!user) throw new AppError(MESSAGES.ERROR.USER_NOT_FOUND, 400);
@@ -29,7 +30,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     responseData({
       res,
       status: 200,
-      message: MESSAGES.SUCCESS.CREATE,
+      message: MESSAGES.SUCCESS.LOGIN,
       data: {
         accessToken,
         refreshToken,

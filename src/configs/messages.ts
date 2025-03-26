@@ -4,6 +4,7 @@ export const MESSAGES = {
     UPDATE: 'Successfully Updated!',
     DELETE: 'Successfully Deleted!',
     RETRIVE: 'Successfully Retrived!',
+    LOGIN: 'Successfully Logged In!',
   },
   ERROR: {
     CREATE: '',
