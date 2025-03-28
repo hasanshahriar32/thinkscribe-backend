@@ -9,10 +9,22 @@ import {
   updateOneUser,
 } from './user.controller';
 import upload from '../../3rd-services/multer-upload';
+import verifyRBAC from '../../middlewares/rbac';
+import { ACTIONS } from '../../configs/rbac';
 
 const userRoutes = Router();
 
-userRoutes.get('/users', validateRequest(validator.select), getAllUsers);
+userRoutes.get(
+  '/users',
+  verifyRBAC({
+    action: ACTIONS.VIEW,
+    roles: ['Admin'],
+    module: 'User Management',
+    subModule: 'User Role Assign',
+  }),
+  validateRequest(validator.select),
+  getAllUsers
+);
 userRoutes.get('/users/:id', validateRequest(validator.detail), getOneUser);
 userRoutes.post(
   '/users',

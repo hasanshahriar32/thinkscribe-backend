@@ -4,12 +4,12 @@ export const ROLES = {
   DEV: 'Developer',
 };
 export const ACTIONS = {
-  CREATE: 'create',
-  VIEW: 'view',
-  UPDATE: 'update',
-  DELETE: 'delete',
+  CREATE: 'Create',
+  VIEW: 'View',
+  UPDATE: 'Update',
+  DELETE: 'Delete',
 };
 export const CHANNELS = {
-  WEB: 'web',
-  MOBILE: 'mobile',
+  WEB: 'Web',
+  MOBILE: 'Mobile',
 };
