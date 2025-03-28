@@ -10,7 +10,7 @@ import {
 } from './user.controller';
 import upload from '../../3rd-services/multer-upload';
 import verifyRBAC from '../../middlewares/rbac';
-import { ACTIONS } from '../../configs/rbac';
+import { ACTIONS, ROLES } from '../../configs/rbac';
 
 const userRoutes = Router();
 
@@ -18,7 +18,7 @@ userRoutes.get(
   '/users',
   verifyRBAC({
     action: ACTIONS.VIEW,
-    roles: ['Admin'],
+    roles: [ROLES.ADMIN],
     module: 'User Management',
     subModule: 'User Role Assign',
   }),

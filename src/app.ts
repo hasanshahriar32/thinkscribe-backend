@@ -8,16 +8,12 @@ import helmet from 'helmet';
 import './cron-jobs/sample-cron';
 
 const app = express();
+
 app.use(helmet());
 app.use(cors());
-app.use(morgan(':date[iso] :method :url'));
 app.use(express.json());
 app.use(cookieParser());
-
-app.use((req, res, next) => {
-  console.log(req.body);
-  next();
-});
+app.use(morgan(':date[iso] :method :url'));
 
 // Routes
 app.use(routes);

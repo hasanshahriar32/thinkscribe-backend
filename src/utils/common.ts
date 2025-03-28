@@ -1,5 +1,9 @@
 import { ListQuery } from '../types/types';
 
+export const base64Encode = (data: string): string => {
+  return Buffer.from(data).toString('base64');
+};
+
 export const getPagination = ({
   page,
   size,
