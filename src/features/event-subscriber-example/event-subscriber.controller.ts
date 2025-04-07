@@ -2,25 +2,25 @@ import { NextFunction, Request, Response } from 'express';
 import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
-  createProduct,
-  deleteProduct,
-  getExistingProduct,
-  getProduct,
-  getProducts,
-  updateProduct,
-} from './event-emit.service';
+  createEventSubscriber,
+  deleteEventSubscriber,
+  getExistingEventSubscriber,
+  getEventSubscriber,
+  getEventSubscribers,
+  updateEventSubscriber,
+} from './event-subscriber.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
 import { eventBus } from '../../events/event-bus';
 
-export async function getAllProducts(
+export async function getAllEventSubscribers(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const result = await getProducts(req.query as unknown as ListQuery);
+    const result = await getEventSubscribers(req.query as unknown as ListQuery);
 
     responseData({
       res,
@@ -33,13 +33,13 @@ export async function getAllProducts(
   }
 }
 
-export async function getOneProduct(
+export async function getOneEventSubscriber(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const product = await getProduct(req.params.id);
+    const product = await getEventSubscriber(req.params.id);
 
     responseData({
       res,
@@ -52,31 +52,35 @@ export async function getOneProduct(
   }
 }
 
-export async function createOneProduct(
+export async function createOneEventSubscriber(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const existingProduct = await getExistingProduct({ name: req.body.name });
-    if (existingProduct)
+    const existingEventSubscriber = await getExistingEventSubscriber({
+      name: req.body.name,
+    });
+    if (existingEventSubscriber)
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
       name: req.body.name,
-      price: req.body.price,
-      category_id: req.body.category_id,
+      event_emitter_id: req.body.event_emitter_id,
       created_by: req.body.user.id,
     };
-    const createdProduct = await createProduct(payload, trx);
+    const createdEventSubscriber = await createEventSubscriber(payload, trx);
 
     /**
      * * This event need to be subscribed by
-     * * product module
-     * * product category module
+     * * event subscriber example module
      */
-    // eventBus.emit('create-product', (req, trx) => {});
+    eventBus.emit('create-event-emitter', {
+      id: createdEventSubscriber[0],
+      name: req.body.name,
+      created_by: req.body.user.id,
+    });
 
     await trx.commit();
 
@@ -84,7 +88,7 @@ export async function createOneProduct(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: createdProduct,
+      data: createdEventSubscriber,
     });
   } catch (error) {
     await trx.rollback();
@@ -92,7 +96,7 @@ export async function createOneProduct(
   }
 }
 
-export async function updateOneProduct(
+export async function updateOneEventSubscriber(
   req: Request,
   res: Response,
   next: NextFunction
@@ -105,7 +109,7 @@ export async function updateOneProduct(
       category_id: req.body.category_id,
       updated_by: req.body.user.id,
     };
-    const updatedProduct = await updateProduct(
+    const updatedEventSubscriber = await updateEventSubscriber(
       {
         id: req.params.id,
         data: payload,
@@ -119,7 +123,7 @@ export async function updateOneProduct(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedProduct,
+      data: updatedEventSubscriber,
     });
   } catch (error) {
     await trx.rollback();
@@ -127,14 +131,14 @@ export async function updateOneProduct(
   }
 }
 
-export async function deleteOneProduct(
+export async function deleteOneEventSubscriber(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProduct = await deleteProduct(req.params.id);
+    const deletedEventSubscriber = await deleteEventSubscriber(req.params.id);
 
     await trx.commit();
 
@@ -142,7 +146,7 @@ export async function deleteOneProduct(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: deletedProduct,
+      data: deletedEventSubscriber,
     });
   } catch (error) {
     await trx.rollback();
