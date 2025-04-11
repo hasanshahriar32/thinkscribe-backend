@@ -10,8 +10,6 @@ import roleRoutes from './features/rbac/role/role.route';
 import channelRoutes from './features/rbac/channel/channel.route';
 import moduleRoutes from './features/rbac/module/module.route';
 import subModuleRoutes from './features/rbac/sub-module/sub-module.route';
-import eventEmitterRoutes from './features/event-emitter-example/event-emit.route';
-import eventSubscriberRoutes from './features/event-subscriber-example/event-subscriber.route';
 
 const routes = Router();
 
@@ -28,7 +26,5 @@ routes.use('/api', verifyToken, permissionRoutes);
 routes.use('/api', verifyToken, productCategoryRoutes);
 routes.use('/api', verifyToken, productRoutes);
 routes.use('/api', verifyToken, userRoutes);
-routes.use('/api', verifyToken, eventEmitterRoutes);
-routes.use('/api', verifyToken, eventSubscriberRoutes);
 
 export default routes;
