@@ -4,8 +4,11 @@ import { validateRequest } from '../../middlewares/validation';
 import {
   createOneProductCategory,
   deleteOneProductCategory,
+  deleteProductCategories,
   getAllProductCategories,
   getOneProductCategory,
+  softDeleteOneProductCategory,
+  softDeleteProductCategories,
   updateOneProductCategory,
 } from './product-category.controller';
 
@@ -39,17 +42,17 @@ productCategoryRoutes.delete(
 productCategoryRoutes.post(
   '/products/delete-multi',
   validateRequest(validator.deleteMulti),
-  deleteOneProductCategory
+  deleteProductCategories
 );
 productCategoryRoutes.delete(
   '/products/soft-delete/:id',
   validateRequest(validator.delete),
-  deleteOneProductCategory
+  softDeleteOneProductCategory
 );
 productCategoryRoutes.post(
   '/products/soft-delete-multi',
   validateRequest(validator.deleteMulti),
-  deleteOneProductCategory
+  softDeleteProductCategories
 );
 
 export default productCategoryRoutes;
