@@ -3,9 +3,13 @@ import validator from './product.validator';
 import { validateRequest } from '../../middlewares/validation';
 import {
   createOneProduct,
+  createProducts,
   deleteOneProduct,
+  deleteProducts,
   getAllProducts,
   getOneProduct,
+  softDeleteOneProduct,
+  softDeleteProducts,
   updateOneProduct,
 } from './product.controller';
 
@@ -29,7 +33,7 @@ productRoutes.post(
 productRoutes.post(
   '/products/create-multi',
   validateRequest(validator.createMulti),
-  createOneProduct
+  createProducts
 );
 productRoutes.patch(
   '/products/:id',
@@ -44,17 +48,17 @@ productRoutes.delete(
 productRoutes.post(
   '/products/delete-multi',
   validateRequest(validator.deleteMulti),
-  deleteOneProduct
+  deleteProducts
 );
 productRoutes.delete(
   '/products/soft-delete/:id',
   validateRequest(validator.delete),
-  deleteOneProduct
+  softDeleteOneProduct
 );
 productRoutes.post(
   '/products/soft-delete-multi',
   validateRequest(validator.deleteMulti),
-  deleteOneProduct
+  softDeleteProducts
 );
 
 export default productRoutes;
