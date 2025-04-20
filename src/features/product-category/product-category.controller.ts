@@ -8,6 +8,9 @@ import {
   getProductCategories,
   updateProductCategory,
   getExistingProductCategory,
+  softDeleteMultiProductCategories,
+  softDeleteProductCategory,
+  deleteMultiProductCategories,
 } from './product-category.service';
 import db from '../../db/db';
 import { Knex } from 'knex';
@@ -142,6 +145,84 @@ export async function deleteOneProductCategory(
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
       data: deletedProductCategory,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function deleteProductCategories(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    await deleteMultiProductCategories(req.body.ids, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function softDeleteOneProductCategory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    const isExistedProductCategory = await getExistingProductCategory({
+      id: req.params.id,
+    });
+
+    if (!isExistedProductCategory)
+      throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+
+    const deletedProductCategory = await softDeleteProductCategory(
+      req.params.id
+    );
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: deletedProductCategory,
+    });
+  } catch (error) {
+    await trx.rollback();
+    next(error);
+  }
+}
+
+export async function softDeleteProductCategories(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const trx: Knex.Transaction = await db.transaction();
+  try {
+    await softDeleteMultiProductCategories(req.body.ids, trx);
+
+    await trx.commit();
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
     });
   } catch (error) {
     await trx.rollback();

@@ -20,6 +20,11 @@ const validator = {
       name: Joi.string().required(),
     }),
   },
+  createMulti: {
+    body: Joi.object({
+      name: Joi.string().required(),
+    }),
+  },
   update: {
     params: Joi.object({
       id: Joi.string().required(),
@@ -31,6 +36,11 @@ const validator = {
   delete: {
     params: Joi.object({
       id: Joi.string().required(),
+    }),
+  },
+  deleteMulti: {
+    body: Joi.object({
+      ids: Joi.array().items(Joi.string().required()),
     }),
   },
 } as const;

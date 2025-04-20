@@ -26,6 +26,11 @@ productRoutes.post(
   validateRequest(validator.create),
   createOneProduct
 );
+productRoutes.post(
+  '/products/create-multi',
+  validateRequest(validator.createMulti),
+  createOneProduct
+);
 productRoutes.patch(
   '/products/:id',
   validateRequest(validator.update),
@@ -34,6 +39,21 @@ productRoutes.patch(
 productRoutes.delete(
   '/products/:id',
   validateRequest(validator.delete),
+  deleteOneProduct
+);
+productRoutes.post(
+  '/products/delete-multi',
+  validateRequest(validator.deleteMulti),
+  deleteOneProduct
+);
+productRoutes.delete(
+  '/products/soft-delete/:id',
+  validateRequest(validator.delete),
+  deleteOneProduct
+);
+productRoutes.post(
+  '/products/soft-delete-multi',
+  validateRequest(validator.deleteMulti),
   deleteOneProduct
 );
 

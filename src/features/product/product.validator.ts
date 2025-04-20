@@ -22,6 +22,13 @@ const validator = {
       price: Joi.number().required(),
     }),
   },
+  createMulti: {
+    body: Joi.object({
+      name: Joi.string().required(),
+      category_id: Joi.string().required(),
+      price: Joi.number().required(),
+    }),
+  },
   update: {
     params: Joi.object({
       id: Joi.string().required(),
@@ -35,6 +42,11 @@ const validator = {
   delete: {
     params: Joi.object({
       id: Joi.string().required(),
+    }),
+  },
+  deleteMulti: {
+    body: Joi.object({
+      ids: Joi.array().items(Joi.string().required()),
     }),
   },
 } as const;

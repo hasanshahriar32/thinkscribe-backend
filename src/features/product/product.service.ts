@@ -58,6 +58,17 @@ export async function createProduct(
   return query;
 }
 
+export async function createMultiProducts(
+  data: Record<string, unknown>[],
+  trx?: Knex.Transaction
+) {
+  const query = db.table('product').insert(data);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
 export async function updateProduct(
   {
     id,
@@ -77,6 +88,45 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string | number) {
   return db.table('product').where('id', id).del();
+}
+
+export async function deleteMultiProducts(
+  ids: string[],
+  trx?: Knex.Transaction
+) {
+  const query = db.table('product').whereIn('id', ids).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteProduct(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('product')
+    .update({ is_deleted: true })
+    .where('id', id);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteMultiProducts(
+  ids: string[] | number[],
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('product')
+    .update({ is_deleted: true })
+    .whereIn('id', ids);
+
+  if (trx) query.transacting(trx);
+
+  return query;
 }
 
 export async function getExistingProduct(data: Record<string, unknown>) {

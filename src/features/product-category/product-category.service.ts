@@ -70,6 +70,45 @@ export async function deleteProductCategory(id: string | number) {
   return db.table('product_category').where('id', id).del();
 }
 
+export async function deleteMultiProductCategories(
+  ids: string[],
+  trx?: Knex.Transaction
+) {
+  const query = db.table('product_category').whereIn('id', ids).del();
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteProductCategory(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('product_category')
+    .update({ is_deleted: true })
+    .where('id', id);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
+export async function softDeleteMultiProductCategories(
+  ids: string[] | number[],
+  trx?: Knex.Transaction
+) {
+  const query = db
+    .table('product_category')
+    .update({ is_deleted: true })
+    .whereIn('id', ids);
+
+  if (trx) query.transacting(trx);
+
+  return query;
+}
+
 export async function getExistingProductCategory(
   data: Record<string, unknown>
 ) {

@@ -4,19 +4,25 @@ import { AppError } from '../utils/http';
 import { MESSAGES } from '../configs/messages';
 
 interface RBACParams {
-  roles: string[];
-  action: string;
-  module?: string;
-  subModule?: string;
+  roles: string[]; // Allowed roles for access
+  action: string; // Required action (e.g., 'Create', 'Delete')
+  module?: string; // Optional module name (e.g., 'User')
+  subModule?: string; // Optional sub-module name (e.g., 'Profile')
 }
 
+/**
+ * Middleware to verify if a user has permission to perform a specific action
+ * based on their role and assigned permissions in the database.
+ */
 const verifyRBAC = ({ roles, action, module, subModule }: RBACParams) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Step 1: Check if the user's role is in the allowed roles list
       if (!roles.includes(req.body.user.role as string)) {
         throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
       }
 
+      // Step 2: Query the permissions from the database for the user's role
       const permissions = await db
         .table('permission')
         .select(
@@ -32,7 +38,7 @@ const verifyRBAC = ({ roles, action, module, subModule }: RBACParams) => {
             JSON_ARRAYAGG(
               JSON_OBJECT('id', action.id, 'name', action.name)
             ) as actions
-          `)
+          `) // Group actions into a JSON array
         )
         .leftJoin('channel', 'channel.id', 'permission.channel_id')
         .leftJoin('module', 'module.id', 'permission.module_id')
@@ -51,17 +57,28 @@ const verifyRBAC = ({ roles, action, module, subModule }: RBACParams) => {
           'channel.name'
         );
 
+      // Step 3: Find the relevant permission entry for the given module/subModule
       const permission = permissions.find(
         (permission) =>
           permission.module === module && permission.sub_module === subModule
       );
-      if (!permission) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
 
+      // If no matching module/subModule permission found, deny access
+      if (!permission) {
+        throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+      }
+
+      // Step 4: Check if the specific action is allowed within the found permission
       const isValidAction = permission.actions.find(
         (ac: Record<string, unknown>) => ac.name === action
       );
-      if (!isValidAction) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
 
+      // If the action is not listed, deny access
+      if (!isValidAction) {
+        throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+      }
+
+      // All checks passed, move to the next middleware or controller
       next();
     } catch (err) {
       next(err);

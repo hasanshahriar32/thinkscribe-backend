@@ -36,5 +36,20 @@ productCategoryRoutes.delete(
   validateRequest(validator.delete),
   deleteOneProductCategory
 );
+productCategoryRoutes.post(
+  '/products/delete-multi',
+  validateRequest(validator.deleteMulti),
+  deleteOneProductCategory
+);
+productCategoryRoutes.delete(
+  '/products/soft-delete/:id',
+  validateRequest(validator.delete),
+  deleteOneProductCategory
+);
+productCategoryRoutes.post(
+  '/products/soft-delete-multi',
+  validateRequest(validator.deleteMulti),
+  deleteOneProductCategory
+);
 
 export default productCategoryRoutes;
