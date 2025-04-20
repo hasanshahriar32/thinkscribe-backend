@@ -3,6 +3,7 @@ import validator from './product-category.validator';
 import { validateRequest } from '../../middlewares/validation';
 import {
   createOneProductCategory,
+  createProductCategories,
   deleteOneProductCategory,
   deleteProductCategories,
   getAllProductCategories,
@@ -28,6 +29,11 @@ productCategoryRoutes.post(
   '/product-categories',
   validateRequest(validator.create),
   createOneProductCategory
+);
+productCategoryRoutes.post(
+  '/product-categories/create-multi',
+  validateRequest(validator.createMulti),
+  createProductCategories
 );
 productCategoryRoutes.patch(
   '/product-categories/:id',

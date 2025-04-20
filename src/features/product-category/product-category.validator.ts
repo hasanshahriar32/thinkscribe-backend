@@ -22,7 +22,11 @@ const validator = {
   },
   createMulti: {
     body: Joi.object({
-      name: Joi.string().required(),
+      productCategories: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+        })
+      ),
     }),
   },
   update: {

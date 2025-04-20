@@ -106,7 +106,6 @@ export async function deleteMultiProducts(
   ids: string[],
   trx?: Knex.Transaction
 ) {
-  console.log('ids', ids);
   const toDelete = await db.table('product').select('*').whereIn('id', ids);
 
   const query = db.table('product').whereIn('id', ids).del();

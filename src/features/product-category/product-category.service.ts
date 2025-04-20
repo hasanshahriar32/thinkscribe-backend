@@ -11,7 +11,11 @@ export async function getProductCategories(filters: ListQuery) {
 
   const query = db
     .table('product_category')
-    .select('id', 'name', 'is_deleted')
+    .select(
+      'product_category.id',
+      'product_category.name',
+      'product_category.is_deleted'
+    )
     .limit(pagination.limit)
     .offset(pagination.offset);
   const totalCountQuery = db.table('product_category').count('* as count');
@@ -19,12 +23,12 @@ export async function getProductCategories(filters: ListQuery) {
   if (filters.sort) {
     query.orderBy(filters.sort, filters.order || 'asc');
   } else {
-    query.orderBy('created_at', 'desc');
+    query.orderBy('product_category.created_at', 'desc');
   }
 
   if (filters.keyword) {
-    query.whereILike('name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
+    query.whereILike('product_category.name', `%${filters.keyword}%`);
+    totalCountQuery.whereILike('product_category.name', `%${filters.keyword}%`);
   }
 
   return getPaginatedData(query, totalCountQuery, filters, pagination);
@@ -43,10 +47,21 @@ export async function createProductCategory(
   trx?: Knex.Transaction
 ) {
   const query = db.table('product_category').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
+}
+
+export async function createMultiProductCategories(
+  data: Record<string, unknown>[],
+  trx?: Knex.Transaction
+) {
+  const query = db.table('product_category').insert(data);
+  if (trx) query.transacting(trx);
+  await query;
+
+  return data;
 }
 
 export async function updateProductCategory(
@@ -66,19 +81,36 @@ export async function updateProductCategory(
   return query;
 }
 
-export async function deleteProductCategory(id: string | number) {
-  return db.table('product_category').where('id', id).del();
+export async function deleteProductCategory(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const toDelete = await db
+    .table('product_category')
+    .select('id', 'name', 'is_deleted')
+    .where('id', id);
+
+  const query = db.table('product_category').where('id', id).del();
+  if (trx) query.transacting(trx);
+  await query;
+
+  return toDelete[0] || null;
 }
 
 export async function deleteMultiProductCategories(
   ids: string[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db
+    .table('product_category')
+    .select('*')
+    .whereIn('id', ids);
+
   const query = db.table('product_category').whereIn('id', ids).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete;
 }
 
 export async function softDeleteProductCategory(
@@ -91,8 +123,14 @@ export async function softDeleteProductCategory(
     .where('id', id);
 
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  const toDelete = await db
+    .table('product_category')
+    .select('id', 'name', 'is_deleted')
+    .where('id', id);
+
+  return toDelete[0] || null;
 }
 
 export async function softDeleteMultiProductCategories(
@@ -103,10 +141,15 @@ export async function softDeleteMultiProductCategories(
     .table('product_category')
     .update({ is_deleted: true })
     .whereIn('id', ids);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  const toDelete = await db
+    .table('product_category')
+    .select('id', 'name', 'is_deleted')
+    .whereIn('id', ids);
+
+  return toDelete || null;
 }
 
 export async function getExistingProductCategory(
