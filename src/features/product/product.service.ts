@@ -52,10 +52,10 @@ export async function createProduct(
   trx?: Knex.Transaction
 ) {
   const query = db.table('product').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function createMultiProducts(
@@ -63,10 +63,10 @@ export async function createMultiProducts(
   trx?: Knex.Transaction
 ) {
   const query = db.table('product').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function updateProduct(
@@ -86,19 +86,34 @@ export async function updateProduct(
   return query;
 }
 
-export async function deleteProduct(id: string | number) {
-  return db.table('product').where('id', id).del();
+export async function deleteProduct(
+  id: string | number,
+  trx?: Knex.Transaction
+) {
+  const toDelete = await db
+    .table('product')
+    .select('id', 'name', 'is_deleted')
+    .where('id', id);
+
+  const query = db.table('product').where('id', id).del();
+  if (trx) query.transacting(trx);
+  await query;
+
+  return toDelete[0] || null;
 }
 
 export async function deleteMultiProducts(
   ids: string[],
   trx?: Knex.Transaction
 ) {
+  console.log('ids', ids);
+  const toDelete = await db.table('product').select('*').whereIn('id', ids);
+
   const query = db.table('product').whereIn('id', ids).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete;
 }
 
 export async function softDeleteProduct(
@@ -111,8 +126,14 @@ export async function softDeleteProduct(
     .where('id', id);
 
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  const toDelete = await db
+    .table('product')
+    .select('id', 'name', 'is_deleted')
+    .where('id', id);
+
+  return toDelete[0] || null;
 }
 
 export async function softDeleteMultiProducts(
@@ -123,10 +144,15 @@ export async function softDeleteMultiProducts(
     .table('product')
     .update({ is_deleted: true })
     .whereIn('id', ids);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  const toDelete = await db
+    .table('product')
+    .select('id', 'name', 'is_deleted')
+    .whereIn('id', ids);
+
+  return toDelete || null;
 }
 
 export async function getExistingProduct(data: Record<string, unknown>) {

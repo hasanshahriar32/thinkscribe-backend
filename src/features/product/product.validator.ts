@@ -24,9 +24,13 @@ const validator = {
   },
   createMulti: {
     body: Joi.object({
-      name: Joi.string().required(),
-      category_id: Joi.string().required(),
-      price: Joi.number().required(),
+      products: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          category_id: Joi.string().required(),
+          price: Joi.number().required(),
+        })
+      ),
     }),
   },
   update: {

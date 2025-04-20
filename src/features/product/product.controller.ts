@@ -16,6 +16,7 @@ import {
 import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllProducts(
   req: Request,
@@ -67,6 +68,7 @@ export async function createOneProduct(
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
+      id: uuidv4(),
       name: req.body.name,
       price: req.body.price,
       category_id: req.body.category_id,
@@ -96,12 +98,13 @@ export async function createProducts(
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.products.map((pd: Record<string, unknown>) => ({
+      id: uuidv4(),
       name: pd.name,
       price: pd.price,
       category_id: pd.category_id,
       created_by: req.body.user.id,
     }));
-    await createMultiProducts(payload, trx);
+    const createdProducts = await createMultiProducts(payload, trx);
 
     await trx.commit();
 
@@ -109,7 +112,7 @@ export async function createProducts(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: null,
+      data: createdProducts,
     });
   } catch (error) {
     await trx.rollback();
@@ -159,7 +162,7 @@ export async function deleteOneProduct(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProduct = await deleteProduct(req.params.id);
+    const deletedProduct = await deleteProduct(req.params.id, trx);
 
     await trx.commit();
 
@@ -182,7 +185,8 @@ export async function deleteProducts(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiProducts(req.body.ids, trx);
+    console.log('controller', req.body.ids);
+    const deletedProducts = await deleteMultiProducts(req.body.ids, trx);
 
     await trx.commit();
 
@@ -190,7 +194,7 @@ export async function deleteProducts(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: null,
+      data: deletedProducts,
     });
   } catch (error) {
     await trx.rollback();
@@ -234,7 +238,7 @@ export async function softDeleteProducts(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await softDeleteMultiProducts(req.body.ids, trx);
+    const deletedProducts = await softDeleteMultiProducts(req.body.ids, trx);
 
     await trx.commit();
 
@@ -242,7 +246,7 @@ export async function softDeleteProducts(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: null,
+      data: deletedProducts,
     });
   } catch (error) {
     await trx.rollback();

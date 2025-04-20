@@ -40,17 +40,17 @@ productCategoryRoutes.delete(
   deleteOneProductCategory
 );
 productCategoryRoutes.post(
-  '/products/delete-multi',
+  '/product-categories/delete-multi',
   validateRequest(validator.deleteMulti),
   deleteProductCategories
 );
 productCategoryRoutes.delete(
-  '/products/soft-delete/:id',
+  '/product-categories/soft-delete/:id',
   validateRequest(validator.delete),
   softDeleteOneProductCategory
 );
 productCategoryRoutes.post(
-  '/products/soft-delete-multi',
+  '/product-categories/soft-delete-multi',
   validateRequest(validator.deleteMulti),
   softDeleteProductCategories
 );
