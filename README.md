@@ -28,6 +28,8 @@ A scalable Express.js project with TypeScript featuring CRUD with pagination, fi
 - **Node-Cron** – Scheduled jobs
 - **Morgan** – Logging
 - **Docker** - Containerization
+- **ESLint, Prettier** - Controlling code quality
+- **Husky** - Git hook
 
 ## 📦 Use Case Ideas
 
@@ -66,7 +68,7 @@ cp .env.example .env
 
 3. 📝 Open the .env file and replace the placeholder values with your actual credentials.
 
-## 🚀 Initiating the Project
+### 🚀 Initiating the Project
 
 ```bash
 cd rbac-expressjs-starter
