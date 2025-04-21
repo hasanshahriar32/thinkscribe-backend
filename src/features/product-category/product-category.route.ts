@@ -17,6 +17,11 @@ import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../configs/rbac';
 
 const productCategoryRoutes = Router();
 
+// =========================
+// GET /product-categories
+// - Get all product categories
+// - Requires ADMIN role with VIEW permission
+// =========================
 productCategoryRoutes.get(
   '/product-categories',
   verifyRBAC({
@@ -28,6 +33,12 @@ productCategoryRoutes.get(
   validateRequest(validator.select),
   getAllProductCategories
 );
+
+// =========================
+// GET /product-categories/:id
+// - Get a product category by ID
+// - Requires ADMIN role with VIEW permission
+// =========================
 productCategoryRoutes.get(
   '/product-categories/:id',
   verifyRBAC({
@@ -39,6 +50,12 @@ productCategoryRoutes.get(
   validateRequest(validator.detail),
   getOneProductCategory
 );
+
+// =========================
+// POST /product-categories
+// - Create a new product category
+// - Requires ADMIN role with CREATE permission
+// =========================
 productCategoryRoutes.post(
   '/product-categories',
   verifyRBAC({
@@ -50,6 +67,12 @@ productCategoryRoutes.post(
   validateRequest(validator.create),
   createOneProductCategory
 );
+
+// =========================
+// POST /product-categories/create-multi
+// - Create multiple product categories
+// - Requires ADMIN role with CREATE permission
+// =========================
 productCategoryRoutes.post(
   '/product-categories/create-multi',
   verifyRBAC({
@@ -61,6 +84,12 @@ productCategoryRoutes.post(
   validateRequest(validator.createMulti),
   createProductCategories
 );
+
+// =========================
+// PATCH /product-categories/:id
+// - Update a product category by ID
+// - Requires ADMIN role with UPDATE permission
+// =========================
 productCategoryRoutes.patch(
   '/product-categories/:id',
   verifyRBAC({
@@ -72,6 +101,12 @@ productCategoryRoutes.patch(
   validateRequest(validator.update),
   updateOneProductCategory
 );
+
+// =========================
+// DELETE /product-categories/:id
+// - Hard delete a product category by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 productCategoryRoutes.delete(
   '/product-categories/:id',
   verifyRBAC({
@@ -83,6 +118,12 @@ productCategoryRoutes.delete(
   validateRequest(validator.delete),
   deleteOneProductCategory
 );
+
+// =========================
+// POST /product-categories/delete-multi
+// - Hard delete multiple product categories
+// - Requires ADMIN role with DELETE permission
+// =========================
 productCategoryRoutes.post(
   '/product-categories/delete-multi',
   verifyRBAC({
@@ -94,6 +135,12 @@ productCategoryRoutes.post(
   validateRequest(validator.deleteMulti),
   deleteProductCategories
 );
+
+// =========================
+// DELETE /product-categories/soft-delete/:id
+// - Soft delete a product category by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 productCategoryRoutes.delete(
   '/product-categories/soft-delete/:id',
   verifyRBAC({
@@ -105,6 +152,12 @@ productCategoryRoutes.delete(
   validateRequest(validator.delete),
   softDeleteOneProductCategory
 );
+
+// =========================
+// POST /product-categories/soft-delete-multi
+// - Soft delete multiple product categories
+// - Requires ADMIN role with DELETE permission
+// =========================
 productCategoryRoutes.post(
   '/product-categories/soft-delete-multi',
   verifyRBAC({

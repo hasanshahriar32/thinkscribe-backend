@@ -17,6 +17,11 @@ import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../../configs/rbac';
 
 const channelRoutes = Router();
 
+// =========================
+// GET /channels
+// - Get all channels
+// - Requires ADMIN role with VIEW permission
+// =========================
 channelRoutes.get(
   '/channels',
   verifyRBAC({
@@ -28,6 +33,12 @@ channelRoutes.get(
   validateRequest(validator.select),
   getAllChannels
 );
+
+// =========================
+// GET /channels/:id
+// - Get a specific channel by ID
+// - Requires ADMIN role with VIEW permission
+// =========================
 channelRoutes.get(
   '/channels/:id',
   verifyRBAC({
@@ -39,6 +50,12 @@ channelRoutes.get(
   validateRequest(validator.detail),
   getOneChannel
 );
+
+// =========================
+// POST /channels/create
+// - Create a single channel
+// - Requires ADMIN role with CREATE permission
+// =========================
 channelRoutes.post(
   '/channels/create',
   verifyRBAC({
@@ -50,6 +67,12 @@ channelRoutes.post(
   validateRequest(validator.create),
   createOneChannel
 );
+
+// =========================
+// POST /channels/create-multi
+// - Create multiple channels
+// - Requires ADMIN role with CREATE permission
+// =========================
 channelRoutes.post(
   '/channels/create-multi',
   verifyRBAC({
@@ -61,6 +84,12 @@ channelRoutes.post(
   validateRequest(validator.createMulti),
   createChannels
 );
+
+// =========================
+// PATCH /channels/update/:id
+// - Update a channel by ID
+// - Requires ADMIN role with UPDATE permission
+// =========================
 channelRoutes.patch(
   '/channels/update/:id',
   verifyRBAC({
@@ -72,6 +101,12 @@ channelRoutes.patch(
   validateRequest(validator.update),
   updateOneChannel
 );
+
+// =========================
+// DELETE /channels/delete/:id
+// - Hard delete a specific channel by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 channelRoutes.delete(
   '/channels/delete/:id',
   verifyRBAC({
@@ -83,6 +118,12 @@ channelRoutes.delete(
   validateRequest(validator.delete),
   deleteOneChannel
 );
+
+// =========================
+// POST /channels/delete-multi
+// - Hard delete multiple channels
+// - Requires ADMIN role with DELETE permission
+// =========================
 channelRoutes.post(
   '/channels/delete-multi',
   verifyRBAC({
@@ -94,6 +135,12 @@ channelRoutes.post(
   validateRequest(validator.deleteMulti),
   deleteChannels
 );
+
+// =========================
+// DELETE /channels/soft-delete/:id
+// - Soft delete a specific channel by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 channelRoutes.delete(
   '/channels/soft-delete/:id',
   verifyRBAC({
@@ -105,6 +152,12 @@ channelRoutes.delete(
   validateRequest(validator.delete),
   softDeleteOneChannel
 );
+
+// =========================
+// POST /channels/soft-delete-multi
+// - Soft delete multiple channels
+// - Requires ADMIN role with DELETE permission
+// =========================
 channelRoutes.post(
   '/channels/soft-delete-multi',
   verifyRBAC({

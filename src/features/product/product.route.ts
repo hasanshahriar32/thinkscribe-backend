@@ -17,6 +17,11 @@ import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../configs/rbac';
 
 const productRoutes = Router();
 
+// =========================
+// GET /products
+// - Get all products
+// - Requires ADMIN role with VIEW permission on PRODUCT module
+// =========================
 productRoutes.get(
   '/products',
   verifyRBAC({
@@ -28,6 +33,12 @@ productRoutes.get(
   validateRequest(validator.select),
   getAllProducts
 );
+
+// =========================
+// GET /products/:id
+// - Get a single product by ID
+// - Requires ADMIN role with VIEW permission
+// =========================
 productRoutes.get(
   '/products/:id',
   verifyRBAC({
@@ -39,6 +50,12 @@ productRoutes.get(
   validateRequest(validator.detail),
   getOneProduct
 );
+
+// =========================
+// POST /products
+// - Create a new product
+// - Requires ADMIN role with CREATE permission
+// =========================
 productRoutes.post(
   '/products',
   verifyRBAC({
@@ -50,6 +67,12 @@ productRoutes.post(
   validateRequest(validator.create),
   createOneProduct
 );
+
+// =========================
+// POST /products/create-multi
+// - Create multiple products in bulk
+// - Requires ADMIN role with CREATE permission
+// =========================
 productRoutes.post(
   '/products/create-multi',
   verifyRBAC({
@@ -61,6 +84,12 @@ productRoutes.post(
   validateRequest(validator.createMulti),
   createProducts
 );
+
+// =========================
+// PATCH /products/:id
+// - Update a product by ID
+// - Requires ADMIN role with UPDATE permission
+// =========================
 productRoutes.patch(
   '/products/:id',
   verifyRBAC({
@@ -72,6 +101,12 @@ productRoutes.patch(
   validateRequest(validator.update),
   updateOneProduct
 );
+
+// =========================
+// DELETE /products/:id
+// - Hard delete a product by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 productRoutes.delete(
   '/products/:id',
   verifyRBAC({
@@ -83,6 +118,12 @@ productRoutes.delete(
   validateRequest(validator.delete),
   deleteOneProduct
 );
+
+// =========================
+// POST /products/delete-multi
+// - Hard delete multiple products
+// - Requires ADMIN role with DELETE permission
+// =========================
 productRoutes.post(
   '/products/delete-multi',
   verifyRBAC({
@@ -94,6 +135,12 @@ productRoutes.post(
   validateRequest(validator.deleteMulti),
   deleteProducts
 );
+
+// =========================
+// DELETE /products/soft-delete/:id
+// - Soft delete a product by ID (mark as inactive instead of removing)
+// - Requires ADMIN role with DELETE permission
+// =========================
 productRoutes.delete(
   '/products/soft-delete/:id',
   verifyRBAC({
@@ -105,6 +152,12 @@ productRoutes.delete(
   validateRequest(validator.delete),
   softDeleteOneProduct
 );
+
+// =========================
+// POST /products/soft-delete-multi
+// - Soft delete multiple products
+// - Requires ADMIN role with DELETE permission
+// =========================
 productRoutes.post(
   '/products/soft-delete-multi',
   verifyRBAC({

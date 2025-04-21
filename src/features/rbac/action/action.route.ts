@@ -17,6 +17,11 @@ import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../../configs/rbac';
 
 const actionRoutes = Router();
 
+// =========================
+// GET /actions
+// - Get all actions
+// - Requires ADMIN role with VIEW permission
+// =========================
 actionRoutes.get(
   '/actions',
   verifyRBAC({
@@ -28,6 +33,12 @@ actionRoutes.get(
   validateRequest(validator.select),
   getAllActions
 );
+
+// =========================
+// GET /actions/:id
+// - Get a specific action by ID
+// - Requires ADMIN role with VIEW permission
+// =========================
 actionRoutes.get(
   '/actions/:id',
   verifyRBAC({
@@ -39,6 +50,12 @@ actionRoutes.get(
   validateRequest(validator.detail),
   getOneAction
 );
+
+// =========================
+// POST /actions/create
+// - Create a single action
+// - Requires ADMIN role with CREATE permission
+// =========================
 actionRoutes.post(
   '/actions/create',
   verifyRBAC({
@@ -50,6 +67,12 @@ actionRoutes.post(
   validateRequest(validator.create),
   createOneAction
 );
+
+// =========================
+// POST /actions/create-multi
+// - Create multiple actions
+// - Requires ADMIN role with CREATE permission
+// =========================
 actionRoutes.post(
   '/actions/create-multi',
   verifyRBAC({
@@ -61,6 +84,12 @@ actionRoutes.post(
   validateRequest(validator.createMulti),
   createActions
 );
+
+// =========================
+// PATCH /actions/:id
+// - Update an action by ID
+// - Requires ADMIN role with UPDATE permission
+// =========================
 actionRoutes.patch(
   '/actions/:id',
   verifyRBAC({
@@ -72,6 +101,12 @@ actionRoutes.patch(
   validateRequest(validator.update),
   updateOneAction
 );
+
+// =========================
+// DELETE /actions/:id
+// - Hard delete a specific action by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 actionRoutes.delete(
   '/actions/:id',
   verifyRBAC({
@@ -83,6 +118,12 @@ actionRoutes.delete(
   validateRequest(validator.delete),
   deleteOneAction
 );
+
+// =========================
+// POST /actions/delete-multi
+// - Hard delete multiple actions
+// - Requires ADMIN role with DELETE permission
+// =========================
 actionRoutes.post(
   '/actions/delete-multi',
   verifyRBAC({
@@ -94,6 +135,12 @@ actionRoutes.post(
   validateRequest(validator.deleteMulti),
   deleteActions
 );
+
+// =========================
+// DELETE /actions/soft-delete/:id
+// - Soft delete a specific action by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 actionRoutes.delete(
   '/actions/soft-delete/:id',
   verifyRBAC({
@@ -105,6 +152,12 @@ actionRoutes.delete(
   validateRequest(validator.delete),
   softDeleteOneAction
 );
+
+// =========================
+// POST /actions/soft-delete-multi
+// - Soft delete multiple actions
+// - Requires ADMIN role with DELETE permission
+// =========================
 actionRoutes.post(
   '/actions/soft-delete-multi',
   verifyRBAC({

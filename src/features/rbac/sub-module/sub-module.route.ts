@@ -17,6 +17,11 @@ import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../../configs/rbac';
 
 const subModuleRoutes = Router();
 
+// =========================
+// GET /sub-modules
+// - Get all sub-modules
+// - Requires ADMIN role with VIEW permission
+// =========================
 subModuleRoutes.get(
   '/sub-modules',
   verifyRBAC({
@@ -28,6 +33,12 @@ subModuleRoutes.get(
   validateRequest(validator.select),
   getAllSubModules
 );
+
+// =========================
+// GET /sub-modules/:id
+// - Get a specific sub-module by ID
+// - Requires ADMIN role with VIEW permission
+// =========================
 subModuleRoutes.get(
   '/sub-modules/:id',
   verifyRBAC({
@@ -39,6 +50,12 @@ subModuleRoutes.get(
   validateRequest(validator.detail),
   getOneSubModule
 );
+
+// =========================
+// POST /sub-modules/create
+// - Create a single sub-module
+// - Requires ADMIN role with CREATE permission
+// =========================
 subModuleRoutes.post(
   '/sub-modules/create',
   verifyRBAC({
@@ -50,6 +67,12 @@ subModuleRoutes.post(
   validateRequest(validator.create),
   createOneSubModule
 );
+
+// =========================
+// POST /sub-modules/create-multi
+// - Create multiple sub-modules
+// - Requires ADMIN role with CREATE permission
+// =========================
 subModuleRoutes.post(
   '/sub-modules/create-multi',
   verifyRBAC({
@@ -61,6 +84,12 @@ subModuleRoutes.post(
   validateRequest(validator.createMulti),
   createSubModules
 );
+
+// =========================
+// PATCH /sub-modules/update/:id
+// - Update a sub-module by ID
+// - Requires ADMIN role with UPDATE permission
+// =========================
 subModuleRoutes.patch(
   '/sub-modules/update/:id',
   verifyRBAC({
@@ -72,6 +101,12 @@ subModuleRoutes.patch(
   validateRequest(validator.update),
   updateOneSubModule
 );
+
+// =========================
+// DELETE /sub-modules/delete/:id
+// - Hard delete a specific sub-module by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 subModuleRoutes.delete(
   '/sub-modules/delete/:id',
   verifyRBAC({
@@ -83,6 +118,12 @@ subModuleRoutes.delete(
   validateRequest(validator.delete),
   deleteOneSubModule
 );
+
+// =========================
+// POST /sub-modules/delete-multi
+// - Hard delete multiple sub-modules
+// - Requires ADMIN role with DELETE permission
+// =========================
 subModuleRoutes.post(
   '/sub-modules/delete-multi',
   verifyRBAC({
@@ -94,6 +135,12 @@ subModuleRoutes.post(
   validateRequest(validator.deleteMulti),
   deleteSubModules
 );
+
+// =========================
+// DELETE /sub-modules/soft-delete/:id
+// - Soft delete a specific sub-module by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 subModuleRoutes.delete(
   '/sub-modules/soft-delete/:id',
   verifyRBAC({
@@ -105,6 +152,12 @@ subModuleRoutes.delete(
   validateRequest(validator.delete),
   softDeleteOneSubModule
 );
+
+// =========================
+// POST /sub-modules/soft-delete-multi
+// - Soft delete multiple sub-modules
+// - Requires ADMIN role with DELETE permission
+// =========================
 subModuleRoutes.post(
   '/sub-modules/soft-delete-multi',
   verifyRBAC({

@@ -14,6 +14,11 @@ import { upload } from '../../utils/multer-upload';
 
 const userRoutes = Router();
 
+// =========================
+// GET /users
+// - Get all users
+// - Requires ADMIN role with VIEW permission
+// =========================
 userRoutes.get(
   '/users',
   verifyRBAC({
@@ -25,6 +30,12 @@ userRoutes.get(
   validateRequest(validator.select),
   getAllUsers
 );
+
+// =========================
+// GET /users/:id
+// - Get a user by ID
+// - Requires ADMIN role with VIEW permission
+// =========================
 userRoutes.get(
   '/users/:id',
   verifyRBAC({
@@ -36,6 +47,13 @@ userRoutes.get(
   validateRequest(validator.detail),
   getOneUser
 );
+
+// =========================
+// POST /users
+// - Create a new user
+// - Requires ADMIN role with CREATE permission
+// - Accepts single file upload (e.g., profile picture)
+// =========================
 userRoutes.post(
   '/users',
   (req, res, next) => {
@@ -52,6 +70,12 @@ userRoutes.post(
   upload.single('file'),
   createOneUser
 );
+
+// =========================
+// PATCH /users/:id
+// - Update a user by ID
+// - Requires ADMIN role with UPDATE permission
+// =========================
 userRoutes.patch(
   '/users/:id',
   verifyRBAC({
@@ -63,6 +87,12 @@ userRoutes.patch(
   validateRequest(validator.update),
   updateOneUser
 );
+
+// =========================
+// DELETE /users/:id
+// - Delete a user by ID
+// - Requires ADMIN role with DELETE permission
+// =========================
 userRoutes.delete(
   '/users/:id',
   verifyRBAC({

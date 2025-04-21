@@ -10,6 +10,11 @@ import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../../configs/rbac';
 
 const permissionRoutes = Router();
 
+// =========================
+// GET /permissions
+// - Get all permissions
+// - Requires ADMIN role with VIEW permission
+// =========================
 permissionRoutes.get(
   '/permissions',
   verifyRBAC({
@@ -21,6 +26,12 @@ permissionRoutes.get(
   validateRequest(validator.select),
   getAllPermissions
 );
+
+// =========================
+// PATCH /permissions
+// - Update permissions by role
+// - Requires ADMIN role with UPDATE permission
+// =========================
 permissionRoutes.patch(
   '/permissions',
   verifyRBAC({
