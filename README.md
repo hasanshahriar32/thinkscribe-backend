@@ -70,11 +70,17 @@ cp .env.example .env
 
 ### 🚀 Initiating the Project
 
+1. ⚙️ Run these commands
+
 ```bash
 cd rbac-expressjs-starter
 npm install
 npm run dev
 ```
+
+2. ⚙️ Log in with this credential
+   username - sai min
+   password - saimin
 
 ## 👨‍💻 Author
 
