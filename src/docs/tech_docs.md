@@ -54,7 +54,37 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ## Logging
 
-(Explain how logging is set up – e.g., using `winston`, log levels, file output, etc.)
+This project implements **two types of logging** using **Morgan** and a **custom audit logging system**:
+
+### 1. Access Logging (via Morgan)
+
+- **Purpose**: Automatically records all incoming HTTP requests.
+- **Implementation**: Uses the standard Morgan setup.
+- **Output**: Logs are typically written to the console or an access log file, depending on your environment configuration.
+
+### 2. Audit Logging (Custom Implementation)
+
+- **Purpose**: Tracks sensitive or critical operations such as:
+  - External API calls
+  - Internal service interactions
+  - User actions requiring traceability (e.g., login, data changes)
+
+#### 📁 File Location
+
+- Audit logs are stored in:  
+  `src/storage/logs/audit.log`
+
+#### 🧾 Log Format
+
+- The structure and format of audit logs are defined in:  
+  `config/log-format.ts`
+
+#### ⚙️ How It Works
+
+- A **custom middleware** (located in `middlewares/`) is used to automatically capture audit-related logs for specific routes or actions.
+- A reusable utility function `logAudit` is exported from:  
+  `utils/log.ts`  
+  This function allows you to **manually log important events** from anywhere in the application.
 
 ## Integrating With External Services
 
