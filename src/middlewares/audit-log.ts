@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Ensure log folder exists
-const logDir = path.join(__dirname, '../storage/logs');
+export const logDir = path.join(__dirname, '../storage/logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }

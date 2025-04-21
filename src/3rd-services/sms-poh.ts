@@ -1,6 +1,6 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 import { base64Encode } from '../utils/common';
+import apiClient from '../api-client';
 dotenv.config();
 
 const encodedToken = base64Encode(
@@ -8,7 +8,7 @@ const encodedToken = base64Encode(
 );
 
 export const sendSMS = async (phones: string, message: string) => {
-  return axios.post(
+  return apiClient.post(
     'https://v3.smspoh.com/api/rest/send/bulk',
     {
       messages: [
@@ -29,7 +29,7 @@ export const sendSMS = async (phones: string, message: string) => {
 };
 
 export const sendBulkSMS = async (phones: string[], message: string) => {
-  return axios.post(
+  return apiClient.post(
     'https://v3.smspoh.com/api/rest/send/bulk',
     {
       messages: [
