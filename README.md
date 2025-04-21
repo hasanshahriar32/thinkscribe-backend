@@ -65,3 +65,11 @@ cp .env.example .env
 ```
 
 3. 📝 Open the .env file and replace the placeholder values with your actual credentials.
+
+## 🚀 Initiating the Project
+
+```bash
+cd rbac-expressjs-starter
+npm install
+npm run dev
+```
