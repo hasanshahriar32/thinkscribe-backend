@@ -85,6 +85,7 @@ npm run dev
 
 3. 📄 Postman collection can be found in `src/docs` folder
 4. 📝 Read detailed technical documentation [here](src/docs/tech_docs.md)
+5. 📝 Postman collection [here](src/docs/tech_docs.md)
 
 ## 👨‍💻 Author
 
