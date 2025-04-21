@@ -49,12 +49,19 @@ git clone https://github.com/MinPyaeKyaw/rbac-expressjs-starter.git
 - **Node.js** (v14.x or higher) - [Download Node.js](https://nodejs.org/) 🌐
 - **MySQL** - [Download MySQL](https://dev.mysql.com/downloads/) 💾
 
-### 🛠️ Initialize Project 🛠️
+### 🛠️ Setting Up the Database
 
-Start by initializing a new Node.js project.
+1. 📁 Navigate to the `src/docs` folder – you'll find a SQL file named `rbac_express.sql`.
+2. 🗄️ Create a MySQL database named `rbac_express`.
+3. 🧩 Run the SQL file in your database to create the required tables and seed data.
+
+### 🛠️ Setting Up env
+
+1. 📄 You'll find a .env.example file in the project root.
+2. 📋 Copy the file and rename it to .env.
 
 ```bash
-cd rbac-expressjs-starter
-npm i
-npm run dev
+cp .env.example .env
 ```
+
+3. 📝 Open the .env file and replace the placeholder values with your actual credentials.
