@@ -6,6 +6,7 @@ This template is crafted with best practices in mind, using **Node.js**, **Expre
 
 This documentation includes the following key areas:
 
+- [API Documentation](#api-documentation)
 - [ERD](#erd)
 - [Architecture](#architecture)
 - [Folder Structure](#folder-structure)
@@ -14,6 +15,10 @@ This documentation includes the following key areas:
 - [Integrating With External Service APIs](#integrating-with-external-service-apis)
 
 ---
+
+## API Documentation
+
+- Postman collection is provided in `src/docs/api-docs`.
 
 ## ERD
 
