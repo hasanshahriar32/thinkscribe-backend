@@ -33,7 +33,26 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ## Folder Structure
 
-(Describe the purpose of each main folder and how the structure supports scalability.)
+📁 rbac-expressjs-starter/
+├── 📁 src/
+│ ├── 📁 config/ # App configuration (env, db, etc.)
+│ ├── 📁 cron-jobs/ # Route handlers
+│ ├── 📁 docs/ # Custom middlewares (auth, error handling, etc.)
+│ ├── 📁 external-services/ # Database models / SQL queries
+│ ├── 📁 features/ # Express route definitions
+│ ├── 📁 middlewares/ # Business logic and reusable functions
+│ ├── 📁 storage/ # Utility functions (response formatter, etc.)
+│ ├── 📁 types/ # Utility functions (response form)
+│ ├── 📁 utils/ # Utility functions (response form)
+│ ├── app.ts # Express app setup
+│ ├── api-client.ts # Express app setup
+│ ├── routes.ts # Express app setup
+│ └── server.ts # Server entry point
+├── .env # Environment variables
+├── .gitignore
+├── package.json
+├── tsconfig.json # TypeScript configuration
+└── README.md
 
 ---
 
