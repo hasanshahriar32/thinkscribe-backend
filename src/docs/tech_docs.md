@@ -6,16 +6,16 @@ This template is crafted with best practices in mind, using **Node.js**, **Expre
 
 This documentation includes the following key areas:
 
-- 📊 [ERD](#📊-erd)
-- 🏗️ [Architecture](#🏗️-architecture)
-- 🗂️ [Folder Structure](#🗂️-folder-structure)
-- 🔐 [RBAC Implementation](#🔐-rbac-implementation)
-- 📜 [Logging](#📜-logging)
-- 🌐 [Integrating With External Service APIs](#🌐-integrating-with-external-service-apis)
+- [ERD](#erd)
+- [Architecture](#architecture)
+- [Folder Structure](#folder-structure)
+- [RBAC Implementation](#rbac-implementation)
+- [Logging](#logging)
+- [Integrating With External Service APIs](#integrating-with-external-service-apis)
 
 ---
 
-## 📊 ERD
+## ERD
 
 🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)
 
@@ -25,39 +25,39 @@ This documentation includes the following key areas:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.). You can find the folder structure in the [Folder Structure](#folder-structure) section.
 
-### ✅ Why Feature-Based?
+### Why Feature-Based?
 
-#### 1. 📈 **High Scalability**
+#### 📈 **High Scalability**
 
 - Easy to scale and manage large codebases.
 - Teams can work on separate features independently without conflicts.
 
-#### 2. 🛠️ **Better Maintainability**
+#### 🛠️ **Better Maintainability**
 
 - Easier to locate, update, and test business logic per domain.
 - Simplifies bug tracking and debugging.
 
-#### 3. 🧱 **Separation of Concerns**
+#### 🧱 **Separation of Concerns**
 
 - Reduces coupling between unrelated parts of the codebase.
 
-#### 4. 🚀 **Improved Developer Productivity**
+#### 🚀 **Improved Developer Productivity**
 
 - Developers can focus on isolated features.
 - Easier onboarding for new developers.
 
-#### 5. 🧩 **Modularity & Reusability**
+#### 🧩 **Modularity & Reusability**
 
 - Promotes reusable and encapsulated modules.
 - Easier to extract features into packages or microservices.
 
 ---
 
-## 🗂️ Folder Structure
+## Folder Structure
 
 ```
 📁 rbac-expressjs-starter
@@ -107,7 +107,7 @@ This project follows a **Feature-Based Architecture**, organizing code by busine
 
 ```
 
-## 🔐 RBAC Implementation
+## RBAC Implementation
 
 This project implements **Role-Based Access Control (RBAC)** to ensure users only access what they are authorized for.
 
@@ -132,7 +132,7 @@ To update user permissions, call the `/api/permissions` endpoint using the **PAT
 
 ---
 
-## 📜 Logging
+## Logging
 
 This project uses **two types of logging**:
 
@@ -164,7 +164,7 @@ This project uses **two types of logging**:
 
 ---
 
-## 🌐 Integrating With External Service APIs
+## Integrating With External Service APIs
 
 - Uses a custom **Axios instance**: `apiClient` (in `src/api-client.ts`)
 - Already integrated with **audit logging**.
