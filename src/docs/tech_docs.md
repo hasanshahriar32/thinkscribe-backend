@@ -27,17 +27,18 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ## Folder Structure
 
-📁 rbac-expressjs-starter/
-├── 📁 src/
-│ ├── 📁 config/
-│ ├── 📁 cron-jobs/
-│ ├── 📁 docs/
-│ ├── 📁 external-services/
-│ ├── 📁 features/
-│ ├── 📁 middlewares/
-│ ├── 📁 storage/
-│ ├── 📁 types/
-│ ├── 📁 utils/
+```markdown
+📁 rbac-expressjs-starter
+├── 📁 src
+│ ├── 📁 config
+│ ├── 📁 cron-jobs
+│ ├── 📁 docs
+│ ├── 📁 external-services
+│ ├── 📁 middlewares
+│ ├── 📁 features
+│ ├── 📁 storage
+│ ├── 📁 types
+│ ├── 📁 utils
 │ ├── app.ts
 │ ├── api-client.ts
 │ ├── routes.ts
@@ -72,3 +73,4 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 - 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
 
 Made with ❤️ by Sai Min Pyae Kyaw
+```
