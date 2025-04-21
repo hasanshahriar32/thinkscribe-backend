@@ -6,52 +6,58 @@ This template is crafted with best practices in mind, using **Node.js**, **Expre
 
 This documentation includes the following key areas:
 
-- [ERD](#erd)
-- [Architecture](#architecture)
-- [Folder Structure](#folder-structure)
-- [RBAC Implementation](#rbac-implementation)
-- [Logging](#logging)
-- [Integrating With External Service APIs](#integrating-with-external-service-apis)
+- 📊 [ERD](#erd)
+- 🏗️ [Architecture](#architecture)
+- 🗂️ [Folder Structure](#folder-structure)
+- 🔐 [RBAC Implementation](#rbac-implementation)
+- 📜 [Logging](#logging)
+- 🌐 [Integrating With External Service APIs](#integrating-with-external-service-apis)
 
-## ERD
+---
+
+## 📊 ERD
 
 🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)
 
-Get a SQL file named `rbac_express.sql` in `src/docs` folder.
+🗃️ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ![ERD](./erd.png)
 
-## Architecture
+---
+
+## 🏗️ Architecture
 
 This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.). You can find the folder structure in the [Folder Structure](#folder-structure) section.
 
-Below are the reasons why I chose Feature-Based Architecture:
+### ✅ Why Feature-Based?
 
-#### 1. **High Scalability**
+#### 1. 📈 **High Scalability**
 
 - Easy to scale and manage large codebases.
 - Teams can work on separate features independently without conflicts.
 
-#### 2. **Better Maintainability**
+#### 2. 🛠️ **Better Maintainability**
 
-- Makes it easy to locate, update, and test business logic related to a specific domain.
-- Bug tracking and debugging are easier when everything related to a feature is in one place.
+- Easier to locate, update, and test business logic per domain.
+- Simplifies bug tracking and debugging.
 
-#### 3. **Separation of Concerns**
+#### 3. 🧱 **Separation of Concerns**
 
-- Clean separation of different domains reduces coupling between unrelated parts of the codebase.
+- Reduces coupling between unrelated parts of the codebase.
 
-#### 4. **Improved Developer Productivity**
+#### 4. 🚀 **Improved Developer Productivity**
 
-- Developers only need to understand and focus on the feature they are working on.
-- Onboarding new developers is easier as they can explore one feature at a time.
+- Developers can focus on isolated features.
+- Easier onboarding for new developers.
 
-#### 5. **Modularity & Reusability**
+#### 5. 🧩 **Modularity & Reusability**
 
 - Promotes reusable and encapsulated modules.
-- Makes it easier to extract features into separate packages or microservices if needed.
+- Easier to extract features into packages or microservices.
 
-## Folder Structure
+---
+
+## 🗂️ Folder Structure
 
 ```
 📁 rbac-expressjs-starter
@@ -101,68 +107,68 @@ Below are the reasons why I chose Feature-Based Architecture:
 
 ```
 
-## RBAC Implementation
+## 🔐 RBAC Implementation
 
-This project implements Role-Based Access Control (RBAC) to ensure users have access only to the resources and actions they are authorized to perform.
+This project implements **Role-Based Access Control (RBAC)** to ensure users only access what they are authorized for.
 
-RBAC is structured around Roles, Modules, Sub-Modules, Actions, and Channels, enabling fine-grained access control across all application features.
+RBAC is structured around **Roles**, **Modules**, **Sub-Modules**, **Actions**, and **Channels**, enabling fine-grained control across features.
 
-Every time a user logs in, their configured permissions are included in the response.
+🟢 On login, the user’s configured permissions are included in the response.
 
-### RBAC Middleware
+### 🔍 RBAC Middleware
 
-RBAC is implemented in the `src/middlewares/rbac.ts` file.
-You need to apply this middleware to each protected route.
+- Located in: `src/middlewares/rbac.ts`
+- Apply it to each protected route.
 
-### RBAC Configs
+### ⚙️ RBAC Configs
 
-RBAC configurations can be found in `src/configs/rbac.ts` file.
+- Found in: `src/configs/rbac.ts`
 
-### Updating User Permissions
+### ✏️ Updating User Permissions
 
-To update user permissions, you need to call the `/api/permissions` endpoint using the PATCH method with a predefined payload structure.
+To update user permissions, call the `/api/permissions` endpoint using the **PATCH** method with a predefined payload structure.
 
-> CRUD operations can be performed on roles, modules, sub-modules, channels, and actions, but you need to update the configurations accordingly after these operations.
+> ⚠️ CRUD operations can be performed on roles, modules, sub-modules, channels, and actions – but remember to update the configurations accordingly afterward.
 
-## Logging
+---
 
-This project implements **two types of logging** using **Morgan** and a **custom audit logging system**:
+## 📜 Logging
 
-### 1. Access Logging (via Morgan)
+This project uses **two types of logging**:
 
-- **Purpose**: Automatically records all incoming HTTP requests.
-- **Implementation**: Uses the standard Morgan setup.
-- **Output**: Logs are typically written to the console.
+### 1. 🛣️ Access Logging (via Morgan)
 
-### 2. Audit Logging (Custom Implementation)
+- **Purpose:** Automatically records all incoming HTTP requests.
+- **Setup:** Standard Morgan.
+- **Output:** Console logs.
 
-- **Purpose**: Tracks sensitive or critical operations such as:
-  - External API calls
-  - Internal service interactions
-  - User actions requiring traceability (e.g., login, data changes)
+### 2. 🧾 Audit Logging (Custom)
+
+- **Purpose:** Tracks sensitive or critical actions like:
+  - API calls
+  - User logins
+  - Data changes
 
 #### 📁 File Location
 
-- Audit logs are stored in:  
-  `src/storage/logs/audit.log`
+- Stored in: `src/storage/logs/audit.log`
 
-#### 🧾 Log Format
+#### 🧱 Format Definition
 
-- The structure and format of audit logs are defined in:  
-  `config/log-format.ts`
+- Defined in: `config/log-format.ts`
 
 #### ⚙️ How It Works
 
-- A **custom middleware** (located in `middlewares/`) is used to automatically capture audit-related logs for specific routes or actions.
-- A reusable utility function `logAudit` is exported from:  
-  `utils/log.ts`  
-  This function allows you to **manually log important events** from anywhere in the application.
+- Custom middleware captures audit logs.
+- Use `logAudit` (from `utils/log.ts`) to manually log events.
 
-## Integrating With External Service APIs
+---
 
-To interact with external services via their APIs, this project uses an Axios instance named apiClient. This instance is configured in the `/src/api-client.ts` file and is already integrated with the audit logging system to track API requests and responses.
+## 🌐 Integrating With External Service APIs
 
-By using the apiClient, you ensure that all external API calls are logged for auditing purposes.
+- Uses a custom **Axios instance**: `apiClient` (in `src/api-client.ts`)
+- Already integrated with **audit logging**.
+- Ensures all external API interactions are traceable.
 
 ## 👨‍💻 Author
 
