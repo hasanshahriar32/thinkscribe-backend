@@ -23,8 +23,6 @@ This documentation includes the following key areas:
 
 ![ERD](./erd.png)
 
----
-
 ## Architecture
 
 This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.). You can find the folder structure in the [Folder Structure](#folder-structure) section.
@@ -54,8 +52,6 @@ This project follows a **Feature-Based Architecture**, organizing code by busine
 
 - Promotes reusable and encapsulated modules.
 - Easier to extract features into packages or microservices.
-
----
 
 ## Folder Structure
 
@@ -130,8 +126,6 @@ To update user permissions, call the `/api/permissions` endpoint using the **PAT
 
 > ⚠️ CRUD operations can be performed on roles, modules, sub-modules, channels, and actions – but remember to update the configurations accordingly afterward.
 
----
-
 ## Logging
 
 This project uses **two types of logging**:
@@ -162,13 +156,13 @@ This project uses **two types of logging**:
 - Custom middleware captures audit logs.
 - Use `logAudit` (from `utils/log.ts`) to manually log events.
 
----
-
 ## Integrating With External Service APIs
 
 - Uses a custom **Axios instance**: `apiClient` (in `src/api-client.ts`)
 - Already integrated with **audit logging**.
 - Ensures all external API interactions are traceable.
+
+---
 
 ## 👨‍💻 Author
 
