@@ -6,14 +6,14 @@ This template is crafted with best practices in mind, using **Node.js**, **Expre
 
 This documentation includes the following key areas:
 
-- [ERD Diagram](#erd-diagram)
+- [ERD](#erd)
 - [Architecture](#architecture)
 - [Folder Structure](#folder-structure)
 - [RBAC Implementation](#rbac-implementation)
 - [Logging](#logging)
 - [Integrating With External Service APIs](#integrating-with-external-service-apis)
 
-## ERD Diagram
+## ERD
 
 🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)
 
@@ -22,8 +22,6 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 ![ERD](./erd.png)
 
 ## Architecture
-
-### Advantages of Feature-Based Architecture
 
 This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.). You can find the folder structure in the [Folder Structure](#folder-structure) section.
 
@@ -104,6 +102,27 @@ Below are the reasons why I chose Feature-Based Architecture:
 ```
 
 ## RBAC Implementation
+
+This project implements Role-Based Access Control (RBAC) to ensure users have access only to the resources and actions they are authorized to perform.
+
+RBAC is structured around Roles, Modules, Sub-Modules, Actions, and Channels, enabling fine-grained access control across all application features.
+
+Every time a user logs in, their configured permissions are included in the response.
+
+### RBAC Middleware
+
+RBAC is implemented in the `src/middlewares/rbac.ts` file.
+You need to apply this middleware to each protected route.
+
+### RBAC Configs
+
+RBAC configurations can be found in `src/configs/rbac.ts` file.
+
+### Updating User Permissions
+
+To update user permissions, you need to call the `/api/permissions` endpoint using the PATCH method with a predefined payload structure.
+
+> CRUD operations can be performed on roles, modules, sub-modules, channels, and actions, but you need to update the configurations accordingly after these operations.
 
 ## Logging
 
