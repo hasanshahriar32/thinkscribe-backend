@@ -27,7 +27,7 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ## Folder Structure
 
-```markdown
+```
 📁 rbac-expressjs-starter
 ├── 📁 src
 │ ├── 📁 config
@@ -48,6 +48,7 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 ├── package.json
 ├── tsconfig.json
 └── README.md
+```
 
 ## RBAC Implementation
 
@@ -73,4 +74,7 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 - 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
 
 Made with ❤️ by Sai Min Pyae Kyaw
+
+```
+
 ```
