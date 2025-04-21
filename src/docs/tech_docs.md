@@ -42,3 +42,20 @@ This documentation includes the following key areas:
 ## Integrating With External Services
 
 (Outline how the app integrates with third-party APIs, services like AWS, Auth0, etc.)
+
+## 👨‍💻 Author
+
+**Sai Min Pyae Kyaw**
+
+💼 Passionate Full Stack Developer | Node.js | TypeScript | React | MySQL  
+📍 Based in Myanmar
+
+### 🌐 Connect with me
+
+- 💼 [LinkedIn](https://www.linkedin.com/in/sai-min-pyae-kyaw-369005200/)
+- 💻 [GitHub](https://github.com/MinPyaeKyaw)
+- 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
+
+---
+
+Made with ❤️ by Sai Min Pyae Kyaw
