@@ -8,7 +8,7 @@ import {
   getOneUser,
   updateOneUser,
 } from './user.controller';
-import upload from '../../3rd-services/multer-upload';
+import upload from '../../utils/multer-upload';
 import verifyRBAC from '../../middlewares/rbac';
 import { ACTIONS, ROLES } from '../../configs/rbac';
 
