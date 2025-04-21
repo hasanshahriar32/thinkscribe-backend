@@ -79,8 +79,8 @@ npm run dev
 ```
 
 2. ⚙️ Log in with this credential
-   username - sai min
-   password - saimin
+   - username - sai min
+   - password - saimin
 
 ## 👨‍💻 Author
 
