@@ -6,6 +6,8 @@ import routes from './routes';
 import { errorHandler } from './middlewares/error-handler';
 import helmet from 'helmet';
 import './cron-jobs/sample-cron';
+import { accessLogFormat, auditLogFormat } from './configs/log-formats';
+import auditLogStream from './middlewares/audit-log';
 
 // Initialize the Express application
 const app = express();
@@ -22,8 +24,13 @@ app.use(express.json());
 // Middleware to parse cookies attached to the client request
 app.use(cookieParser());
 
-// Logger middleware that logs each request in ISO date format, HTTP method, and URL
-app.use(morgan(':date[iso] :method :url'));
+// Access Logger middleware that logs each request in ISO date format, HTTP method, and URL
+app.use(morgan(accessLogFormat));
+
+// Audit Logger middleware that logs detailed request information to /src/storage/logs/audit.log file
+// This includes method, URL, status, response time, content length, and request body
+morgan.token('body', (req) => JSON.stringify((req as express.Request).body));
+app.use(morgan(auditLogFormat, { stream: auditLogStream }));
 
 // Register all application routes
 app.use(routes);
