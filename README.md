@@ -75,3 +75,20 @@ cd rbac-expressjs-starter
 npm install
 npm run dev
 ```
+
+## 👨‍💻 Author
+
+**Sai Min Pyae Kyaw**
+
+💼 Passionate Full Stack Developer | Node.js | TypeScript | React | MySQL  
+📍 Based in Myanmar
+
+### 🌐 Connect with me
+
+- 💼 [LinkedIn](https://www.linkedin.com/in/sai-min-pyae-kyaw-369005200/)
+- 💻 [GitHub](https://github.com/MinPyaeKyaw)
+- 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
+
+---
+
+Made with ❤️ by Sai Min Pyae Kyaw
