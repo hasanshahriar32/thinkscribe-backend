@@ -21,6 +21,9 @@ app.use(cors());
 // Middleware to parse incoming JSON payloads
 app.use(express.json());
 
+// Middleware to parse URL-encoded payloads (e.g., form submissions)
+app.use(express.urlencoded({ extended: true }));
+
 // Middleware to parse cookies attached to the client request
 app.use(cookieParser());
 

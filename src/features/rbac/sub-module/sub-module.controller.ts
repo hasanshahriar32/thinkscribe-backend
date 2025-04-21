@@ -114,7 +114,7 @@ export async function createSubModules(
         created_by: req.body.user.id,
       })
     );
-    await createMultiSubModules(payload, trx);
+    const createdModules = await createMultiSubModules(payload, trx);
 
     await trx.commit();
 
@@ -122,7 +122,7 @@ export async function createSubModules(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.CREATE,
-      data: null,
+      data: createdModules,
     });
   } catch (error) {
     await trx.rollback();
@@ -201,7 +201,7 @@ export async function deleteSubModules(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiSubModules(req.body.ids, trx);
+    const deletedModules = await deleteMultiSubModules(req.body.ids, trx);
 
     await trx.commit();
 
@@ -209,7 +209,7 @@ export async function deleteSubModules(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: null,
+      data: deletedModules,
     });
   } catch (error) {
     await trx.rollback();
@@ -254,7 +254,7 @@ export async function softDeleteSubModules(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await softDeleteMultiSubModules(req.body.ids, trx);
+    const deletedModules = await softDeleteMultiSubModules(req.body.ids, trx);
 
     await trx.commit();
 
@@ -262,7 +262,7 @@ export async function softDeleteSubModules(
       res,
       status: 200,
       message: MESSAGES.SUCCESS.DELETE,
-      data: null,
+      data: deletedModules,
     });
   } catch (error) {
     await trx.rollback();

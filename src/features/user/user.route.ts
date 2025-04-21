@@ -8,9 +8,9 @@ import {
   getOneUser,
   updateOneUser,
 } from './user.controller';
-import upload from '../../utils/multer-upload';
 import verifyRBAC from '../../middlewares/rbac';
 import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../configs/rbac';
+import { upload } from '../../utils/multer-upload';
 
 const userRoutes = Router();
 
@@ -38,14 +38,18 @@ userRoutes.get(
 );
 userRoutes.post(
   '/users',
+  (req, res, next) => {
+    console.log('Request body:', req.body);
+    next();
+  },
   verifyRBAC({
     action: ACTIONS.CREATE,
     roles: [ROLES.ADMIN],
     module: MODULES.USER_MANAGEMENT,
     subModule: SUB_MODULES.USER,
   }),
-  upload.single('file'),
   validateRequest(validator.create),
+  upload.single('file'),
   createOneUser
 );
 userRoutes.patch(

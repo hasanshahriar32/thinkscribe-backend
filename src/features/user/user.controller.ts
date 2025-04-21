@@ -12,6 +12,7 @@ import {
 import db from '../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllUsers(
   req: Request,
@@ -58,12 +59,15 @@ export async function createOneUser(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
+    console.log('req.body', req.body);
+    console.log('req.file', req.file);
     if (!req.file) {
       throw new AppError(`File is required!`, 400);
     }
 
     const password = await hashPassword(req.body.password);
     const payload = {
+      id: uuidv4(),
       username: req.body.username,
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -74,9 +78,10 @@ export async function createOneUser(
       password: password,
       address1: req.body.address1,
       address2: req.body.address2,
-      img: req.body.img,
+      img: req.file.path,
       created_by: req.body.user.id,
     };
+    console.log('payload', payload);
     const createdUser = await createUser(payload, trx);
 
     await trx.commit();
