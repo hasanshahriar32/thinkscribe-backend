@@ -13,8 +13,6 @@ This documentation includes the following key areas:
 - [Logging](#logging)
 - [Integrating With External Services](#integrating-with-external-services)
 
----
-
 ## ERD Diagram
 
 🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)
@@ -23,48 +21,38 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ![ERD](./erd.png)
 
----
-
 ## Architecture
 
 (Explain your system's layered architecture, request flow, technologies used, etc.)
-
----
 
 ## Folder Structure
 
 📁 rbac-expressjs-starter/
 ├── 📁 src/
-│ ├── 📁 config/ # App configuration (env, db, etc.)
-│ ├── 📁 cron-jobs/ # Route handlers
-│ ├── 📁 docs/ # Custom middlewares (auth, error handling, etc.)
-│ ├── 📁 external-services/ # Database models / SQL queries
-│ ├── 📁 features/ # Express route definitions
-│ ├── 📁 middlewares/ # Business logic and reusable functions
-│ ├── 📁 storage/ # Utility functions (response formatter, etc.)
-│ ├── 📁 types/ # Utility functions (response form)
-│ ├── 📁 utils/ # Utility functions (response form)
-│ ├── app.ts # Express app setup
-│ ├── api-client.ts # Express app setup
-│ ├── routes.ts # Express app setup
-│ └── server.ts # Server entry point
-├── .env # Environment variables
+│ ├── 📁 config/
+│ ├── 📁 cron-jobs/
+│ ├── 📁 docs/
+│ ├── 📁 external-services/
+│ ├── 📁 features/
+│ ├── 📁 middlewares/
+│ ├── 📁 storage/
+│ ├── 📁 types/
+│ ├── 📁 utils/
+│ ├── app.ts
+│ ├── api-client.ts
+│ ├── routes.ts
+│ └── server.ts
+├── .env
 ├── .gitignore
 ├── package.json
-├── tsconfig.json # TypeScript configuration
+├── tsconfig.json
 └── README.md
 
----
-
 ## RBAC Implementation
-
----
 
 ## Logging
 
 (Explain how logging is set up – e.g., using `winston`, log levels, file output, etc.)
-
----
 
 ## Integrating With External Services
 
@@ -82,7 +70,5 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 - 💼 [LinkedIn](https://www.linkedin.com/in/sai-min-pyae-kyaw-369005200/)
 - 💻 [GitHub](https://github.com/MinPyaeKyaw)
 - 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
-
----
 
 Made with ❤️ by Sai Min Pyae Kyaw
