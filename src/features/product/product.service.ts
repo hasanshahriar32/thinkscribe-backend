@@ -90,10 +90,7 @@ export async function deleteProduct(
   id: string | number,
   trx?: Knex.Transaction
 ) {
-  const toDelete = await db
-    .table('product')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+  const toDelete = await db.table('product').select('*').where('id', id);
 
   const query = db.table('product').where('id', id).del();
   if (trx) query.transacting(trx);
@@ -127,10 +124,7 @@ export async function softDeleteProduct(
   if (trx) query.transacting(trx);
   await query;
 
-  const toDelete = await db
-    .table('product')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+  const toDelete = await db.table('product').select('*').where('id', id);
 
   return toDelete[0] || null;
 }

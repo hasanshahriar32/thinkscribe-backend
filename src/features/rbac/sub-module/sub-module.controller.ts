@@ -16,6 +16,7 @@ import {
 import db from '../../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllSubModules(
   req: Request,
@@ -75,6 +76,7 @@ export async function createOneSubModule(
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
+      id: uuidv4(),
       name: req.body.name,
       channel_id: req.body.channel_id,
       module_id: req.body.module_id,
@@ -105,6 +107,7 @@ export async function createSubModules(
   try {
     const payload = req.body.subModules.map(
       (subModule: Record<string, unknown>) => ({
+        id: uuidv4(),
         name: subModule.name,
         channel_id: subModule.channel_id,
         module_id: subModule.module_id,

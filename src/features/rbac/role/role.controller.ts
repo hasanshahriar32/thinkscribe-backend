@@ -16,6 +16,7 @@ import {
 import db from '../../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllRoles(
   req: Request,
@@ -69,6 +70,7 @@ export async function createOneRole(
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
+      id: uuidv4(),
       name: req.body.name,
       created_by: req.body.user.id,
     };
@@ -96,6 +98,7 @@ export async function createRoles(
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.roles.map((action: Record<string, unknown>) => ({
+      id: uuidv4(),
       name: action.name,
       created_by: req.body.user.id,
     }));

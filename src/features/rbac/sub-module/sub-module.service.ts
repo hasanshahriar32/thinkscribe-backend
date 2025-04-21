@@ -69,10 +69,10 @@ export async function createSubModule(
   trx?: Knex.Transaction
 ) {
   const query = db.table('sub_module').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function createMultiSubModules(
@@ -80,10 +80,10 @@ export async function createMultiSubModules(
   trx?: Knex.Transaction
 ) {
   const query = db.table('sub_module').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function updateSubModule(
@@ -107,50 +107,58 @@ export async function deleteSubModule(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('sub_module').select('*').where('id', id);
+
   const query = db.table('sub_module').where('id', id).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function deleteMultiSubModules(
   ids: string[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('sub_module').select('*').whereIn('id', ids);
+
   const query = db.table('sub_module').whereIn('id', ids).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function softDeleteSubModule(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('sub_module').select('*').where('id', id);
+
   const query = db
     .table('sub_module')
     .update({ is_deleted: true })
     .where('id', id);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function softDeleteMultiSubModules(
   ids: string[] | number[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('sub_module').select('*').whereIn('id', ids);
+
   const query = db
     .table('sub_module')
     .update({ is_deleted: true })
     .whereIn('id', ids);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function getExistingSubModule(data: Record<string, unknown>) {

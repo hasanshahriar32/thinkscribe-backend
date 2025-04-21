@@ -16,6 +16,7 @@ import {
 import db from '../../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllModules(
   req: Request,
@@ -72,6 +73,7 @@ export async function createOneModule(
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
+      id: uuidv4(),
       name: req.body.name,
       channel_id: req.body.channel_id,
       created_by: req.body.user.id,
@@ -100,6 +102,7 @@ export async function createModules(
   const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.modules.map((module: Record<string, unknown>) => ({
+      id: uuidv4(),
       name: module.name,
       channel_id: module.channel_id,
       created_by: req.body.user.id,

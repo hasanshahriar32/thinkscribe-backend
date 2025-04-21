@@ -44,22 +44,21 @@ export async function createAction(
   trx?: Knex.Transaction
 ) {
   const query = db.table('action').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function createMultiActions(
   data: Record<string, unknown>[],
   trx?: Knex.Transaction
 ) {
-  console.log('DATA', data);
   const query = db.table('action').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function updateAction(
@@ -83,47 +82,55 @@ export async function deleteAction(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('action').select('*').where('id', id);
+
   const query = db.table('action').where('id', id).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete;
 }
 
 export async function deleteMultiActions(
   ids: string[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('action').select('*').whereIn('id', ids);
+
   const query = db.table('action').whereIn('id', ids).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function softDeleteAction(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('action').select('*').where('id', id);
+
   const query = db.table('action').update({ is_deleted: true }).where('id', id);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function softDeleteMultiActions(
   ids: string[] | number[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('action').select('*').whereIn('id', ids);
+
   const query = db
     .table('action')
     .update({ is_deleted: true })
     .whereIn('id', ids);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function getExistingAction(data: Record<string, unknown>) {

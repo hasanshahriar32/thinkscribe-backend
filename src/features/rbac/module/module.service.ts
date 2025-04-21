@@ -62,22 +62,21 @@ export async function createModule(
   trx?: Knex.Transaction
 ) {
   const query = db.table('module').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function createMultiModules(
   data: Record<string, unknown>[],
   trx?: Knex.Transaction
 ) {
-  console.log('DATA', data);
   const query = db.table('module').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function updateModule(
@@ -101,47 +100,55 @@ export async function deleteModule(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('module').select('*').where('id', id);
+
   const query = db.table('module').where('id', id).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function deleteMultiModules(
   ids: string[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('module').select('*').whereIn('id', ids);
+
   const query = db.table('module').whereIn('id', ids).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function softDeleteModule(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('module').select('*').where('id', id);
+
   const query = db.table('module').update({ is_deleted: true }).where('id', id);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function softDeleteMultiModules(
   ids: string[] | number[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('module').select('*').whereIn('id', ids);
+
   const query = db
     .table('module')
     .update({ is_deleted: true })
     .whereIn('id', ids);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function getExistingModule(data: Record<string, unknown>) {

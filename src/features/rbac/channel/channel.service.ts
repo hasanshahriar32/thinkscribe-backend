@@ -44,22 +44,21 @@ export async function createChannel(
   trx?: Knex.Transaction
 ) {
   const query = db.table('channel').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function createMultiChannels(
   data: Record<string, unknown>[],
   trx?: Knex.Transaction
 ) {
-  console.log('DATA', data);
   const query = db.table('channel').insert(data);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return data;
 }
 
 export async function updateChannel(
@@ -83,50 +82,58 @@ export async function deleteChannel(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('channel').select('*').where('id', id);
+
   const query = db.table('channel').where('id', id).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function deleteMultiChannels(
   ids: string[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('channel').select('*').whereIn('id', ids);
+
   const query = db.table('channel').whereIn('id', ids).del();
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function softDeleteChannel(
   id: string | number,
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('channel').select('*').where('id', id);
+
   const query = db
     .table('channel')
     .update({ is_deleted: true })
     .where('id', id);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete[0] || null;
 }
 
 export async function softDeleteMultiChannels(
   ids: string[] | number[],
   trx?: Knex.Transaction
 ) {
+  const toDelete = await db.table('channel').select('*').whereIn('id', ids);
+
   const query = db
     .table('channel')
     .update({ is_deleted: true })
     .whereIn('id', ids);
-
   if (trx) query.transacting(trx);
+  await query;
 
-  return query;
+  return toDelete || null;
 }
 
 export async function getExistingChannel(data: Record<string, unknown>) {
