@@ -11,7 +11,7 @@ This documentation includes the following key areas:
 - [Folder Structure](#folder-structure)
 - [RBAC Implementation](#rbac-implementation)
 - [Logging](#logging)
-- [Integrating With External Services](#integrating-with-external-services)
+- [Integrating With External Service APIs](#integrating-with-external-service-apis)
 
 ## ERD Diagram
 
@@ -139,9 +139,11 @@ This project implements **two types of logging** using **Morgan** and a **custom
   `utils/log.ts`  
   This function allows you to **manually log important events** from anywhere in the application.
 
-## Integrating With External Services
+## Integrating With External Service APIs
 
-(Outline how the app integrates with third-party APIs, services like AWS, Auth0, etc.)
+To interact with external services via their APIs, this project uses an Axios instance named apiClient. This instance is configured in the `/src/api-client.ts` file and is already integrated with the audit logging system to track API requests and responses.
+
+By using the apiClient, you ensure that all external API calls are logged for auditing purposes.
 
 ## 👨‍💻 Author
 
