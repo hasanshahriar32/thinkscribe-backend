@@ -79,8 +79,12 @@ npm run dev
 ```
 
 2. ⚙️ Log in with this credential
+
    - username - sai min
    - password - saimin
+
+3. 📄 Postman collection can be found in `src/docs` folder
+4. [📝 Read detailed technical documentatiom here](src/docs/tech_docs.md)
 
 ## 👨‍💻 Author
 
