@@ -1,1 +1,0 @@
-POST /api/auth/login 200 134.906 ms - 3069 {"username":"sai min","password":"saimin"}
