@@ -10,7 +10,7 @@ import {
 } from './user.controller';
 import verifyRBAC from '../../middlewares/rbac';
 import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../configs/rbac';
-import { upload } from '../../utils/multer-upload';
+import { upload } from '../../middlewares/multer-upload';
 
 const userRoutes = Router();
 
@@ -56,10 +56,6 @@ userRoutes.get(
 // =========================
 userRoutes.post(
   '/users',
-  (req, res, next) => {
-    console.log('Request body:', req.body);
-    next();
-  },
   verifyRBAC({
     action: ACTIONS.CREATE,
     roles: [ROLES.ADMIN],
@@ -67,7 +63,12 @@ userRoutes.post(
     subModule: SUB_MODULES.USER,
   }),
   validateRequest(validator.create),
-  upload.single('file'),
+  (req, res, next) => {
+    console.log('req.body', req.body);
+    console.log('req.file', req.file);
+    next();
+  },
+  // upload.single('file'),
   createOneUser
 );
 

@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import './cron-jobs/sample-cron';
 import { accessLogFormat, auditLogFormat } from './configs/log-formats';
 import auditLogStream from './middlewares/audit-log';
+import { upload } from './middlewares/multer-upload';
 
 // Initialize the Express application
 const app = express();
@@ -17,6 +18,9 @@ app.use(helmet());
 
 // Enable CORS for all routes and origins
 app.use(cors());
+
+// Middleware to handle file uploads using multer.
+app.use(upload.single('file'));
 
 // Middleware to parse incoming JSON payloads
 app.use(express.json());
