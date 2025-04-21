@@ -6,12 +6,12 @@ This template is crafted with best practices in mind, using **Node.js**, **Expre
 
 This documentation includes the following key areas:
 
-- 📊 [ERD](#erd)
-- 🏗️ [Architecture](#architecture)
-- 🗂️ [Folder Structure](#folder-structure)
-- 🔐 [RBAC Implementation](#rbac-implementation)
-- 📜 [Logging](#logging)
-- 🌐 [Integrating With External Service APIs](#integrating-with-external-service-apis)
+- 📊 [ERD](#📊-erd)
+- 🏗️ [Architecture](#🏗️-architecture)
+- 🗂️ [Folder Structure](#🗂️-folder-structure)
+- 🔐 [RBAC Implementation](#🔐-rbac-implementation)
+- 📜 [Logging](#📜-logging)
+- 🌐 [Integrating With External Service APIs](#🌐-integrating-with-external-service-apis)
 
 ---
 
