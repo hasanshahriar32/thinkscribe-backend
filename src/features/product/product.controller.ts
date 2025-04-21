@@ -185,7 +185,6 @@ export async function deleteProducts(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    console.log('controller', req.body.ids);
     const deletedProducts = await deleteMultiProducts(req.body.ids, trx);
 
     await trx.commit();
