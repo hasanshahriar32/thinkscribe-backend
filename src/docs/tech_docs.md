@@ -56,41 +56,47 @@ Below are the reasons why I chose Feature-Based Architecture:
 ## Folder Structure
 
 ```
-📁 rbac-expressjs-starter
-├── 📁 src
-│   ├── 📁 config
-│   ├── 📁 cron-jobs
-│   ├── 📁 docs
-│   ├── 📁 external-services
-│   ├── 📁 middlewares
-│   │   ├── 📝 audit-log.ts
-│   │   ├── 📝 error-handler.ts
-│   │   ├── 📝 jwt.ts
-│   │   ├── 📝 multer-upload.ts
-│   │   ├── 📝 rbac.ts
-│   │   ├── 📝 validation.ts
-│   ├── 📁 features
-│   │   ├── 📁 product
-│   │   │   ├── 📝 route.ts
-│   │   │   ├── 📝 controller.ts
-│   │   │   ├── 📝 service.ts
-│   │   │   ├── 📝 validator.ts
-│   │   ├── 📁 ...
-│   ├── 📁 storage
-│   │   ├── 📁 logs
-│   │   │   ├── 📝 audit.log
-│   │   ├── 📁 uploads
-│   ├── 📁 types
-│   ├── 📁 utils
-│   ├── 📝 app.ts
-│   ├── 📝 api-client.ts
-│   ├── 📝 routes.ts
-│   └── 📝 server.ts
-├── 📝 .env
-├── 📝 .gitignore
-├── 📝 package.json
-├── 📝 tsconfig.json
-└── 📝 README.md
+📁 rbac-expressjs-starter  // Root folder for the project
+├── 📁 src  // Source code folder
+│   ├── 📁 config  // Configuration files
+│   ├── 📁 cron-jobs  // Cron jobs for scheduled tasks
+│   ├── 📁 docs  // Documentation files
+│   ├── 📁 external-services  // Integrations of external services
+│   ├── 📁 middlewares  // Custom middleware for the app
+│   │   ├── 📝 audit-log.ts  // Middleware for audit logging
+│   │   ├── 📝 error-handler.ts  // Middleware for global error handling
+│   │   ├── 📝 jwt.ts  // Middleware for JWT authentication
+│   │   ├── 📝 multer-upload.ts  // Middleware for file uploads
+│   │   ├── 📝 rbac.ts  // Middleware for role-based access control (RBAC)
+│   │   ├── 📝 validation.ts  // Middleware for request validation
+│   ├── 📁 features  // Feature-based architecture folder
+│   │   ├── 📁 product  // Feature for product-related logic
+│   │   │   ├── 📝 route.ts  // Defines routes for product feature
+│   │   │   ├── 📝 controller.ts  // Business logic for product feature
+│   │   │   ├── 📝 service.ts  // Services for product feature
+│   │   │   ├── 📝 validator.ts  // Request validation logic for product feature
+│   │   ├── 📁 ...  // Other feature folders (e.g., user, rbac, etc.)
+│   ├── 📁 storage  // Storage-related functionality
+│   │   ├── 📁 logs  // Folder for log files
+│   │   │   ├── 📝 audit.log  // Audit log file
+│   │   ├── 📁 uploads  // Folder for uploaded files
+│   ├── 📁 types  // TypeScript type definitions
+│   ├── 📁 utils  // Utility functions
+│   ├── 📝 app.ts  // Main app file that initializes the server
+│   ├── 📝 api-client.ts  // API client for making external requests
+│   ├── 📝 routes.ts  // Centralized routing file
+│   └── 📝 server.ts  // Server setup and initialization
+├── 📝 .dockerignore  // Specifies files to be ignored by Docker
+├── 📝 .env  // Environment variable configurations
+├── 📝 .gitignore  // Specifies files and folders to be ignored by Git
+├── 📝 .prettierrc.json  // Prettier configuration for code formatting
+├── 📝 Dockerfile  // Docker configuration file for building the app's container
+├── 📝 eslint.config.cjs  // ESLint configuration for linting code
+├── 📝 nodemon.json  // Nodemon configuration for development server
+├── 📝 package.json  // Project dependencies and scripts
+├── 📝 tsconfig.json  // TypeScript configuration file
+└── 📝 README.md  // Project documentation
+
 ```
 
 ## RBAC Implementation
