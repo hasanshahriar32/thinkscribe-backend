@@ -84,7 +84,7 @@ npm run dev
    - password - saimin
 
 3. 📄 Postman collection can be found in `src/docs` folder
-4. [📝 Read detailed technical documentatiom here](src/docs/tech_docs.md)
+4. 📝 Read detailed technical documentatiom [here](src/docs/tech_docs.md)
 
 ## 👨‍💻 Author
 
