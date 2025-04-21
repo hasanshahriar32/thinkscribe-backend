@@ -58,24 +58,39 @@ Below are the reasons why I chose Feature-Based Architecture:
 ```
 📁 rbac-expressjs-starter
 ├── 📁 src
-│ ├── 📁 config
-│ ├── 📁 cron-jobs
-│ ├── 📁 docs
-│ ├── 📁 external-services
-│ ├── 📁 middlewares
-│ ├── 📁 features
-│ ├── 📁 storage
-│ ├── 📁 types
-│ ├── 📁 utils
-│ ├── app.ts
-│ ├── api-client.ts
-│ ├── routes.ts
-│ └── server.ts
-├── .env
-├── .gitignore
-├── package.json
-├── tsconfig.json
-└── README.md
+│   ├── 📁 config
+│   ├── 📁 cron-jobs
+│   ├── 📁 docs
+│   ├── 📁 external-services
+│   ├── 📁 middlewares
+│   │   ├── 📝 audit-log.ts
+│   │   ├── 📝 error-handler.ts
+│   │   ├── 📝 jwt.ts
+│   │   ├── 📝 multer-upload.ts
+│   │   ├── 📝 rbac.ts
+│   │   ├── 📝 validation.ts
+│   ├── 📁 features
+│   │   ├── 📁 product
+│   │   │   ├── 📝 route.ts
+│   │   │   ├── 📝 controller.ts
+│   │   │   ├── 📝 service.ts
+│   │   │   ├── 📝 validator.ts
+│   │   ├── 📁 ...
+│   ├── 📁 storage
+│   │   ├── 📁 logs
+│   │   │   ├── 📝 audit.log
+│   │   ├── 📁 uploads
+│   ├── 📁 types
+│   ├── 📁 utils
+│   ├── 📝 app.ts
+│   ├── 📝 api-client.ts
+│   ├── 📝 routes.ts
+│   └── 📝 server.ts
+├── 📝 .env
+├── 📝 .gitignore
+├── 📝 package.json
+├── 📝 tsconfig.json
+└── 📝 README.md
 ```
 
 ## RBAC Implementation
