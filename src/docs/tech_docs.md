@@ -9,6 +9,7 @@ This documentation includes the following key areas:
 - [ERD Diagram](#erd-diagram)
 - [Architecture](#architecture)
 - [Folder Structure](#folder-structure)
+- [RBAC Implementation](#rbac-implementation)
 - [Logging](#logging)
 - [Integrating With External Services](#integrating-with-external-services)
 
@@ -16,7 +17,10 @@ This documentation includes the following key areas:
 
 ## ERD Diagram
 
-🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)  
+🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)
+
+Get a SQL file named `rbac_express.sql` in `src/docs` folder.
+
 ![ERD](./erd.png)
 
 ---
@@ -30,6 +34,10 @@ This documentation includes the following key areas:
 ## Folder Structure
 
 (Describe the purpose of each main folder and how the structure supports scalability.)
+
+---
+
+## RBAC Implementation
 
 ---
 
