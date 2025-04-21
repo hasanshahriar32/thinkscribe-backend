@@ -23,7 +23,35 @@ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
 
 ## Architecture
 
-(Explain your system's layered architecture, request flow, technologies used, etc.)
+### Advantages of Feature-Based Architecture
+
+This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.). You can find the folder structure in the [Folder Structure](#folder-structure) section.
+
+Below are the reasons why I chose Feature-Based Architecture:
+
+#### 1. **High Scalability**
+
+- Easy to scale and manage large codebases.
+- Teams can work on separate features independently without conflicts.
+
+#### 2. **Better Maintainability**
+
+- Makes it easy to locate, update, and test business logic related to a specific domain.
+- Bug tracking and debugging are easier when everything related to a feature is in one place.
+
+#### 3. **Separation of Concerns**
+
+- Clean separation of different domains reduces coupling between unrelated parts of the codebase.
+
+#### 4. **Improved Developer Productivity**
+
+- Developers only need to understand and focus on the feature they are working on.
+- Onboarding new developers is easier as they can explore one feature at a time.
+
+#### 5. **Modularity & Reusability**
+
+- Promotes reusable and encapsulated modules.
+- Makes it easier to extract features into separate packages or microservices if needed.
 
 ## Folder Structure
 
@@ -60,7 +88,7 @@ This project implements **two types of logging** using **Morgan** and a **custom
 
 - **Purpose**: Automatically records all incoming HTTP requests.
 - **Implementation**: Uses the standard Morgan setup.
-- **Output**: Logs are typically written to the console or an access log file, depending on your environment configuration.
+- **Output**: Logs are typically written to the console.
 
 ### 2. Audit Logging (Custom Implementation)
 
@@ -104,7 +132,3 @@ This project implements **two types of logging** using **Morgan** and a **custom
 - 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
 
 Made with ❤️ by Sai Min Pyae Kyaw
-
-```
-
-```
