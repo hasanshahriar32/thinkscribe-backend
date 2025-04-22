@@ -18,7 +18,7 @@ This documentation includes the following key areas:
 
 ## API Documentation
 
-Postman collection is provided in `src/docs/api-docs`.
+Postman collection is provided in `src/docs/rbac_express.postman_collection.json`.
 
 ## ERD
 
