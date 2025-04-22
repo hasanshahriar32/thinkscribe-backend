@@ -167,8 +167,6 @@ This project uses **two types of logging**:
 - Already integrated with **audit logging**.
 - Ensures all external API interactions are traceable.
 
----
-
 ## 👨‍💻 Author
 
 **Sai Min Pyae Kyaw**
@@ -181,5 +179,7 @@ This project uses **two types of logging**:
 - 💼 [LinkedIn](https://www.linkedin.com/in/sai-min-pyae-kyaw-369005200/)
 - 💻 [GitHub](https://github.com/MinPyaeKyaw)
 - 🌍 [Facebook](https://www.facebook.com/minpyae.kyaw.73)
+
+---
 
 Made with ❤️ by Sai Min Pyae Kyaw
