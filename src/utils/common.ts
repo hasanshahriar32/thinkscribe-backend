@@ -12,7 +12,7 @@ export const getPagination = ({
   size: number;
 }) => {
   const limit = size;
-  const offset = (page - 1) * size;
+  const offset = page * size;
   return { offset, limit };
 };
 

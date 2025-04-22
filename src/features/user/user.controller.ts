@@ -39,13 +39,13 @@ export async function getOneUser(
   next: NextFunction
 ) {
   try {
-    const product = await getUser(req.params.id);
+    const user = await getUser(req.params.id);
 
     responseData({
       res,
       status: 200,
       message: MESSAGES.SUCCESS.RETRIVE,
-      data: product,
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -59,8 +59,6 @@ export async function createOneUser(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    console.log('req.body', req.body);
-    console.log('req.file', req.file);
     if (!req.file) {
       throw new AppError(`File is required!`, 400);
     }
@@ -81,7 +79,6 @@ export async function createOneUser(
       img: req.file.path,
       created_by: req.body.user.id,
     };
-    console.log('payload', payload);
     const createdUser = await createUser(payload, trx);
 
     await trx.commit();
