@@ -16,4 +16,15 @@ const db = knex({
   },
 });
 
+async function testConnection() {
+  try {
+    await db.raw('SELECT 1');
+    console.log('✅ Database connection is working');
+  } catch (error: any) {
+    console.error('❌ Database connection failed:', error.message);
+  }
+}
+
+testConnection();
+
 export default db;
