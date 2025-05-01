@@ -12,11 +12,31 @@ import {
   deleteMultiModules,
   softDeleteModule,
   softDeleteMultiModules,
+  getModulesWithPermissions,
 } from './module.service';
 import db from '../../../db/db';
 import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
 import { v4 as uuidv4 } from 'uuid';
+
+export async function getAllModulesWithPermissions(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await getModulesWithPermissions(req.query);
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.RETRIVE,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export async function getAllModules(
   req: Request,

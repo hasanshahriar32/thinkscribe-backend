@@ -16,6 +16,12 @@ const validator = {
       id: Joi.string().required(),
     }),
   },
+  moduleWithPermissionSelect: {
+    query: Joi.object({
+      channel_id: Joi.string().optional(),
+      role_id: Joi.string().optional(),
+    }),
+  },
   create: {
     body: Joi.object({
       name: Joi.string().required(),

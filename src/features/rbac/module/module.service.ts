@@ -3,6 +3,80 @@ import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
 
+export async function getModulesWithPermissions(
+  filters?: Record<string, unknown>
+) {
+  if (!(filters?.role_id && filters?.channel_id)) return [];
+
+  const query = db('module as m').select(
+    'm.id as id',
+    'm.name',
+    db.raw(`
+      CASE
+        WHEN EXISTS (
+          SELECT 1
+          FROM permission p
+          WHERE
+          p.module_id = m.id
+          ${filters?.role_id && `AND p.role_id = '${filters.role_id}'`}
+          ${filters?.channel_id && `AND p.channel_id = '${filters.channel_id}'`}
+        )
+      THEN TRUE
+      ELSE FALSE
+      END AS checked
+    `),
+    db.raw(`
+      (
+        SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', sm.id,
+            'name', sm.name,
+            'checked', CASE
+              WHEN EXISTS (
+                SELECT 1
+                FROM permission p
+                WHERE
+                p.module_id = m.id
+                AND p.sub_module_id = sm.id
+                ${filters?.role_id && `AND p.role_id = '${filters.role_id}'`}
+                ${filters?.channel_id && `AND p.channel_id = '${filters.channel_id}'`}
+              )
+              THEN TRUE
+              ELSE FALSE
+            END,
+            'actions', (
+              SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                  'id', ac.id,
+                  'name', ac.name,
+                  'checked', CASE
+                    WHEN EXISTS (
+                      SELECT 1
+                      FROM permission p
+                      WHERE p.module_id = m.id
+                        AND p.sub_module_id = sm.id
+                        AND p.action_id = ac.id
+                        ${filters?.role_id && `AND p.role_id = '${filters.role_id}'`}
+                        ${filters?.channel_id && `AND p.channel_id = '${filters.channel_id}'`}
+                    )
+                    THEN TRUE
+                    ELSE FALSE
+                  END
+                )
+              )
+              FROM action ac
+            )
+          )
+        )
+        FROM sub_module sm
+        WHERE sm.module_id = m.id
+      ) AS sub_modules
+    `)
+  );
+
+  return query;
+}
+
 export async function getModules(filters: ListQuery & { channel_id: string }) {
   const pagination = getPagination({
     page: filters.page as number,
