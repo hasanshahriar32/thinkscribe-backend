@@ -24,6 +24,7 @@ const validator = {
   update: {
     body: Joi.object({
       role_id: Joi.string().required(),
+      channel_id: Joi.string().required(),
       permissions: Joi.array()
         .items(
           Joi.object({

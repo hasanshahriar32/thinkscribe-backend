@@ -59,7 +59,10 @@ export async function updatePermissionsByRole(
 ) {
   const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiPermissions(req.body.role_id, trx);
+    await deleteMultiPermissions(
+      { role_id: req.body.role_id, channel_id: req.body.channel_id },
+      trx
+    );
 
     const preparedMultiCreatePayload = req.body.permissions.flatMap(
       (permission: Record<string, any>) =>

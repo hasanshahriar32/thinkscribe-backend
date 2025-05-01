@@ -177,10 +177,10 @@ export async function deletePermission(
 }
 
 export async function deleteMultiPermissions(
-  role_id: string,
+  conds: Record<string, unknown>,
   trx?: Knex.Transaction
 ) {
-  const query = db.table('permission').where('role_id', role_id).del();
+  const query = db.table('permission').where(conds).del();
 
   if (trx) query.transacting(trx);
 
