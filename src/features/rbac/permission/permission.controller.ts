@@ -6,9 +6,32 @@ import {
   deleteMultiPermissions,
   createMultiPermissions,
   getPermissions,
+  getRolesOnChannelData,
 } from './permission.service';
 import db from '../../../db/db';
 import { Knex } from 'knex';
+import { ListQuery } from '../../../types/types';
+
+export async function getAllRoleOnChannels(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await getRolesOnChannelData(
+      req.query as unknown as ListQuery
+    );
+
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.RETRIVE,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export async function getAllPermissions(
   req: Request,

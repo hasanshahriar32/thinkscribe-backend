@@ -1,5 +1,40 @@
 import { Knex } from 'knex';
 import db from '../../../db/db';
+import { getPaginatedData, getPagination } from '../../../utils/common';
+import { ListQuery } from '../../../types/types';
+
+export async function getRolesOnChannelData(
+  filters: ListQuery & { role_id?: string; channel_id?: string }
+) {
+  const pagination = getPagination({
+    page: filters.page as number,
+    size: filters.size as number,
+  });
+
+  const query = db('permission')
+    .select(
+      'permission.role_id',
+      'role.name as role',
+      'permission.channel_id',
+      'channel.name as channel'
+    )
+    .leftJoin('channel', 'channel.id', 'permission.channel_id')
+    .leftJoin('role', 'role.id', 'permission.role_id')
+    .groupBy(
+      'permission.role_id',
+      'role.name',
+      'permission.channel_id',
+      'channel.name'
+    )
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+  const totalCountQuery = db.table('permission').count('* as count');
+
+  if (filters.channel_id) query.where('channel.id', '=', filters.channel_id);
+  if (filters.role_id) query.where('role.id', '=', filters.role_id);
+
+  return getPaginatedData(query, totalCountQuery, filters, pagination);
+}
 
 export async function getPermissions(filters: Record<string, unknown>) {
   const query = db
