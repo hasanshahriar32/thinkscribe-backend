@@ -9,7 +9,6 @@ import {
   getRolesOnChannelData,
 } from './permission.service';
 import db from '../../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
 
 export async function getAllRoleOnChannels(
@@ -57,26 +56,23 @@ export async function updatePermissionsByRole(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiPermissions(
-      { role_id: req.body.role_id, channel_id: req.body.channel_id },
-      trx
-    );
+    // Remove all permissions for this role/channel
+    // req.body.permissionIds should be an array of numbers (permission IDs to delete)
+    await deleteMultiPermissions(req.body.permissionIds as number[]);
 
+    // Prepare and create new permissions
     const preparedMultiCreatePayload = req.body.permissions.flatMap(
       (permission: Record<string, any>) =>
-        permission.actions.map((action_id: string | number) => ({
-          action_id,
-          role_id: req.body.role_id,
-          module_id: permission.module_id,
-          sub_module_id: permission.sub_module_id,
-          channel_id: permission.channel_id,
+        (permission.actions as (string | number)[]).map((actionId) => ({
+          actionId: Number(actionId),
+          roleId: Number(req.body.role_id),
+          moduleId: Number(permission.module_id),
+          subModuleId: Number(permission.sub_module_id),
+          channelId: permission.channel_id ? Number(permission.channel_id) : undefined,
         }))
     );
-    await createMultiPermissions(preparedMultiCreatePayload, trx);
-
-    await trx.commit();
+    await createMultiPermissions(preparedMultiCreatePayload);
 
     responseData({
       res,
@@ -85,7 +81,6 @@ export async function updatePermissionsByRole(
       data: null,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

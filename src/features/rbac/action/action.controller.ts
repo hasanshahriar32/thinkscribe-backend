@@ -14,7 +14,6 @@ import {
   softDeleteMultiActions,
 } from './action.service';
 import db from '../../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -61,22 +60,16 @@ export async function createOneAction(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const existingAction = await getExistingAction({
-      name: req.body.name,
-    });
+    const existingAction = await getExistingAction({ name: req.body.name });
     if (existingAction)
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
-      id: uuidv4(),
       name: req.body.name,
       created_by: req.body.user.id,
     };
-    const createdAction = await createAction(payload, trx);
-
-    await trx.commit();
+    const createdAction = await createAction(payload);
 
     responseData({
       res,
@@ -85,7 +78,6 @@ export async function createOneAction(
       data: createdAction,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -95,16 +87,12 @@ export async function createActions(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.actions.map((action: Record<string, unknown>) => ({
-      id: uuidv4(),
       name: action.name,
       created_by: req.body.user.id,
     }));
-    await createMultiActions(payload, trx);
-
-    await trx.commit();
+    await createMultiActions(payload);
 
     responseData({
       res,
@@ -113,7 +101,6 @@ export async function createActions(
       data: null,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -123,21 +110,15 @@ export async function updateOneAction(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
       updated_by: req.body.user.id,
     };
-    const updatedAction = await updateAction(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
-    );
-
-    await trx.commit();
+    const updatedAction = await updateAction({
+      id: Number(req.params.id),
+      data: payload,
+    });
 
     responseData({
       res,
@@ -146,7 +127,6 @@ export async function updateOneAction(
       data: updatedAction,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -156,17 +136,12 @@ export async function deleteOneAction(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedAction = await getExistingAction({
-      id: req.params.id,
-    });
+    const isExistedAction = await getAction(Number(req.params.id));
 
     if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedAction = await deleteAction(req.params.id);
-
-    await trx.commit();
+    const deletedAction = await deleteAction(Number(req.params.id));
 
     responseData({
       res,
@@ -175,7 +150,6 @@ export async function deleteOneAction(
       data: deletedAction,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -185,11 +159,8 @@ export async function deleteActions(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiActions(req.body.ids, trx);
-
-    await trx.commit();
+    await deleteMultiActions(req.body.ids);
 
     responseData({
       res,
@@ -198,7 +169,6 @@ export async function deleteActions(
       data: null,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -208,17 +178,12 @@ export async function softDeleteOneAction(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedAction = await getExistingAction({
-      id: req.params.id,
-    });
+    const isExistedAction = await getAction(Number(req.params.id));
 
     if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedAction = await softDeleteAction(req.params.id);
-
-    await trx.commit();
+    const deletedAction = await softDeleteAction(Number(req.params.id));
 
     responseData({
       res,
@@ -227,7 +192,6 @@ export async function softDeleteOneAction(
       data: deletedAction,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -237,11 +201,8 @@ export async function softDeleteActions(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    await softDeleteMultiActions(req.body.ids, trx);
-
-    await trx.commit();
+    await softDeleteMultiActions(req.body.ids);
 
     responseData({
       res,
@@ -250,7 +211,6 @@ export async function softDeleteActions(
       data: null,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

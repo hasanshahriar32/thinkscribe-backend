@@ -1,4 +1,5 @@
-import { Knex } from 'knex';
+import { eq, inArray, ilike } from 'drizzle-orm';
+import { actions } from '../../../db/schema/rbac';
 import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
@@ -8,135 +9,74 @@ export async function getActions(filters: ListQuery) {
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('action')
-    .select('id', 'name', 'is_deleted')
-    .where('is_deleted', 0)
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(actions.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select()
+    .from(actions)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('action').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  return data;
 }
 
 export async function getAction(id: string | number) {
   const action = await db
-    .table('action')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+    .select()
+    .from(actions)
+    .where(eq(actions.id, Number(id)));
   return action[0] || null;
 }
 
-export async function createAction(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('action').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createAction(data: typeof actions.$inferInsert) {
+  const [created] = await db.insert(actions).values(data).returning();
+  return created;
 }
 
-export async function createMultiActions(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
-) {
-  const query = db.table('action').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createMultiActions(data: Array<typeof actions.$inferInsert>) {
+  return db.insert(actions).values(data).returning();
 }
 
 export async function updateAction(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
+  { id, data }: { id: string | number; data: Partial<typeof actions.$inferInsert> }
 ) {
-  const query = db.table('action').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+  const [updated] = await db
+    .update(actions)
+    .set(data)
+    .where(eq(actions.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function deleteAction(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('action').select('*').where('id', id);
-
-  const query = db.table('action').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete;
+export async function deleteAction(id: string | number) {
+  const [deleted] = await db
+    .delete(actions)
+    .where(eq(actions.id, Number(id)))
+    .returning();
+  return deleted;
 }
 
-export async function deleteMultiActions(
-  ids: string[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('action').select('*').whereIn('id', ids);
-
-  const query = db.table('action').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function deleteMultiActions(ids: Array<number>) {
+  return db.delete(actions).where(inArray(actions.id, ids)).returning();
 }
 
-export async function softDeleteAction(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('action').select('*').where('id', id);
-
-  const query = db.table('action').update({ is_deleted: true }).where('id', id);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function softDeleteAction(id: string | number) {
+  // No is_deleted in schema, so just delete
+  return deleteAction(id);
 }
 
-export async function softDeleteMultiActions(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('action').select('*').whereIn('id', ids);
-
-  const query = db
-    .table('action')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function softDeleteMultiActions(ids: Array<number>) {
+  // No is_deleted in schema, so just delete
+  return deleteMultiActions(ids);
 }
 
-export async function getExistingAction(data: Record<string, unknown>) {
+export async function getExistingAction(data: Partial<typeof actions.$inferInsert>) {
+  // Example: find by name
   const action = await db
-    .table('action')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+    .select()
+    .from(actions)
+    .where(eq(actions.name, data.name!));
   return action[0] || null;
 }

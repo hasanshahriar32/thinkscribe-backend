@@ -1,25 +1,25 @@
 export const ROLES = {
-  ADMIN: 'Admin',
-  USER: 'User',
-  DEV: 'Developer',
+  ADMIN: 'ADMIN',
+  USER: 'USER',
+  DEV: 'DEVELOPER',
 };
 export const ACTIONS = {
-  CREATE: 'Create',
-  VIEW: 'View',
-  UPDATE: 'Update',
-  DELETE: 'Delete',
+  CREATE: 'CREATE',
+  VIEW: 'VIEW',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE',
 };
 export const CHANNELS = {
-  WEB: 'Web',
-  MOBILE: 'Mobile',
+  WEB: 'WEB',
+  MOBILE: 'MOBILE',
 };
 export const MODULES = {
-  USER_MANAGEMENT: 'User Management',
-  PRODUCT: 'Product',
+  USER_MANAGEMENT: 'USER_MANAGEMENT',
+  PRODUCT: 'PRODUCT',
 };
 export const SUB_MODULES = {
-  USER: 'User',
-  USER_ROLE_ASSIGN: 'User Role Assign',
-  PRODUCT_CATEGORY: 'Product Category',
-  PRODUCT: 'Product',
+  USER: 'USER',
+  USER_ROLE_ASSIGN: 'USER_ROLE_ASSIGN',
+  PRODUCT_CATEGORY: 'PRODUCT_CATEGORY',
+  PRODUCT: 'PRODUCT',
 };

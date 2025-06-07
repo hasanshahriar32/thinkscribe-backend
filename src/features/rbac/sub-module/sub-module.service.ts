@@ -1,170 +1,102 @@
-import { Knex } from 'knex';
+import { eq, inArray, ilike, and } from 'drizzle-orm';
+import { subModules } from '../../../db/schema/rbac';
 import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
 
 export async function getSubModules(
-  filters: ListQuery & {
-    channel_id: string;
-    module_id: string;
-  }
+  filters: ListQuery & { module_id?: string }
 ) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('sub_module')
-    .select(
-      'sub_module.id',
-      'sub_module.name',
-      'sub_module.is_deleted',
-      db.raw(`JSON_OBJECT('id', channel.id, 'name', channel.name) as channel`),
-      db.raw(`JSON_OBJECT('id', module.id, 'name', module.name) as module`)
-    )
-    .leftJoin('channel', 'channel.id', 'sub_module.channel_id')
-    .leftJoin('module', 'module.id', 'sub_module.module_id')
-    .where('sub_module.is_deleted', 0)
-    .limit(pagination.limit)
-    .offset(pagination.offset);
-  const totalCountQuery = db.table('sub_module').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('sub_module.created_at', 'desc');
-  }
-
+  let whereClauses = [];
   if (filters.keyword) {
-    query.whereILike('sub_module.name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('sub_module.name', `%${filters.keyword}%`);
-  }
-
-  if (filters.channel_id) {
-    query.whereILike('sub_module.channel_id', `${filters.channel_id}`);
-    totalCountQuery.whereILike(
-      'sub_module.channel_id',
-      `${filters.channel_id}`
-    );
+    whereClauses.push(ilike(subModules.name, `%${filters.keyword}%`));
   }
   if (filters.module_id) {
-    query.whereILike('sub_module.module_id', `${filters.module_id}`);
-    totalCountQuery.whereILike('sub_module.module_id', `${filters.module_id}`);
+    whereClauses.push(eq(subModules.moduleId, Number(filters.module_id)));
   }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  const data = await db
+    .select()
+    .from(subModules)
+    .where(whereClauses.length ? and(...whereClauses) : undefined)
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+  return data;
 }
 
 export async function getSubModule(id: string | number) {
   const subModule = await db
-    .table('sub_module')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+    .select()
+    .from(subModules)
+    .where(eq(subModules.id, Number(id)));
   return subModule[0] || null;
 }
 
-export async function createSubModule(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('sub_module').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createSubModule(data: typeof subModules.$inferInsert) {
+  const [created] = await db.insert(subModules).values(data).returning();
+  return created;
 }
 
 export async function createMultiSubModules(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
+  data: Array<typeof subModules.$inferInsert>
 ) {
-  const query = db.table('sub_module').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+  return db.insert(subModules).values(data).returning();
 }
 
-export async function updateSubModule(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('sub_module').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function updateSubModule({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof subModules.$inferInsert>;
+}) {
+  const [updated] = await db
+    .update(subModules)
+    .set(data)
+    .where(eq(subModules.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function deleteSubModule(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('sub_module').select('*').where('id', id);
-
-  const query = db.table('sub_module').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function deleteSubModule(id: string | number) {
+  const [deleted] = await db
+    .delete(subModules)
+    .where(eq(subModules.id, Number(id)))
+    .returning();
+  return deleted;
 }
 
-export async function deleteMultiSubModules(
-  ids: string[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('sub_module').select('*').whereIn('id', ids);
-
-  const query = db.table('sub_module').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function deleteMultiSubModules(ids: Array<number>) {
+  return db.delete(subModules).where(inArray(subModules.id, ids)).returning();
 }
 
-export async function softDeleteSubModule(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('sub_module').select('*').where('id', id);
-
-  const query = db
-    .table('sub_module')
-    .update({ is_deleted: true })
-    .where('id', id);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function softDeleteSubModule(id: string | number) {
+  const [updated] = await db
+    .update(subModules)
+    .set({ isActive: false })
+    .where(eq(subModules.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function softDeleteMultiSubModules(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('sub_module').select('*').whereIn('id', ids);
-
-  const query = db
-    .table('sub_module')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function softDeleteMultiSubModules(ids: Array<number>) {
+  return db
+    .update(subModules)
+    .set({ isActive: false })
+    .where(inArray(subModules.id, ids))
+    .returning();
 }
 
-export async function getExistingSubModule(data: Record<string, unknown>) {
+export async function getExistingSubModule(
+  data: Partial<typeof subModules.$inferInsert>
+) {
+  // Example: find by name
   const subModule = await db
-    .table('sub_module')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+    .select()
+    .from(subModules)
+    .where(eq(subModules.name, data.name!));
   return subModule[0] || null;
 }

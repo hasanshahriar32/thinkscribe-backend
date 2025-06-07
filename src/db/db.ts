@@ -1,27 +1,21 @@
 import dotenv from 'dotenv';
-import knex from 'knex';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
 
 // Load environment variables from .env file
 dotenv.config();
 
-// Create the knex instance using the environment variables
-const db = knex({
-  client: 'mysql2',
-  connection: {
-    host: process.env.DB_HOST,
-    port: 3306,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-  },
-});
+// Use DATABASE_URL from environment or fallback
+const connectionString = process.env.DATABASE_URL || 'postgres://neondb_owner:npg_HCw7a6QAiJqM@ep-cold-salad-a1hblfyk-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+const pool = new Pool({ connectionString });
+const db = drizzle(pool);
 
 async function testConnection() {
   try {
-    await db.raw('SELECT 1');
-    console.log('✅ Database connection is working');
+    await pool.query('SELECT 1');
+    console.log('✅ Postgres connection is working');
   } catch (error: any) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error('❌ Postgres connection failed:', error.message);
   }
 }
 

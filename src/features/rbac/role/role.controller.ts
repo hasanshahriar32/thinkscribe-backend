@@ -13,10 +13,7 @@ import {
   softDeleteRole,
   softDeleteMultiRoles,
 } from './role.service';
-import db from '../../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllRoles(
   req: Request,
@@ -25,13 +22,7 @@ export async function getAllRoles(
 ) {
   try {
     const result = await getRoles(req.query as unknown as ListQuery);
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.RETRIVE,
-      data: result,
-    });
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.RETRIVE, data: result });
   } catch (error) {
     next(error);
   }
@@ -43,14 +34,8 @@ export async function getOneRole(
   next: NextFunction
 ) {
   try {
-    const product = await getRole(req.params.id);
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.RETRIVE,
-      data: product,
-    });
+    const product = await getRole(Number(req.params.id));
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.RETRIVE, data: product });
   } catch (error) {
     next(error);
   }
@@ -61,31 +46,18 @@ export async function createOneRole(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const existingRole = await getExistingRole({
-      name: req.body.name,
-    });
-    if (existingRole)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
-
+    const existingRole = await getExistingRole({ name: req.body.name });
+    if (existingRole) throw new AppError(`${req.body.name} is already existed!`, 400);
     const payload = {
-      id: uuidv4(),
       name: req.body.name,
-      created_by: req.body.user.id,
+      description: req.body.description,
+      isActive: true,
+      createdAt: new Date(),
     };
-    const createdRole = await createRole(payload, trx);
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.CREATE,
-      data: createdRole,
-    });
+    const createdRole = await createRole(payload);
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.CREATE, data: createdRole });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -95,25 +67,16 @@ export async function createRoles(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const payload = req.body.roles.map((action: Record<string, unknown>) => ({
-      id: uuidv4(),
-      name: action.name,
-      created_by: req.body.user.id,
+    const payload = req.body.roles.map((role: Record<string, unknown>) => ({
+      name: role.name,
+      description: role.description,
+      isActive: true,
+      createdAt: new Date(),
     }));
-    await createMultiRoles(payload, trx);
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.CREATE,
-      data: null,
-    });
+    await createMultiRoles(payload);
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.CREATE, data: null });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -123,30 +86,15 @@ export async function updateOneRole(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
-      updated_by: req.body.user.id,
+      description: req.body.description,
+      isActive: req.body.isActive,
     };
-    const updatedRole = await updateRole(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
-    );
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.UPDATE,
-      data: updatedRole,
-    });
+    const updatedRole = await updateRole({ id: Number(req.params.id), data: payload });
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.UPDATE, data: updatedRole });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -156,26 +104,12 @@ export async function deleteOneRole(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedRole = await getExistingRole({
-      id: req.params.id,
-    });
-
+    const isExistedRole = await getExistingRole({ name: req.body.name });
     if (!isExistedRole) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
-
-    const deletedRole = await deleteRole(req.params.id);
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.DELETE,
-      data: deletedRole,
-    });
+    const deletedRole = await deleteRole(Number(req.params.id));
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: deletedRole });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -185,20 +119,11 @@ export async function deleteRoles(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    await deleteMultiRoles(req.body.ids, trx);
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.DELETE,
-      data: null,
-    });
+    const ids = req.body.ids.map((id: string | number) => Number(id));
+    await deleteMultiRoles(ids);
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: null });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -208,26 +133,12 @@ export async function softDeleteOneRole(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedRole = await getExistingRole({
-      id: req.params.id,
-    });
-
+    const isExistedRole = await getExistingRole({ name: req.body.name });
     if (!isExistedRole) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
-
-    const deletedRole = await softDeleteRole(req.params.id);
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.DELETE,
-      data: deletedRole,
-    });
+    const deletedRole = await softDeleteRole(Number(req.params.id));
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: deletedRole });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -237,20 +148,11 @@ export async function softDeleteRoles(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    await softDeleteMultiRoles(req.body.ids, trx);
-
-    await trx.commit();
-
-    responseData({
-      res,
-      status: 200,
-      message: MESSAGES.SUCCESS.DELETE,
-      data: null,
-    });
+    const ids = req.body.ids.map((id: string | number) => Number(id));
+    await softDeleteMultiRoles(ids);
+    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: null });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

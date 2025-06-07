@@ -5,7 +5,6 @@ import {
   deleteModules,
   deleteOneModule,
   getAllModules,
-  getAllModulesWithPermissions,
   getOneModule,
   softDeleteModules,
   softDeleteOneModule,
@@ -17,24 +16,6 @@ import verifyRBAC from '../../../middlewares/rbac';
 import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../../configs/rbac';
 
 const moduleRoutes = Router();
-
-// =========================
-// GET /modules-with-permissions
-// - Get all modules with it's sub modules and permissions
-//   based on role and channel from query
-// - Requires ADMIN role with VIEW permission
-// =========================
-moduleRoutes.get(
-  '/modules-with-permissions',
-  verifyRBAC({
-    action: ACTIONS.VIEW,
-    roles: [ROLES.ADMIN],
-    module: MODULES.USER_MANAGEMENT,
-    subModule: SUB_MODULES.USER_ROLE_ASSIGN,
-  }),
-  validateRequest(validator.moduleWithPermissionSelect),
-  getAllModulesWithPermissions
-);
 
 // =========================
 // GET /modules

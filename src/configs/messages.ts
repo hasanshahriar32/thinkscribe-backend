@@ -19,3 +19,4 @@ export const MESSAGES = {
     UNAUTHORIZED: 'Unauthorized Access!',
   },
 } as const;
+// All messages are fine and compatible with the new setup. No changes needed.

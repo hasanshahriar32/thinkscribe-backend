@@ -2,62 +2,51 @@ import db from '../../db/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { users } from '../../db/schema/users';
+import { userRoles, roles, permissions, actions, modules, subModules, rolePermissions } from '../../db/schema/rbac';
+import { channels } from '../../db/schema/channels';
+import { eq } from 'drizzle-orm';
 dotenv.config();
 
 export async function getUser(conds: Record<string, unknown>) {
-  const user = await db
-    .table('user')
-    .select(
-      'user.id',
-      'user.username',
-      'user.password',
-      'user.phone1',
-      'user.email',
-      'user.is_deleted',
-      'user.role_id',
-      'role.name as role'
-    )
-    .leftJoin('role', 'role.id', 'user.role_id')
-    .where(conds);
-  return user[0] || null;
+  // Only support username or id lookup for login
+  let userRows: any[] = [];
+  if (conds.username) {
+    userRows = await db.select().from(users).where(eq(users.username, conds.username as string));
+  } else if (conds.id) {
+    userRows = await db.select().from(users).where(eq(users.id, Number(conds.id)));
+  }
+  const user = userRows[0];
+  if (!user) return null;
+  // Get role name via userRoles
+  const userRole = await db.select().from(userRoles).where(eq(userRoles.userId, user.id));
+  let roleName = null;
+  if (userRole[0]?.roleId) {
+    const role = await db.select().from(roles).where(eq(roles.id, userRole[0].roleId));
+    roleName = role[0]?.name || null;
+  }
+  return { ...user, role: roleName };
 }
 
-export async function getPermissionsByRole(roleId: string) {
-  const permissions = await db
-    .table('permission')
-    .select(
-      'permission.module_id',
-      'module.name as module',
-      'permission.sub_module_id',
-      'sub_module.name as sub_module',
-      'permission.role_id',
-      'role.name as role',
-      'permission.channel_id',
-      'channel.name as channel',
-      db.raw(`
-      JSON_ARRAYAGG(
-        JSON_OBJECT('id', action.id, 'name', action.name)
-      ) as actions
-    `)
-    )
-    .leftJoin('channel', 'channel.id', 'permission.channel_id')
-    .leftJoin('module', 'module.id', 'permission.module_id')
-    .leftJoin('sub_module', 'sub_module.id', 'permission.sub_module_id')
-    .leftJoin('role', 'role.id', 'permission.role_id')
-    .leftJoin('action', 'action.id', 'permission.action_id')
-    .where('permission.role_id', '=', roleId)
-    .groupBy(
-      'permission.module_id',
-      'module.name',
-      'permission.sub_module_id',
-      'sub_module.name',
-      'permission.role_id',
-      'role.name',
-      'permission.channel_id',
-      'channel.name'
-    );
-
-  return permissions;
+export async function getPermissionsByRole(roleId: number) {
+  // Get all permissions for a role, including action/module/submodule/channel names
+  const perms = await db
+    .select({
+      permissionId: permissions.id,
+      actionName: actions.name,
+      moduleName: modules.name,
+      subModuleName: subModules.name,
+      channelName: channels.name,
+    })
+    .from(rolePermissions)
+    .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+    .innerJoin(actions, eq(permissions.actionId, actions.id))
+    .innerJoin(modules, eq(permissions.moduleId, modules.id))
+    .innerJoin(subModules, eq(permissions.subModuleId, subModules.id))
+    // If you have channelId in permissions, join here; otherwise, remove this join
+    //.innerJoin(channels, eq(permissions.channelId, channels.id))
+    .where(eq(rolePermissions.roleId, roleId));
+  return perms;
 }
 
 export async function getAccessToken(payload: Record<string, unknown>) {

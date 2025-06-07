@@ -14,7 +14,6 @@ import {
   updateProduct,
 } from './product.service';
 import db from '../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -61,22 +60,18 @@ export async function createOneProduct(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const existingProduct = await getExistingProduct({ name: req.body.name });
     if (existingProduct)
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
-      id: uuidv4(),
       name: req.body.name,
       price: req.body.price,
-      category_id: req.body.category_id,
-      created_by: req.body.user.id,
+      categoryId: req.body.categoryId,
+      createdBy: req.body.user.id,
     };
-    const createdProduct = await createProduct(payload, trx);
-
-    await trx.commit();
+    const createdProduct = await createProduct(payload);
 
     responseData({
       res,
@@ -85,7 +80,6 @@ export async function createOneProduct(
       data: createdProduct,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -95,18 +89,14 @@ export async function createProducts(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.products.map((pd: Record<string, unknown>) => ({
-      id: uuidv4(),
       name: pd.name,
       price: pd.price,
-      category_id: pd.category_id,
-      created_by: req.body.user.id,
+      categoryId: pd.categoryId,
+      createdBy: req.body.user.id,
     }));
-    const createdProducts = await createMultiProducts(payload, trx);
-
-    await trx.commit();
+    const createdProducts = await createMultiProducts(payload);
 
     responseData({
       res,
@@ -115,7 +105,6 @@ export async function createProducts(
       data: createdProducts,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -125,23 +114,17 @@ export async function updateOneProduct(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
       price: req.body.price,
-      category_id: req.body.category_id,
-      updated_by: req.body.user.id,
+      categoryId: req.body.categoryId,
+      updatedBy: req.body.user.id,
     };
-    const updatedProduct = await updateProduct(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
-    );
-
-    await trx.commit();
+    const updatedProduct = await updateProduct({
+      id: req.params.id,
+      data: payload,
+    });
 
     responseData({
       res,
@@ -150,7 +133,6 @@ export async function updateOneProduct(
       data: updatedProduct,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -160,11 +142,8 @@ export async function deleteOneProduct(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProduct = await deleteProduct(req.params.id, trx);
-
-    await trx.commit();
+    const deletedProduct = await deleteProduct(req.params.id);
 
     responseData({
       res,
@@ -173,7 +152,6 @@ export async function deleteOneProduct(
       data: deletedProduct,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -183,11 +161,8 @@ export async function deleteProducts(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProducts = await deleteMultiProducts(req.body.ids, trx);
-
-    await trx.commit();
+    const deletedProducts = await deleteMultiProducts(req.body.ids);
 
     responseData({
       res,
@@ -196,7 +171,6 @@ export async function deleteProducts(
       data: deletedProducts,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -206,17 +180,12 @@ export async function softDeleteOneProduct(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const isExistedProduct = await getExistingProduct({
-      id: req.params.id,
-    });
+    const isExistedProduct = await getExistingProduct({ id: Number(req.params.id) });
 
     if (!isExistedProduct) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
     const deletedProduct = await softDeleteProduct(req.params.id);
-
-    await trx.commit();
 
     responseData({
       res,
@@ -225,7 +194,6 @@ export async function softDeleteOneProduct(
       data: deletedProduct,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -235,11 +203,8 @@ export async function softDeleteProducts(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProducts = await softDeleteMultiProducts(req.body.ids, trx);
-
-    await trx.commit();
+    const deletedProducts = await softDeleteMultiProducts(req.body.ids);
 
     responseData({
       res,
@@ -248,7 +213,6 @@ export async function softDeleteProducts(
       data: deletedProducts,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

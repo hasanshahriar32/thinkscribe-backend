@@ -13,8 +13,6 @@ import {
   softDeleteProductCategory,
   updateProductCategory,
 } from './product-category.service';
-import db from '../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -45,7 +43,7 @@ export async function getOneProductCategory(
   next: NextFunction
 ) {
   try {
-    const product = await getProductCategory(req.params.id);
+    const product = await getProductCategory(Number(req.params.id));
 
     responseData({
       res,
@@ -63,7 +61,6 @@ export async function createOneProductCategory(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const existingProductCategory = await getExistingProductCategory({
       name: req.body.name,
@@ -72,13 +69,10 @@ export async function createOneProductCategory(
       throw new AppError(`${req.body.name} is already existed!`, 400);
 
     const payload = {
-      id: uuidv4(),
       name: req.body.name,
       created_by: req.body.user.id,
     };
-    const createdProductCategory = await createProductCategory(payload, trx);
-
-    await trx.commit();
+    const createdProductCategory = await createProductCategory(payload);
 
     responseData({
       res,
@@ -87,7 +81,6 @@ export async function createOneProductCategory(
       data: createdProductCategory,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -97,21 +90,16 @@ export async function createProductCategories(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.productCategories.map(
       (pd: Record<string, unknown>) => ({
-        id: uuidv4(),
         name: pd.name,
         created_by: req.body.user.id,
       })
     );
     const createdProductCategories = await createMultiProductCategories(
-      payload,
-      trx
+      payload
     );
-
-    await trx.commit();
 
     responseData({
       res,
@@ -120,7 +108,6 @@ export async function createProductCategories(
       data: createdProductCategories,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -130,21 +117,15 @@ export async function updateOneProductCategory(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
       updated_by: req.body.user.id,
     };
-    const updatedProductCategory = await updateProductCategory(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
-    );
-
-    await trx.commit();
+    const updatedProductCategory = await updateProductCategory({
+      id: Number(req.params.id),
+      data: payload,
+    });
 
     responseData({
       res,
@@ -153,7 +134,6 @@ export async function updateOneProductCategory(
       data: updatedProductCategory,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -163,14 +143,8 @@ export async function deleteOneProductCategory(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedProductCategory = await deleteProductCategory(
-      req.params.id,
-      trx
-    );
-
-    await trx.commit();
+    const deletedProductCategory = await deleteProductCategory(Number(req.params.id));
 
     responseData({
       res,
@@ -179,7 +153,6 @@ export async function deleteOneProductCategory(
       data: deletedProductCategory,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -189,15 +162,10 @@ export async function deleteProductCategories(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    console.log('controller', req.body.ids);
     const deletedProductCategories = await deleteMultiProductCategories(
-      req.body.ids,
-      trx
+      req.body.ids.map((id: string | number) => Number(id))
     );
-
-    await trx.commit();
 
     responseData({
       res,
@@ -206,7 +174,6 @@ export async function deleteProductCategories(
       data: deletedProductCategories,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -216,20 +183,15 @@ export async function softDeleteOneProductCategory(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const isExistedProductCategory = await getExistingProductCategory({
-      id: req.params.id,
+      name: req.body.name,
     });
 
     if (!isExistedProductCategory)
       throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedProductCategory = await softDeleteProductCategory(
-      req.params.id
-    );
-
-    await trx.commit();
+    const deletedProductCategory = await softDeleteProductCategory(Number(req.params.id));
 
     responseData({
       res,
@@ -238,7 +200,6 @@ export async function softDeleteOneProductCategory(
       data: deletedProductCategory,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -248,14 +209,10 @@ export async function softDeleteProductCategories(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const deletedProductCategories = await softDeleteMultiProductCategories(
-      req.body.ids,
-      trx
+      req.body.ids.map((id: string | number) => Number(id))
     );
-
-    await trx.commit();
 
     responseData({
       res,
@@ -264,7 +221,6 @@ export async function softDeleteProductCategories(
       data: deletedProductCategories,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

@@ -9,8 +9,6 @@ import {
   hashPassword,
   updateUser,
 } from './user.service';
-import db from '../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../types/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -57,7 +55,6 @@ export async function createOneUser(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     if (!req.file) {
       throw new AppError(`File is required!`, 400);
@@ -65,7 +62,6 @@ export async function createOneUser(
 
     const password = await hashPassword(req.body.password);
     const payload = {
-      id: uuidv4(),
       username: req.body.username,
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -79,9 +75,7 @@ export async function createOneUser(
       img: req.file.path,
       created_by: req.body.user.id,
     };
-    const createdUser = await createUser(payload, trx);
-
-    await trx.commit();
+    const createdUser = await createUser(payload);
 
     responseData({
       res,
@@ -90,7 +84,6 @@ export async function createOneUser(
       data: createdUser,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -100,22 +93,16 @@ export async function updateOneUser(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
       price: req.body.price,
       updated_by: req.body.user.id,
     };
-    const updatedUser = await updateUser(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
-    );
-
-    await trx.commit();
+    const updatedUser = await updateUser({
+      id: req.params.id,
+      data: payload,
+    });
 
     responseData({
       res,
@@ -124,7 +111,6 @@ export async function updateOneUser(
       data: updatedUser,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -134,11 +120,8 @@ export async function deleteOneUser(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const deletedUser = await deleteUser(req.params.id);
-
-    await trx.commit();
 
     responseData({
       res,
@@ -147,7 +130,6 @@ export async function deleteOneUser(
       data: deletedUser,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

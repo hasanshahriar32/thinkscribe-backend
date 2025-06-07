@@ -1,4 +1,5 @@
-import { Knex } from 'knex';
+import { eq, inArray, ilike } from 'drizzle-orm';
+import { roles } from '../../../db/schema/rbac';
 import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
@@ -8,129 +9,72 @@ export async function getRoles(filters: ListQuery) {
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('role')
-    .select('id', 'name', 'is_deleted')
-    .where('is_deleted', 0)
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(roles.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select()
+    .from(roles)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('role').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
-}
-
-export async function getRole(id: string | number) {
-  const role = await db
-    .table('role')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
-  return role[0] || null;
-}
-
-export async function createRole(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('role').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
   return data;
 }
 
-export async function createMultiRoles(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
-) {
-  const query = db.table('role').insert(data);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function getRole(id: string | number) {
+  const role = await db.select().from(roles).where(eq(roles.id, Number(id)));
+  return role[0] || null;
 }
 
-export async function updateRole(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('role').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function createRole(data: typeof roles.$inferInsert) {
+  const [created] = await db.insert(roles).values(data).returning();
+  return created;
 }
 
-export async function deleteRole(id: string | number, trx?: Knex.Transaction) {
-  const toDelete = await db.table('role').select('*').where('id', id);
-
-  const query = db.table('role').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function createMultiRoles(data: Array<typeof roles.$inferInsert>) {
+  return db.insert(roles).values(data).returning();
 }
 
-export async function deleteMultiRoles(ids: string[], trx?: Knex.Transaction) {
-  const toDelete = await db.table('role').select('*').whereIn('id', ids);
-
-  const query = db.table('role').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function updateRole({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof roles.$inferInsert>;
+}) {
+  const [updated] = await db
+    .update(roles)
+    .set(data)
+    .where(eq(roles.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function softDeleteRole(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('role').select('*').where('id', id);
-
-  const query = db.table('role').update({ is_deleted: true }).where('id', id);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function deleteRole(id: string | number) {
+  const [deleted] = await db.delete(roles).where(eq(roles.id, Number(id))).returning();
+  return deleted;
 }
 
-export async function softDeleteMultiRoles(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('role').select('*').whereIn('id', ids);
-
-  const query = db
-    .table('role')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function deleteMultiRoles(ids: Array<number>) {
+  return db.delete(roles).where(inArray(roles.id, ids)).returning();
 }
 
-export async function getExistingRole(data: Record<string, unknown>) {
-  const role = await db
-    .table('role')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+export async function softDeleteRole(id: string | number) {
+  const [updated] = await db
+    .update(roles)
+    .set({ isActive: false })
+    .where(eq(roles.id, Number(id)))
+    .returning();
+  return updated;
+}
+
+export async function softDeleteMultiRoles(ids: Array<number>) {
+  return db.update(roles).set({ isActive: false }).where(inArray(roles.id, ids)).returning();
+}
+
+export async function getExistingRole(data: Partial<typeof roles.$inferInsert>) {
+  // Example: find by name
+  const role = await db.select().from(roles).where(eq(roles.name, data.name!));
   return role[0] || null;
 }

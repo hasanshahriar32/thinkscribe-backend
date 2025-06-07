@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import db from '../db/db';
 import { AppError } from '../utils/http';
 import { MESSAGES } from '../configs/messages';
+import { eq, and, inArray } from 'drizzle-orm';
+import { userRoles, roles, rolePermissions, permissions, actions, modules, subModules } from '../db/schema/rbac';
 
 interface RBACParams {
   roles: string[]; // Allowed roles for access
@@ -14,71 +16,44 @@ interface RBACParams {
  * Middleware to verify if a user has permission to perform a specific action
  * based on their role and assigned permissions in the database.
  */
-const verifyRBAC = ({ roles, action, module, subModule }: RBACParams) => {
+const verifyRBAC = ({ roles: allowedRoles, action, module, subModule }: RBACParams) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Step 1: Check if the user's role is in the allowed roles list
-      if (!roles.includes(req.body.user.role as string)) {
+      // Step 1: Get userId from request (adjust as per your auth logic)
+      const userId = req.body.user?.id;
+      if (!userId) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+
+      // Step 2: Get all roles assigned to the user
+      const userRoleRows = await db.select({ roleId: userRoles.roleId }).from(userRoles).where(eq(userRoles.userId, userId));
+      const userRoleIds = userRoleRows.map((ur) => ur.roleId).filter((id): id is number => id !== null && id !== undefined);
+      if (!userRoleIds.length) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+
+      // Step 3: Get role names and check if any are allowed
+      const userRoleNameRows = await db.select({ name: roles.name }).from(roles).where(inArray(roles.id, userRoleIds));
+      const userRoleNames = userRoleNameRows.map((r) => r.name);
+      if (!userRoleNames.some((r) => allowedRoles.includes(r))) {
         throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
       }
 
-      // Step 2: Query the permissions from the database for the user's role
-      const permissions = await db
-        .table('permission')
-        .select(
-          'permission.module_id',
-          'module.name as module',
-          'permission.sub_module_id',
-          'sub_module.name as sub_module',
-          'permission.role_id',
-          'role.name as role',
-          'permission.channel_id',
-          'channel.name as channel',
-          db.raw(`
-            JSON_ARRAYAGG(
-              JSON_OBJECT('id', action.id, 'name', action.name)
-            ) as actions
-          `) // Group actions into a JSON array
-        )
-        .leftJoin('channel', 'channel.id', 'permission.channel_id')
-        .leftJoin('module', 'module.id', 'permission.module_id')
-        .leftJoin('sub_module', 'sub_module.id', 'permission.sub_module_id')
-        .leftJoin('role', 'role.id', 'permission.role_id')
-        .leftJoin('action', 'action.id', 'permission.action_id')
-        .where('permission.role_id', '=', req.body.user.role_id)
-        .groupBy(
-          'permission.module_id',
-          'module.name',
-          'permission.sub_module_id',
-          'sub_module.name',
-          'permission.role_id',
-          'role.name',
-          'permission.channel_id',
-          'channel.name'
-        );
-
-      // Step 3: Find the relevant permission entry for the given module/subModule
-      const permission = permissions.find(
-        (permission) =>
-          permission.module === module && permission.sub_module === subModule
-      );
-
-      // If no matching module/subModule permission found, deny access
-      if (!permission) {
-        throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
-      }
-
-      // Step 4: Check if the specific action is allowed within the found permission
-      const isValidAction = permission.actions.find(
-        (ac: Record<string, unknown>) => ac.name === action
-      );
-
-      // If the action is not listed, deny access
-      if (!isValidAction) {
-        throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
-      }
-
-      // All checks passed, move to the next middleware or controller
+      // Step 4: Check permissions for the action/module/subModule
+      const perms = await db.select({
+        permissionId: permissions.id,
+        actionName: actions.name,
+        moduleName: modules.name,
+        subModuleName: subModules.name,
+      })
+        .from(rolePermissions)
+        .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+        .innerJoin(actions, eq(permissions.actionId, actions.id))
+        .innerJoin(modules, eq(permissions.moduleId, modules.id))
+        .innerJoin(subModules, eq(permissions.subModuleId, subModules.id))
+        .where(and(
+          inArray(rolePermissions.roleId, userRoleIds),
+          eq(actions.name, action),
+          eq(modules.name, module ?? ''),
+          eq(subModules.name, subModule ?? '')
+        ));
+      if (!perms.length) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
       next();
     } catch (err) {
       next(err);

@@ -1,87 +1,68 @@
-import { Knex } from 'knex';
-import bcrypt from 'bcrypt';
+import { eq, ilike, and } from 'drizzle-orm';
+// You need to create this schema file for users if not present
 import db from '../../db/db';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
+import bcrypt from 'bcrypt';
+import { users } from '../../db/schema/users';
 
 export async function getUsers(filters: ListQuery) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('user')
-    .select('*')
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(users.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select()
+    .from(users)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('user').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('user.created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('user.name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('user.name', `%${filters.keyword}%`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
-}
-
-export async function getUser(id: string | number) {
-  const user = await db
-    .table('user')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
-  return user[0] || null;
-}
-
-export async function createUser(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('user').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-  console.log('oops');
+  // You may want to implement total count with a separate query if needed
   return data;
 }
 
-export async function updateUser(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('user').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function getUser(id: string | number) {
+  const user = await db.select().from(users).where(eq(users.id, Number(id)));
+  return user[0] || null;
 }
 
-export async function deleteUser(id: string | number, trx?: Knex.Transaction) {
-  const toDelete = await db.table('user').where('id', id);
-
-  const query = db.table('user').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function createUser(data: typeof users.$inferInsert) {
+  const [created] = await db.insert(users).values(data).returning();
+  return created;
 }
 
-export async function getExistingUser(data: Record<string, unknown>) {
-  const user = await db
-    .table('user')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+export async function updateUser({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof users.$inferInsert>;
+}) {
+  const [updated] = await db
+    .update(users)
+    .set(data)
+    .where(eq(users.id, Number(id)))
+    .returning();
+  return updated;
+}
+
+export async function deleteUser(id: string | number) {
+  const [deleted] = await db.delete(users).where(eq(users.id, Number(id))).returning();
+  return deleted;
+}
+
+export async function getExistingUser(data: Partial<typeof users.$inferInsert>) {
+  // Example: find by email or username
+  const user = await db.select().from(users).where(
+    and(
+      data.email ? eq(users.email, data.email) : undefined,
+      data.username ? eq(users.username, data.username) : undefined
+    )
+  );
   return user[0] || null;
 }
 

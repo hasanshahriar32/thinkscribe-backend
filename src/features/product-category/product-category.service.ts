@@ -1,4 +1,5 @@
-import { Knex } from 'knex';
+import { eq, inArray, ilike } from 'drizzle-orm';
+import { productCategories } from '../../db/schema/products';
 import db from '../../db/db';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
@@ -8,156 +9,97 @@ export async function getProductCategories(filters: ListQuery) {
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('product_category')
-    .select(
-      'product_category.id',
-      'product_category.name',
-      'product_category.is_deleted'
-    )
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(productCategories.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select()
+    .from(productCategories)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('product_category').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('product_category.created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('product_category.name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('product_category.name', `%${filters.keyword}%`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  return data;
 }
 
 export async function getProductCategory(id: string | number) {
-  const product_category = await db
-    .table('product_category')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
-  return product_category[0] || null;
+  const category = await db
+    .select()
+    .from(productCategories)
+    .where(eq(productCategories.id, Number(id)));
+  return category[0] || null;
 }
 
 export async function createProductCategory(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
+  data: typeof productCategories.$inferInsert
 ) {
-  const query = db.table('product_category').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+  const [created] = await db
+    .insert(productCategories)
+    .values(data)
+    .returning();
+  return created;
 }
 
 export async function createMultiProductCategories(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
+  data: Array<typeof productCategories.$inferInsert>
 ) {
-  const query = db.table('product_category').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+  return db.insert(productCategories).values(data).returning();
 }
 
-export async function updateProductCategory(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('product_category').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function updateProductCategory({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof productCategories.$inferInsert>;
+}) {
+  const [updated] = await db
+    .update(productCategories)
+    .set(data)
+    .where(eq(productCategories.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function deleteProductCategory(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db
-    .table('product_category')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
-
-  const query = db.table('product_category').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function deleteProductCategory(id: string | number) {
+  const [deleted] = await db
+    .delete(productCategories)
+    .where(eq(productCategories.id, Number(id)))
+    .returning();
+  return deleted;
 }
 
-export async function deleteMultiProductCategories(
-  ids: string[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db
-    .table('product_category')
-    .select('*')
-    .whereIn('id', ids);
-
-  const query = db.table('product_category').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete;
+export async function deleteMultiProductCategories(ids: Array<number>) {
+  return db
+    .delete(productCategories)
+    .where(inArray(productCategories.id, ids))
+    .returning();
 }
 
-export async function softDeleteProductCategory(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const query = db
-    .table('product_category')
-    .update({ is_deleted: true })
-    .where('id', id);
-
-  if (trx) query.transacting(trx);
-  await query;
-
-  const toDelete = await db
-    .table('product_category')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
-
-  return toDelete[0] || null;
+export async function softDeleteProductCategory(id: string | number) {
+  const [updated] = await db
+    .update(productCategories)
+    .set({ isDeleted: true })
+    .where(eq(productCategories.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function softDeleteMultiProductCategories(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const query = db
-    .table('product_category')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  const toDelete = await db
-    .table('product_category')
-    .select('id', 'name', 'is_deleted')
-    .whereIn('id', ids);
-
-  return toDelete || null;
+export async function softDeleteMultiProductCategories(ids: Array<number>) {
+  return db
+    .update(productCategories)
+    .set({ isDeleted: true })
+    .where(inArray(productCategories.id, ids))
+    .returning();
 }
 
 export async function getExistingProductCategory(
-  data: Record<string, unknown>
+  data: Partial<typeof productCategories.$inferInsert>
 ) {
-  const product_category = await db
-    .table('product_category')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
-  return product_category[0] || null;
+  // Example: find by name
+  const category = await db
+    .select()
+    .from(productCategories)
+    .where(eq(productCategories.name, data.name!));
+  return category[0] || null;
 }

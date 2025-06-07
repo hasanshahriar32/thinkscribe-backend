@@ -1,0 +1,96 @@
+paths:
+  /api/roles:
+    get:
+      summary: Get all roles
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../swagger/openapi.yml#/components/schemas/Role'
+    post:
+      summary: Create a new role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../swagger/openapi.yml#/components/schemas/Role'
+      responses:
+        '200':
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/schemas/Role'
+  /api/roles/{id}:
+    get:
+      summary: Get a role by ID
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: Role found
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/schemas/Role'
+    put:
+      summary: Update a role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../swagger/openapi.yml#/components/schemas/Role'
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/schemas/Role'
+    delete:
+      summary: Delete a role
+      tags: [Roles]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: Role deleted
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/schemas/Role'
+# Repeat for modules, sub-modules, permissions, actions, channels, etc.

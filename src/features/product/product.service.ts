@@ -1,4 +1,5 @@
-import { Knex } from 'knex';
+import { eq, inArray, and, ilike } from 'drizzle-orm';
+import { products, productCategories } from '../../db/schema/products';
 import db from '../../db/db';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
@@ -8,150 +9,93 @@ export async function getProducts(filters: ListQuery) {
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('product')
-    .select(
-      'product.id',
-      'product.name',
-      'product.price',
-      'product.is_deleted',
-      db.raw(
-        `JSON_OBJECT('id', product_category.id, 'name', product_category.name) as category`
-      )
-    )
-    .leftJoin('product_category', 'product_category.id', 'product.category_id')
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(products.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select({
+      id: products.id,
+      name: products.name,
+      price: products.price,
+      isDeleted: products.isDeleted,
+      categoryId: products.categoryId,
+    })
+    .from(products)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('product').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('product.created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('product.name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('product.name', `%${filters.keyword}%`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  return data;
 }
 
 export async function getProduct(id: string | number) {
   const product = await db
-    .table('product')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+    .select()
+    .from(products)
+    .where(eq(products.id, Number(id)));
   return product[0] || null;
 }
 
-export async function createProduct(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('product').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createProduct(data: typeof products.$inferInsert) {
+  const [created] = await db.insert(products).values(data).returning();
+  return created;
 }
 
 export async function createMultiProducts(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
+  data: Array<typeof products.$inferInsert>
 ) {
-  const query = db.table('product').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+  return db.insert(products).values(data).returning();
 }
 
-export async function updateProduct(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('product').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function updateProduct({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof products.$inferInsert>;
+}) {
+  const [updated] = await db
+    .update(products)
+    .set(data)
+    .where(eq(products.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function deleteProduct(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('product').select('*').where('id', id);
-
-  const query = db.table('product').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function deleteProduct(id: string | number) {
+  const [deleted] = await db
+    .delete(products)
+    .where(eq(products.id, Number(id)))
+    .returning();
+  return deleted;
 }
 
-export async function deleteMultiProducts(
-  ids: string[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('product').select('*').whereIn('id', ids);
-
-  const query = db.table('product').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete;
+export async function deleteMultiProducts(ids: Array<number>) {
+  return db.delete(products).where(inArray(products.id, ids)).returning();
 }
 
-export async function softDeleteProduct(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const query = db
-    .table('product')
-    .update({ is_deleted: true })
-    .where('id', id);
-
-  if (trx) query.transacting(trx);
-  await query;
-
-  const toDelete = await db.table('product').select('*').where('id', id);
-
-  return toDelete[0] || null;
+export async function softDeleteProduct(id: string | number) {
+  const [updated] = await db
+    .update(products)
+    .set({ isDeleted: true })
+    .where(eq(products.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function softDeleteMultiProducts(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const query = db
-    .table('product')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  const toDelete = await db
-    .table('product')
-    .select('id', 'name', 'is_deleted')
-    .whereIn('id', ids);
-
-  return toDelete || null;
+export async function softDeleteMultiProducts(ids: Array<number>) {
+  return db
+    .update(products)
+    .set({ isDeleted: true })
+    .where(inArray(products.id, ids))
+    .returning();
 }
 
-export async function getExistingProduct(data: Record<string, unknown>) {
+export async function getExistingProduct(data: Partial<typeof products.$inferInsert>) {
+  // Example: find by name
   const product = await db
-    .table('product')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+    .select()
+    .from(products)
+    .where(eq(products.name, data.name!));
   return product[0] || null;
 }

@@ -13,10 +13,7 @@ import {
   softDeleteSubModule,
   softDeleteMultiSubModules,
 } from './sub-module.service';
-import db from '../../../db/db';
-import { Knex } from 'knex';
 import { ListQuery } from '../../../types/types';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllSubModules(
   req: Request,
@@ -48,7 +45,7 @@ export async function getOneSubModule(
   next: NextFunction
 ) {
   try {
-    const product = await getSubModule(req.params.id);
+    const product = await getSubModule(Number(req.params.id));
 
     responseData({
       res,
@@ -66,25 +63,20 @@ export async function createOneSubModule(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const existingSubModule = await getExistingSubModule({
       name: req.body.name,
-      channel_id: req.body.channel_id,
     });
     if (existingSubModule)
       throw new AppError(`${req.body.name} is already existed!`, 400);
-
     const payload = {
-      id: uuidv4(),
       name: req.body.name,
-      channel_id: req.body.channel_id,
-      module_id: req.body.module_id,
-      created_by: req.body.user.id,
+      moduleId: Number(req.body.module_id),
+      description: req.body.description,
+      isActive: true,
+      createdAt: new Date(),
     };
-    const createdSubModule = await createSubModule(payload, trx);
-
-    await trx.commit();
+    const createdSubModule = await createSubModule(payload);
 
     responseData({
       res,
@@ -93,7 +85,6 @@ export async function createOneSubModule(
       data: createdSubModule,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -103,20 +94,17 @@ export async function createSubModules(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = req.body.subModules.map(
       (subModule: Record<string, unknown>) => ({
-        id: uuidv4(),
         name: subModule.name,
-        channel_id: subModule.channel_id,
-        module_id: subModule.module_id,
-        created_by: req.body.user.id,
+        moduleId: Number(subModule.module_id),
+        description: subModule.description,
+        isActive: true,
+        createdAt: new Date(),
       })
     );
-    const createdModules = await createMultiSubModules(payload, trx);
-
-    await trx.commit();
+    const createdModules = await createMultiSubModules(payload);
 
     responseData({
       res,
@@ -125,7 +113,6 @@ export async function createSubModules(
       data: createdModules,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -135,22 +122,16 @@ export async function updateOneSubModule(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const payload = {
       name: req.body.name,
-      channel_id: req.body.channel_id,
-      updated_by: req.body.user.id,
+      moduleId: Number(req.body.module_id),
+      description: req.body.description,
+      isActive: req.body.isActive,
     };
     const updatedSubModule = await updateSubModule(
-      {
-        id: req.params.id,
-        data: payload,
-      },
-      trx
+      { id: Number(req.params.id), data: payload }
     );
-
-    await trx.commit();
 
     responseData({
       res,
@@ -159,7 +140,6 @@ export async function updateOneSubModule(
       data: updatedSubModule,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -169,18 +149,15 @@ export async function deleteOneSubModule(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const isExistedSubModule = await getExistingSubModule({
-      id: req.params.id,
+      name: req.body.name,
     });
 
     if (!isExistedSubModule)
       throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedSubModule = await deleteSubModule(req.params.id);
-
-    await trx.commit();
+    const deletedSubModule = await deleteSubModule(Number(req.params.id));
 
     responseData({
       res,
@@ -189,7 +166,6 @@ export async function deleteOneSubModule(
       data: deletedSubModule,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -199,11 +175,9 @@ export async function deleteSubModules(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedModules = await deleteMultiSubModules(req.body.ids, trx);
-
-    await trx.commit();
+    const ids = req.body.ids.map((id: string | number) => Number(id));
+    const deletedModules = await deleteMultiSubModules(ids);
 
     responseData({
       res,
@@ -212,7 +186,6 @@ export async function deleteSubModules(
       data: deletedModules,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -222,18 +195,15 @@ export async function softDeleteOneSubModule(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
     const isExistedSubModule = await getExistingSubModule({
-      id: req.params.id,
+      name: req.body.name,
     });
 
     if (!isExistedSubModule)
       throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedSubModule = await softDeleteSubModule(req.params.id);
-
-    await trx.commit();
+    const deletedSubModule = await softDeleteSubModule(Number(req.params.id));
 
     responseData({
       res,
@@ -242,7 +212,6 @@ export async function softDeleteOneSubModule(
       data: deletedSubModule,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }
@@ -252,11 +221,9 @@ export async function softDeleteSubModules(
   res: Response,
   next: NextFunction
 ) {
-  const trx: Knex.Transaction = await db.transaction();
   try {
-    const deletedModules = await softDeleteMultiSubModules(req.body.ids, trx);
-
-    await trx.commit();
+    const ids = req.body.ids.map((id: string | number) => Number(id));
+    const deletedModules = await softDeleteMultiSubModules(ids);
 
     responseData({
       res,
@@ -265,7 +232,6 @@ export async function softDeleteSubModules(
       data: deletedModules,
     });
   } catch (error) {
-    await trx.rollback();
     next(error);
   }
 }

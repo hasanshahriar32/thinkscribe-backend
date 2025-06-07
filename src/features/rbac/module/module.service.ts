@@ -1,234 +1,96 @@
-import { Knex } from 'knex';
+import { eq, inArray, ilike } from 'drizzle-orm';
+import { modules } from '../../../db/schema/rbac';
 import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
 
-export async function getModulesWithPermissions(
-  filters?: Record<string, unknown>
-) {
-  if (!(filters?.role_id && filters?.channel_id)) return [];
-
-  const query = db('module as m').select(
-    'm.id as id',
-    'm.name',
-    db.raw(`
-      CASE
-        WHEN EXISTS (
-          SELECT 1
-          FROM permission p
-          WHERE
-          p.module_id = m.id
-          ${filters?.role_id && `AND p.role_id = '${filters.role_id}'`}
-          ${filters?.channel_id && `AND p.channel_id = '${filters.channel_id}'`}
-        )
-      THEN TRUE
-      ELSE FALSE
-      END AS checked
-    `),
-    db.raw(`
-      (
-        SELECT JSON_ARRAYAGG(
-          JSON_OBJECT(
-            'id', sm.id,
-            'name', sm.name,
-            'checked', CASE
-              WHEN EXISTS (
-                SELECT 1
-                FROM permission p
-                WHERE
-                p.module_id = m.id
-                AND p.sub_module_id = sm.id
-                ${filters?.role_id && `AND p.role_id = '${filters.role_id}'`}
-                ${filters?.channel_id && `AND p.channel_id = '${filters.channel_id}'`}
-              )
-              THEN TRUE
-              ELSE FALSE
-            END,
-            'actions', (
-              SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                  'id', ac.id,
-                  'name', ac.name,
-                  'checked', CASE
-                    WHEN EXISTS (
-                      SELECT 1
-                      FROM permission p
-                      WHERE p.module_id = m.id
-                        AND p.sub_module_id = sm.id
-                        AND p.action_id = ac.id
-                        ${filters?.role_id && `AND p.role_id = '${filters.role_id}'`}
-                        ${filters?.channel_id && `AND p.channel_id = '${filters.channel_id}'`}
-                    )
-                    THEN TRUE
-                    ELSE FALSE
-                  END
-                )
-              )
-              FROM action ac
-            )
-          )
-        )
-        FROM sub_module sm
-        WHERE sm.module_id = m.id
-      ) AS sub_modules
-    `)
-  );
-
-  return query;
-}
-
-export async function getModules(filters: ListQuery & { channel_id: string }) {
+export async function getModules(filters: ListQuery) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('module')
-    .select(
-      'module.id',
-      'module.name',
-      'module.is_deleted',
-      db.raw(`JSON_OBJECT('id', channel.id, 'name', channel.name) as channel`),
-      db.raw(
-        `JSON_ARRAYAGG(
-          JSON_OBJECT('id', sub_module.id, 'name', sub_module.name)
-        ) as sub_modules`
-      )
-    )
-    .where('module.is_deleted', 0)
-    .leftJoin('channel', 'channel.id', 'module.channel_id')
-    .leftJoin('sub_module', 'sub_module.module_id', 'module.id')
-    .groupBy('module.id')
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(modules.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select()
+    .from(modules)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('module').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('module.created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('module.name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('module.name', `%${filters.keyword}%`);
-  }
-
-  if (filters.channel_id) {
-    query.whereILike('module.channel_id', `${filters.channel_id}`);
-    totalCountQuery.whereILike('module.channel_id', `${filters.channel_id}`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  return data;
 }
 
 export async function getModule(id: string | number) {
   const module = await db
-    .table('module')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+    .select()
+    .from(modules)
+    .where(eq(modules.id, Number(id)));
   return module[0] || null;
 }
 
-export async function createModule(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('module').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createModule(data: typeof modules.$inferInsert) {
+  const [created] = await db
+    .insert(modules)
+    .values(data)
+    .returning();
+  return created;
 }
 
-export async function createMultiModules(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
-) {
-  const query = db.table('module').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createMultiModules(data: Array<typeof modules.$inferInsert>) {
+  return db
+    .insert(modules)
+    .values(data)
+    .returning();
 }
 
-export async function updateModule(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('module').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function updateModule({ id, data }: { id: string | number; data: Partial<typeof modules.$inferInsert> }) {
+  const [updated] = await db
+    .update(modules)
+    .set(data)
+    .where(eq(modules.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function deleteModule(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('module').select('*').where('id', id);
-
-  const query = db.table('module').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function deleteModule(id: string | number) {
+  const [deleted] = await db
+    .delete(modules)
+    .where(eq(modules.id, Number(id)))
+    .returning();
+  return deleted;
 }
 
-export async function deleteMultiModules(
-  ids: string[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('module').select('*').whereIn('id', ids);
-
-  const query = db.table('module').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function deleteMultiModules(ids: Array<number>) {
+  return db
+    .delete(modules)
+    .where(inArray(modules.id, ids))
+    .returning();
 }
 
-export async function softDeleteModule(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('module').select('*').where('id', id);
-
-  const query = db.table('module').update({ is_deleted: true }).where('id', id);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function softDeleteModule(id: string | number) {
+  const [updated] = await db
+    .update(modules)
+    .set({ isActive: false })
+    .where(eq(modules.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function softDeleteMultiModules(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('module').select('*').whereIn('id', ids);
-
-  const query = db
-    .table('module')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function softDeleteMultiModules(ids: Array<number>) {
+  return db
+    .update(modules)
+    .set({ isActive: false })
+    .where(inArray(modules.id, ids))
+    .returning();
 }
 
-export async function getExistingModule(data: Record<string, unknown>) {
+export async function getExistingModule(data: Partial<typeof modules.$inferInsert>) {
+  // Example: find by name
   const module = await db
-    .table('module')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+    .select()
+    .from(modules)
+    .where(eq(modules.name, data.name!));
   return module[0] || null;
 }

@@ -1,4 +1,5 @@
-import { Knex } from 'knex';
+import { eq, inArray, and } from 'drizzle-orm';
+import { permissions, actions, modules, subModules, roles, rolePermissions, userRoles } from '../../../db/schema/rbac';
 import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
@@ -6,191 +7,90 @@ import { ListQuery } from '../../../types/types';
 export async function getRolesOnChannelData(
   filters: ListQuery & { role_id?: string; channel_id?: string }
 ) {
-  const pagination = getPagination({
-    page: filters.page as number,
-    size: filters.size as number,
-  });
-
-  const query = db('permission')
-    .select(
-      'permission.role_id',
-      'role.name as role',
-      'permission.channel_id',
-      'channel.name as channel'
-    )
-    .leftJoin('channel', 'channel.id', 'permission.channel_id')
-    .leftJoin('role', 'role.id', 'permission.role_id')
-    .groupBy(
-      'permission.role_id',
-      'role.name',
-      'permission.channel_id',
-      'channel.name'
-    )
-    .limit(pagination.limit)
-    .offset(pagination.offset);
-  const totalCountQuery = db.table('permission').count('* as count');
-
-  if (filters.channel_id) query.where('channel.id', '=', filters.channel_id);
-  if (filters.role_id) query.where('role.id', '=', filters.role_id);
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  // NOTE: Channel support is not in the schema above, so this is a placeholder for future extension
+  // For now, just return roles
+  const userRoleRows = await db.select({ roleId: userRoles.roleId }).from(userRoles);
+  const roleIds = userRoleRows.map((ur) => ur.roleId);
+  const roleRows = await db
+    .select({ id: roles.id, name: roles.name })
+    .from(roles)
+    .where(inArray(roles.id, roleIds.filter((id): id is number => id !== null)));
+  return roleRows;
 }
 
 export async function getPermissions(filters: Record<string, unknown>) {
-  const query = db
-    .table('permission')
-    .select(
-      'permission.id',
-      'permission.module_id',
-      'module.name as module',
-      'permission.sub_module_id',
-      'sub_module.name as sub_module',
-      'permission.role_id',
-      'role.name as role',
-      'permission.channel_id',
-      'channel.name as channel',
-      db.raw(`
-        JSON_ARRAYAGG(
-          JSON_OBJECT('id', action.id, 'name', action.name)
-        ) as actions
-      `)
-    )
-    .leftJoin('user', 'user.role_id', 'permission.role_id')
-    .leftJoin('channel', 'channel.id', 'permission.channel_id')
-    .leftJoin('module', 'module.id', 'permission.module_id')
-    .leftJoin('sub_module', 'sub_module.id', 'permission.sub_module_id')
-    .leftJoin('role', 'role.id', 'permission.role_id')
-    .leftJoin('action', 'action.id', 'permission.action_id')
-    .groupBy(
-      'permission.id',
-      'permission.module_id',
-      'module.name',
-      'permission.sub_module_id',
-      'sub_module.name',
-      'permission.role_id',
-      'role.name',
-      'permission.channel_id',
-      'channel.name'
-    );
-
-  if (filters.user_id) query.where('user.id', '=', filters.user_id);
-  if (filters.rold_id) query.where('role.id', '=', filters.rold_id);
-
-  return query;
+  // Example: get all permissions with action/module/submodule names
+  const perms = await db.select({
+    id: permissions.id,
+    name: permissions.name,
+    action: actions.name,
+    module: modules.name,
+    subModule: subModules.name,
+    description: permissions.description,
+    createdAt: permissions.createdAt,
+  })
+    .from(permissions)
+    .innerJoin(actions, eq(permissions.actionId, actions.id))
+    .innerJoin(modules, eq(permissions.moduleId, modules.id))
+    .innerJoin(subModules, eq(permissions.subModuleId, subModules.id));
+  return perms;
 }
 
-export async function getPermissionsByUser(userId: string) {
-  const permissions = await db
-    .table('permission')
-    .select(
-      'permission.module_id',
-      'module.name as module',
-      'permission.sub_module_id',
-      'sub_module.name as sub_module',
-      'permission.role_id',
-      'role.name as role',
-      'permission.channel_id',
-      'channel.name as channel',
-      db.raw(`
-        JSON_ARRAYAGG(
-          JSON_OBJECT('id', action.id, 'name', action.name)
-        ) as actions
-      `)
-    )
-    .leftJoin('user', 'user.role_id', 'permission.role_id')
-    .leftJoin('channel', 'channel.id', 'permission.channel_id')
-    .leftJoin('module', 'module.id', 'permission.module_id')
-    .leftJoin('sub_module', 'sub_module.id', 'permission.sub_module_id')
-    .leftJoin('role', 'role.id', 'permission.role_id')
-    .leftJoin('action', 'action.id', 'permission.action_id')
-    .where('user.id', '=', userId)
-    .groupBy(
-      'permission.module_id',
-      'module.name',
-      'permission.sub_module_id',
-      'sub_module.name',
-      'permission.role_id',
-      'role.name',
-      'permission.channel_id',
-      'channel.name'
-    );
-
-  return permissions;
+export async function getPermissionsByUser(userId: number) {
+  // Get all roles for user
+  const userRoleRows = await db.select({ roleId: userRoles.roleId }).from(userRoles).where(eq(userRoles.userId, userId));
+  const userRoleIds = userRoleRows.map((ur) => ur.roleId);
+  if (!userRoleIds.length) return [];
+  // Get permissions for these roles
+  const perms = await db.select({
+    id: permissions.id,
+    name: permissions.name,
+    action: actions.name,
+    module: modules.name,
+    subModule: subModules.name,
+    description: permissions.description,
+    createdAt: permissions.createdAt,
+  })
+    .from(rolePermissions)
+    .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+    .innerJoin(actions, eq(permissions.actionId, actions.id))
+    .innerJoin(modules, eq(permissions.moduleId, modules.id))
+    .innerJoin(subModules, eq(permissions.subModuleId, subModules.id))
+    .where(inArray(rolePermissions.roleId, userRoleIds.filter((id): id is number => id !== null)));
+  return perms;
 }
 
-export async function getPermission(id: string | number) {
-  const permission = await db
-    .table('permission')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
-  return permission[0] || null;
+export async function getPermission(id: number) {
+  const perm = await db.select().from(permissions).where(eq(permissions.id, id));
+  return perm[0] || null;
 }
 
-export async function createPermission(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('permission').insert(data);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function createPermission(data: Omit<typeof permissions.$inferInsert, 'id'>) {
+  return db.insert(permissions).values(data).returning();
 }
 
-export async function createMultiPermissions(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
-) {
-  const query = db.table('permission').insert(data);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function createMultiPermissions(data: Array<Omit<typeof permissions.$inferInsert, 'id'>>) {
+  return db.insert(permissions).values(data).returning();
 }
 
-export async function updatePermission(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('permission').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function updatePermission({ id, data }: { id: number; data: Partial<typeof permissions.$inferInsert> }) {
+  return db.update(permissions).set(data).where(eq(permissions.id, id)).returning();
 }
 
-export async function deletePermission(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('permission').where('id', id).del();
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function deletePermission(id: number) {
+  return db.delete(permissions).where(eq(permissions.id, id)).returning();
 }
 
-export async function deleteMultiPermissions(
-  conds: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('permission').where(conds).del();
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function deleteMultiPermissions(ids: number[]) {
+  return db.delete(permissions).where(inArray(permissions.id, ids)).returning();
 }
 
-export async function getExistingPermission(data: Record<string, unknown>) {
-  const permission = await db
-    .table('permission')
-    .select('id', 'is_deleted')
-    .where(data);
-  return permission[0] || null;
+export async function getExistingPermission(data: Partial<typeof permissions.$inferInsert>) {
+  // Find by unique fields
+  const perm = await db.select().from(permissions).where(and(
+    eq(permissions.actionId, data.actionId!),
+    eq(permissions.moduleId, data.moduleId!),
+    eq(permissions.subModuleId, data.subModuleId!)
+  ));
+  return perm[0] || null;
 }

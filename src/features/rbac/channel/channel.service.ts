@@ -1,4 +1,5 @@
-import { Knex } from 'knex';
+import { eq, inArray, ilike } from 'drizzle-orm';
+import { channels } from '../../../db/schema/channels';
 import db from '../../../db/db';
 import { getPaginatedData, getPagination } from '../../../utils/common';
 import { ListQuery } from '../../../types/types';
@@ -8,138 +9,85 @@ export async function getChannels(filters: ListQuery) {
     page: filters.page as number,
     size: filters.size as number,
   });
-
-  const query = db
-    .table('channel')
-    .select('id', 'name', 'is_deleted')
-    .where('is_deleted', 0)
+  let whereClause = undefined;
+  if (filters.keyword) {
+    whereClause = ilike(channels.name, `%${filters.keyword}%`);
+  }
+  const data = await db
+    .select()
+    .from(channels)
+    .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  const totalCountQuery = db.table('channel').count('* as count');
-
-  if (filters.sort) {
-    query.orderBy(filters.sort, filters.order || 'asc');
-  } else {
-    query.orderBy('created_at', 'desc');
-  }
-
-  if (filters.keyword) {
-    query.whereILike('name', `%${filters.keyword}%`);
-    totalCountQuery.whereILike('name', `%${filters.keyword}%`);
-  }
-
-  return getPaginatedData(query, totalCountQuery, filters, pagination);
+  return data;
 }
 
 export async function getChannel(id: string | number) {
   const channel = await db
-    .table('channel')
-    .select('id', 'name', 'is_deleted')
-    .where('id', id);
+    .select()
+    .from(channels)
+    .where(eq(channels.id, Number(id)));
   return channel[0] || null;
 }
 
-export async function createChannel(
-  data: Record<string, unknown>,
-  trx?: Knex.Transaction
-) {
-  const query = db.table('channel').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createChannel(data: typeof channels.$inferInsert) {
+  const [created] = await db.insert(channels).values(data).returning();
+  return created;
 }
 
-export async function createMultiChannels(
-  data: Record<string, unknown>[],
-  trx?: Knex.Transaction
-) {
-  const query = db.table('channel').insert(data);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return data;
+export async function createMultiChannels(data: Array<typeof channels.$inferInsert>) {
+  return db.insert(channels).values(data).returning();
 }
 
-export async function updateChannel(
-  {
-    id,
-    data,
-  }: {
-    id: string | number;
-    data: Record<string, unknown>;
-  },
-  trx?: Knex.Transaction
-) {
-  const query = db.table('channel').update(data).where('id', id);
-
-  if (trx) query.transacting(trx);
-
-  return query;
+export async function updateChannel({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof channels.$inferInsert>;
+}) {
+  const [updated] = await db
+    .update(channels)
+    .set(data)
+    .where(eq(channels.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function deleteChannel(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('channel').select('*').where('id', id);
-
-  const query = db.table('channel').where('id', id).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function deleteChannel(id: string | number) {
+  const [deleted] = await db
+    .delete(channels)
+    .where(eq(channels.id, Number(id)))
+    .returning();
+  return deleted;
 }
 
-export async function deleteMultiChannels(
-  ids: string[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('channel').select('*').whereIn('id', ids);
-
-  const query = db.table('channel').whereIn('id', ids).del();
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function deleteMultiChannels(ids: Array<number>) {
+  return db.delete(channels).where(inArray(channels.id, ids)).returning();
 }
 
-export async function softDeleteChannel(
-  id: string | number,
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('channel').select('*').where('id', id);
-
-  const query = db
-    .table('channel')
-    .update({ is_deleted: true })
-    .where('id', id);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete[0] || null;
+export async function softDeleteChannel(id: string | number) {
+  const [updated] = await db
+    .update(channels)
+    .set({ isDeleted: true })
+    .where(eq(channels.id, Number(id)))
+    .returning();
+  return updated;
 }
 
-export async function softDeleteMultiChannels(
-  ids: string[] | number[],
-  trx?: Knex.Transaction
-) {
-  const toDelete = await db.table('channel').select('*').whereIn('id', ids);
-
-  const query = db
-    .table('channel')
-    .update({ is_deleted: true })
-    .whereIn('id', ids);
-  if (trx) query.transacting(trx);
-  await query;
-
-  return toDelete || null;
+export async function softDeleteMultiChannels(ids: Array<number>) {
+  return db
+    .update(channels)
+    .set({ isDeleted: true })
+    .where(inArray(channels.id, ids))
+    .returning();
 }
 
-export async function getExistingChannel(data: Record<string, unknown>) {
+export async function getExistingChannel(data: Partial<typeof channels.$inferInsert>) {
+  // Example: find by name
   const channel = await db
-    .table('channel')
-    .select('id', 'name', 'is_deleted')
-    .where(data);
+    .select()
+    .from(channels)
+    .where(eq(channels.name, data.name!));
   return channel[0] || null;
 }
