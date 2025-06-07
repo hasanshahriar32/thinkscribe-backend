@@ -1,0 +1,10 @@
+GET / 404 25.589 ms - 139 {}
+GET /api-docs 404 8.364 ms - 147 {}
+GET /api-docs 404 1.852 ms - 147 {}
+GET /docs 301 12.559 ms - 154 {}
+GET /docs/ 200 13.519 ms - 3106 {}
+GET /docs/swagger-ui-init.js 200 1.358 ms - 45148 {}
+GET /docs/swagger-ui.css 200 66.655 ms - 154986 {}
+GET /docs/swagger-ui-bundle.js 200 28.025 ms - 1485258 {}
+GET /docs/swagger-ui-standalone-preset.js 200 265.182 ms - 229223 {}
+GET /docs/favicon-32x32.png 200 2.217 ms - 628 {}
