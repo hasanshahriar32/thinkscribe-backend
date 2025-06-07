@@ -12,7 +12,12 @@
     "prepare": "husky",
     "release": "standard-version",
     "docs": "echo Documentation available at: file://%cd%/docs/swagger/openapi.yml && echo Documentation available at: file://%cd%/docs/swagger/README.md",
-    "postbuild": "copyfiles -u 1 \"docs/**/*\" dist/docs"
+    "postbuild": "copyfiles -u 1 \"docs/**/*\" dist/docs",
+    "db:generate": "npm run build && node ./scripts/generate-migration.mjs",
+    "db:migrate": "npm run build && drizzle-kit migrate",
+    "db:studio": "npm run build && drizzle-kit studio --port 4000",
+    "db:studio:prod": "cross-env drizzle-kit studio --host 0.0.0.0 --port $PORT",
+    "db:drop": "drizzle-kit drop"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +32,7 @@
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.29.4",
+    "drizzle-orm": "^0.44.2",
     "express": "^4.21.2",
     "gel": "^2.1.0",
     "helmet": "^8.1.0",

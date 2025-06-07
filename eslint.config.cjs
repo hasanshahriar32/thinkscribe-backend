@@ -30,4 +30,11 @@ module.exports = [
     },
   },
   configPrettier,
+  // Ignore all files in drizzle/ (including seeds/migrations)
+  // Disable Prettier errors for drizzle scripts
+  {
+    rules: {
+      'prettier/prettier': 'off',
+    },
+  },
 ];

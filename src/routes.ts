@@ -14,17 +14,17 @@ import productCategoryRoutes from './features/product-category/product-category.
 const routes = Router();
 
 // Public routes (No authentication required)
-routes.use('/api/auth', authRoutes);
+routes.use('/auth', authRoutes);
 
 // Protected routes (Require JWT authentication)
-routes.use('/api', verifyToken, moduleRoutes);
-routes.use('/api', verifyToken, subModuleRoutes);
-routes.use('/api', verifyToken, channelRoutes);
-routes.use('/api', verifyToken, roleRoutes);
-routes.use('/api', verifyToken, actionRoutes);
-routes.use('/api', verifyToken, permissionRoutes);
-routes.use('/api', verifyToken, productCategoryRoutes);
-routes.use('/api', verifyToken, productRoutes);
-routes.use('/api', verifyToken, userRoutes);
+routes.use('/', verifyToken, moduleRoutes);
+routes.use('/', verifyToken, subModuleRoutes);
+routes.use('/', verifyToken, channelRoutes);
+routes.use('/', verifyToken, roleRoutes);
+routes.use('/', verifyToken, actionRoutes);
+routes.use('/', verifyToken, permissionRoutes);
+routes.use('/', verifyToken, productCategoryRoutes);
+routes.use('/', verifyToken, productRoutes);
+routes.use('/', verifyToken, userRoutes);
 
 export default routes;

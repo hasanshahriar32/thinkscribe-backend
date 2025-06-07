@@ -22,8 +22,12 @@ const options = {
         description: 'Base server',
       },
       {
-        url: 'http://localhost:3001/api/v1',
-        description: 'Development server',
+        url: 'https://think-scribe.onrender.com/api/v1',
+        description: 'Production server',
+      },
+      {
+        url: 'http://localhost:2000/api/v1',
+        description: 'local server',
       },
     ],
   },
