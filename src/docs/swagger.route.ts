@@ -28,9 +28,14 @@ const docAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // Use dynamic import for ESM Scalar API Reference
-router.use('/', docAuth, async (req, res) => {
-  const { apiReference } = await import('@scalar/express-api-reference');
-  return apiReference({ spec: { content: swaggerDocument } })(req, res);
+router.use('/', docAuth, async (req, res, next) => {
+  try {
+    const { apiReference } = await import('@scalar/express-api-reference');
+    // apiReference expects (req, res), not (req, res, next)
+    return apiReference({ spec: { content: swaggerDocument } })(req, res);
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
