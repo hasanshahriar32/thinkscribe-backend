@@ -22,7 +22,12 @@ export async function getAllRoles(
 ) {
   try {
     const result = await getRoles(req.query as unknown as ListQuery);
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.RETRIVE, data: result });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.RETRIVE,
+      data: result,
+    });
   } catch (error) {
     next(error);
   }
@@ -35,7 +40,12 @@ export async function getOneRole(
 ) {
   try {
     const product = await getRole(Number(req.params.id));
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.RETRIVE, data: product });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.RETRIVE,
+      data: product,
+    });
   } catch (error) {
     next(error);
   }
@@ -48,7 +58,8 @@ export async function createOneRole(
 ) {
   try {
     const existingRole = await getExistingRole({ name: req.body.name });
-    if (existingRole) throw new AppError(`${req.body.name} is already existed!`, 400);
+    if (existingRole)
+      throw new AppError(`${req.body.name} is already existed!`, 400);
     const payload = {
       name: req.body.name,
       description: req.body.description,
@@ -56,7 +67,12 @@ export async function createOneRole(
       createdAt: new Date(),
     };
     const createdRole = await createRole(payload);
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.CREATE, data: createdRole });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.CREATE,
+      data: createdRole,
+    });
   } catch (error) {
     next(error);
   }
@@ -75,7 +91,12 @@ export async function createRoles(
       createdAt: new Date(),
     }));
     await createMultiRoles(payload);
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.CREATE, data: null });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.CREATE,
+      data: null,
+    });
   } catch (error) {
     next(error);
   }
@@ -92,8 +113,16 @@ export async function updateOneRole(
       description: req.body.description,
       isActive: req.body.isActive,
     };
-    const updatedRole = await updateRole({ id: Number(req.params.id), data: payload });
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.UPDATE, data: updatedRole });
+    const updatedRole = await updateRole({
+      id: Number(req.params.id),
+      data: payload,
+    });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.UPDATE,
+      data: updatedRole,
+    });
   } catch (error) {
     next(error);
   }
@@ -108,7 +137,12 @@ export async function deleteOneRole(
     const isExistedRole = await getExistingRole({ name: req.body.name });
     if (!isExistedRole) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
     const deletedRole = await deleteRole(Number(req.params.id));
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: deletedRole });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: deletedRole,
+    });
   } catch (error) {
     next(error);
   }
@@ -122,7 +156,12 @@ export async function deleteRoles(
   try {
     const ids = req.body.ids.map((id: string | number) => Number(id));
     await deleteMultiRoles(ids);
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: null });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
+    });
   } catch (error) {
     next(error);
   }
@@ -137,7 +176,12 @@ export async function softDeleteOneRole(
     const isExistedRole = await getExistingRole({ name: req.body.name });
     if (!isExistedRole) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
     const deletedRole = await softDeleteRole(Number(req.params.id));
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: deletedRole });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: deletedRole,
+    });
   } catch (error) {
     next(error);
   }
@@ -151,7 +195,12 @@ export async function softDeleteRoles(
   try {
     const ids = req.body.ids.map((id: string | number) => Number(id));
     await softDeleteMultiRoles(ids);
-    responseData({ res, status: 200, message: MESSAGES.SUCCESS.DELETE, data: null });
+    responseData({
+      res,
+      status: 200,
+      message: MESSAGES.SUCCESS.DELETE,
+      data: null,
+    });
   } catch (error) {
     next(error);
   }

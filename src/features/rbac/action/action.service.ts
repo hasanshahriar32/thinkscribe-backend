@@ -35,13 +35,19 @@ export async function createAction(data: typeof actions.$inferInsert) {
   return created;
 }
 
-export async function createMultiActions(data: Array<typeof actions.$inferInsert>) {
+export async function createMultiActions(
+  data: Array<typeof actions.$inferInsert>
+) {
   return db.insert(actions).values(data).returning();
 }
 
-export async function updateAction(
-  { id, data }: { id: string | number; data: Partial<typeof actions.$inferInsert> }
-) {
+export async function updateAction({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof actions.$inferInsert>;
+}) {
   const [updated] = await db
     .update(actions)
     .set(data)
@@ -72,7 +78,9 @@ export async function softDeleteMultiActions(ids: Array<number>) {
   return deleteMultiActions(ids);
 }
 
-export async function getExistingAction(data: Partial<typeof actions.$inferInsert>) {
+export async function getExistingAction(
+  data: Partial<typeof actions.$inferInsert>
+) {
   // Example: find by name
   const action = await db
     .select()

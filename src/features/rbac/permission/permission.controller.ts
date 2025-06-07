@@ -69,7 +69,9 @@ export async function updatePermissionsByRole(
           roleId: Number(req.body.role_id),
           moduleId: Number(permission.module_id),
           subModuleId: Number(permission.sub_module_id),
-          channelId: permission.channel_id ? Number(permission.channel_id) : undefined,
+          channelId: permission.channel_id
+            ? Number(permission.channel_id)
+            : undefined,
         }))
     );
     await createMultiPermissions(preparedMultiCreatePayload);

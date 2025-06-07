@@ -91,7 +91,9 @@ export async function softDeleteMultiProducts(ids: Array<number>) {
     .returning();
 }
 
-export async function getExistingProduct(data: Partial<typeof products.$inferInsert>) {
+export async function getExistingProduct(
+  data: Partial<typeof products.$inferInsert>
+) {
   // Example: find by name
   const product = await db
     .select()

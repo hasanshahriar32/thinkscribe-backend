@@ -26,7 +26,10 @@ export async function getUsers(filters: ListQuery) {
 }
 
 export async function getUser(id: string | number) {
-  const user = await db.select().from(users).where(eq(users.id, Number(id)));
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, Number(id)));
   return user[0] || null;
 }
 
@@ -51,18 +54,26 @@ export async function updateUser({
 }
 
 export async function deleteUser(id: string | number) {
-  const [deleted] = await db.delete(users).where(eq(users.id, Number(id))).returning();
+  const [deleted] = await db
+    .delete(users)
+    .where(eq(users.id, Number(id)))
+    .returning();
   return deleted;
 }
 
-export async function getExistingUser(data: Partial<typeof users.$inferInsert>) {
+export async function getExistingUser(
+  data: Partial<typeof users.$inferInsert>
+) {
   // Example: find by email or username
-  const user = await db.select().from(users).where(
-    and(
-      data.email ? eq(users.email, data.email) : undefined,
-      data.username ? eq(users.username, data.username) : undefined
-    )
-  );
+  const user = await db
+    .select()
+    .from(users)
+    .where(
+      and(
+        data.email ? eq(users.email, data.email) : undefined,
+        data.username ? eq(users.username, data.username) : undefined
+      )
+    );
   return user[0] || null;
 }
 

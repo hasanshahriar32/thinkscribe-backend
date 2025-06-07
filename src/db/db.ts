@@ -6,7 +6,9 @@ import { Pool } from 'pg';
 dotenv.config();
 
 // Use DATABASE_URL from environment or fallback
-const connectionString = process.env.DATABASE_URL || 'postgres://neondb_owner:npg_HCw7a6QAiJqM@ep-cold-salad-a1hblfyk-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+const connectionString =
+  process.env.DATABASE_URL ||
+  'postgres://neondb_owner:npg_HCw7a6QAiJqM@ep-cold-salad-a1hblfyk-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
 const pool = new Pool({ connectionString });
 const db = drizzle(pool);
 

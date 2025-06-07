@@ -33,10 +33,7 @@ export async function getProductCategory(id: string | number) {
 export async function createProductCategory(
   data: typeof productCategories.$inferInsert
 ) {
-  const [created] = await db
-    .insert(productCategories)
-    .values(data)
-    .returning();
+  const [created] = await db.insert(productCategories).values(data).returning();
   return created;
 }
 

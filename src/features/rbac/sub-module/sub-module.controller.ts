@@ -129,9 +129,10 @@ export async function updateOneSubModule(
       description: req.body.description,
       isActive: req.body.isActive,
     };
-    const updatedSubModule = await updateSubModule(
-      { id: Number(req.params.id), data: payload }
-    );
+    const updatedSubModule = await updateSubModule({
+      id: Number(req.params.id),
+      data: payload,
+    });
 
     responseData({
       res,

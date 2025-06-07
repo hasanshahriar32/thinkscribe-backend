@@ -23,7 +23,10 @@ export async function getRoles(filters: ListQuery) {
 }
 
 export async function getRole(id: string | number) {
-  const role = await db.select().from(roles).where(eq(roles.id, Number(id)));
+  const role = await db
+    .select()
+    .from(roles)
+    .where(eq(roles.id, Number(id)));
   return role[0] || null;
 }
 
@@ -52,7 +55,10 @@ export async function updateRole({
 }
 
 export async function deleteRole(id: string | number) {
-  const [deleted] = await db.delete(roles).where(eq(roles.id, Number(id))).returning();
+  const [deleted] = await db
+    .delete(roles)
+    .where(eq(roles.id, Number(id)))
+    .returning();
   return deleted;
 }
 
@@ -70,10 +76,16 @@ export async function softDeleteRole(id: string | number) {
 }
 
 export async function softDeleteMultiRoles(ids: Array<number>) {
-  return db.update(roles).set({ isActive: false }).where(inArray(roles.id, ids)).returning();
+  return db
+    .update(roles)
+    .set({ isActive: false })
+    .where(inArray(roles.id, ids))
+    .returning();
 }
 
-export async function getExistingRole(data: Partial<typeof roles.$inferInsert>) {
+export async function getExistingRole(
+  data: Partial<typeof roles.$inferInsert>
+) {
   // Example: find by name
   const role = await db.select().from(roles).where(eq(roles.name, data.name!));
   return role[0] || null;

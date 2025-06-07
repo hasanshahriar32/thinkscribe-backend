@@ -3,7 +3,15 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { users } from '../../db/schema/users';
-import { userRoles, roles, permissions, actions, modules, subModules, rolePermissions } from '../../db/schema/rbac';
+import {
+  userRoles,
+  roles,
+  permissions,
+  actions,
+  modules,
+  subModules,
+  rolePermissions,
+} from '../../db/schema/rbac';
 import { channels } from '../../db/schema/channels';
 import { eq } from 'drizzle-orm';
 dotenv.config();
@@ -12,17 +20,29 @@ export async function getUser(conds: Record<string, unknown>) {
   // Only support username or id lookup for login
   let userRows: any[] = [];
   if (conds.username) {
-    userRows = await db.select().from(users).where(eq(users.username, conds.username as string));
+    userRows = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, conds.username as string));
   } else if (conds.id) {
-    userRows = await db.select().from(users).where(eq(users.id, Number(conds.id)));
+    userRows = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, Number(conds.id)));
   }
   const user = userRows[0];
   if (!user) return null;
   // Get role name via userRoles
-  const userRole = await db.select().from(userRoles).where(eq(userRoles.userId, user.id));
+  const userRole = await db
+    .select()
+    .from(userRoles)
+    .where(eq(userRoles.userId, user.id));
   let roleName = null;
   if (userRole[0]?.roleId) {
-    const role = await db.select().from(roles).where(eq(roles.id, userRole[0].roleId));
+    const role = await db
+      .select()
+      .from(roles)
+      .where(eq(roles.id, userRole[0].roleId));
     roleName = role[0]?.name || null;
   }
   return { ...user, role: roleName };

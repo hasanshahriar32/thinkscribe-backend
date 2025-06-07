@@ -31,21 +31,23 @@ export async function getModule(id: string | number) {
 }
 
 export async function createModule(data: typeof modules.$inferInsert) {
-  const [created] = await db
-    .insert(modules)
-    .values(data)
-    .returning();
+  const [created] = await db.insert(modules).values(data).returning();
   return created;
 }
 
-export async function createMultiModules(data: Array<typeof modules.$inferInsert>) {
-  return db
-    .insert(modules)
-    .values(data)
-    .returning();
+export async function createMultiModules(
+  data: Array<typeof modules.$inferInsert>
+) {
+  return db.insert(modules).values(data).returning();
 }
 
-export async function updateModule({ id, data }: { id: string | number; data: Partial<typeof modules.$inferInsert> }) {
+export async function updateModule({
+  id,
+  data,
+}: {
+  id: string | number;
+  data: Partial<typeof modules.$inferInsert>;
+}) {
   const [updated] = await db
     .update(modules)
     .set(data)
@@ -63,10 +65,7 @@ export async function deleteModule(id: string | number) {
 }
 
 export async function deleteMultiModules(ids: Array<number>) {
-  return db
-    .delete(modules)
-    .where(inArray(modules.id, ids))
-    .returning();
+  return db.delete(modules).where(inArray(modules.id, ids)).returning();
 }
 
 export async function softDeleteModule(id: string | number) {
@@ -86,7 +85,9 @@ export async function softDeleteMultiModules(ids: Array<number>) {
     .returning();
 }
 
-export async function getExistingModule(data: Partial<typeof modules.$inferInsert>) {
+export async function getExistingModule(
+  data: Partial<typeof modules.$inferInsert>
+) {
   // Example: find by name
   const module = await db
     .select()

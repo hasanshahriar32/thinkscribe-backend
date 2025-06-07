@@ -1,5 +1,14 @@
 // Drizzle ORM schema for RBAC (Postgres)
-import { pgTable, serial, varchar, integer, boolean, primaryKey, unique, timestamp } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  varchar,
+  integer,
+  boolean,
+  primaryKey,
+  unique,
+  timestamp,
+} from 'drizzle-orm/pg-core';
 
 export const roles = pgTable('roles', {
   id: serial('id').primaryKey(),

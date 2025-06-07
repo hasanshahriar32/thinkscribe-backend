@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "nodemon --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "tsc && node dist/server.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
     "prepare": "husky",
-    "release": "standard-version"
+    "release": "standard-version",
+    "docs": "echo Documentation available at: file://%cd%/docs/swagger/openapi.yml && echo Documentation available at: file://%cd%/docs/swagger/README.md"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,7 @@
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.44.2",
     "express": "^4.21.2",
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
@@ -34,7 +36,10 @@
     "mysql2": "^3.12.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.1",
-    "uuid": "^11.1.0"
+    "pg": "^8.16.0",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -47,8 +52,12 @@
     "@types/node": "^22.13.1",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
+    "@types/pg": "^8.15.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
+    "drizzle-kit": "^0.31.1",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",

@@ -9,6 +9,7 @@ import './cron-jobs/sample-cron';
 import { accessLogFormat, auditLogFormat } from './configs/log-formats';
 import auditLogStream from './middlewares/audit-log';
 import { upload } from './middlewares/multer-upload';
+import swaggerDocsRoute from './docs/swagger.route';
 
 // Initialize the Express application
 const app = express();
@@ -41,6 +42,9 @@ app.use(morgan(auditLogFormat, { stream: auditLogStream }));
 
 // Register all application routes
 app.use(routes);
+
+// Register Swagger/OpenAPI documentation route
+app.use('/docs', swaggerDocsRoute);
 
 // Register custom error handling middleware at the end
 // This ensures it catches errors from previous middlewares or routes

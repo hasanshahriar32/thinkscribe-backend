@@ -35,7 +35,9 @@ export async function createChannel(data: typeof channels.$inferInsert) {
   return created;
 }
 
-export async function createMultiChannels(data: Array<typeof channels.$inferInsert>) {
+export async function createMultiChannels(
+  data: Array<typeof channels.$inferInsert>
+) {
   return db.insert(channels).values(data).returning();
 }
 
@@ -83,7 +85,9 @@ export async function softDeleteMultiChannels(ids: Array<number>) {
     .returning();
 }
 
-export async function getExistingChannel(data: Partial<typeof channels.$inferInsert>) {
+export async function getExistingChannel(
+  data: Partial<typeof channels.$inferInsert>
+) {
   // Example: find by name
   const channel = await db
     .select()

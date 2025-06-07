@@ -97,9 +97,8 @@ export async function createProductCategories(
         created_by: req.body.user.id,
       })
     );
-    const createdProductCategories = await createMultiProductCategories(
-      payload
-    );
+    const createdProductCategories =
+      await createMultiProductCategories(payload);
 
     responseData({
       res,
@@ -144,7 +143,9 @@ export async function deleteOneProductCategory(
   next: NextFunction
 ) {
   try {
-    const deletedProductCategory = await deleteProductCategory(Number(req.params.id));
+    const deletedProductCategory = await deleteProductCategory(
+      Number(req.params.id)
+    );
 
     responseData({
       res,
@@ -191,7 +192,9 @@ export async function softDeleteOneProductCategory(
     if (!isExistedProductCategory)
       throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
-    const deletedProductCategory = await softDeleteProductCategory(Number(req.params.id));
+    const deletedProductCategory = await softDeleteProductCategory(
+      Number(req.params.id)
+    );
 
     responseData({
       res,

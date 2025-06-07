@@ -181,7 +181,9 @@ export async function softDeleteOneProduct(
   next: NextFunction
 ) {
   try {
-    const isExistedProduct = await getExistingProduct({ id: Number(req.params.id) });
+    const isExistedProduct = await getExistingProduct({
+      id: Number(req.params.id),
+    });
 
     if (!isExistedProduct) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
 
