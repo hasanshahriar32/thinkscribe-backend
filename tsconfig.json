@@ -5,6 +5,7 @@
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": ".",
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   }
 }
