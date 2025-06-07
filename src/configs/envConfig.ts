@@ -49,8 +49,10 @@ export const DB_NAME = process.env.DB_NAME || '';
 export const DB_HOST = process.env.DB_HOST || '';
 export const JWT_SECRET = process.env.JWT_SECRET || 'smsk-jwt-secret';
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
-export const REFRESH_JWT_SECRET = process.env.REFRESH_JWT_SECRET || 'smsk-refresh-jwt-secret';
-export const REFRESH_JWT_EXPIRES_IN = process.env.REFRESH_JWT_EXPIRES_IN || '7d';
+export const REFRESH_JWT_SECRET =
+  process.env.REFRESH_JWT_SECRET || 'smsk-refresh-jwt-secret';
+export const REFRESH_JWT_EXPIRES_IN =
+  process.env.REFRESH_JWT_EXPIRES_IN || '7d';
 export const FROM_EMAIL = process.env.FROM_EMAIL || '';
 export const PASSWORD = process.env.PASSWORD || '';
 export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
