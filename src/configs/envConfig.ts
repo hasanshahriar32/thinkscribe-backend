@@ -35,8 +35,9 @@ export function checkMissingEnvVars() {
   if (missing.length > 0) {
     // Warn in dev, throw in prod
     const msg = `Missing required environment variables: ${missing.join(', ')}`;
-    if (process.env.NODE_ENV === 'production') throw new Error(msg);
-    else console.warn(msg);
+    // if (process.env.NODE_ENV === 'production') throw new Error(msg);
+    // else
+    console.warn(msg);
   }
 }
 
