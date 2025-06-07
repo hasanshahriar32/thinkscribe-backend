@@ -1,11 +1,12 @@
-import dotenv from 'dotenv';
+import {
+  SMS_API_KEY,
+  SMS_API_SECRET,
+  SMS_SENDER_ID,
+} from '../configs/envConfig';
 import { base64Encode } from '../utils/common';
 import apiClient from '../api-client';
-dotenv.config();
 
-const encodedToken = base64Encode(
-  `${process.env.SMS_API_KEY}:${process.env.SMS_API_SECRET}`
-);
+const encodedToken = base64Encode(`${SMS_API_KEY}:${SMS_API_SECRET}`);
 
 export const sendSMS = async (phones: string, message: string) => {
   return apiClient.post(
@@ -15,7 +16,7 @@ export const sendSMS = async (phones: string, message: string) => {
         {
           to: phones,
           message,
-          from: process.env.SMS_SENDER_ID,
+          from: SMS_SENDER_ID,
         },
       ],
     },
@@ -36,7 +37,7 @@ export const sendBulkSMS = async (phones: string[], message: string) => {
         {
           to: phones,
           message,
-          from: process.env.SMS_SENDER_ID,
+          from: SMS_SENDER_ID,
         },
       ],
     },

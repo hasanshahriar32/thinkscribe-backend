@@ -1,7 +1,6 @@
 import db from '../../db/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import { users } from '../../db/schema/users';
 import {
   userRoles,
@@ -14,7 +13,12 @@ import {
 } from '../../db/schema/rbac';
 import { channels } from '../../db/schema/channels';
 import { eq } from 'drizzle-orm';
-dotenv.config();
+import {
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+  REFRESH_JWT_SECRET,
+  REFRESH_JWT_EXPIRES_IN,
+} from '../../configs/envConfig';
 
 export async function getUser(conds: Record<string, unknown>) {
   // Only support username or id lookup for login
@@ -70,19 +74,15 @@ export async function getPermissionsByRole(roleId: number) {
 }
 
 export async function getAccessToken(payload: Record<string, unknown>) {
-  return jwt.sign(payload, process.env.JWT_SECRET || 'smsk-jwt-secret', {
-    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
   } as jwt.SignOptions);
 }
 
 export async function getRefreshToken(payload: Record<string, unknown>) {
-  return jwt.sign(
-    payload,
-    process.env.REFRESH_JWT_SECRET || 'smsk-refresh-jwt-secret',
-    {
-      expiresIn: process.env.REFRESH_JWT_EXPIRES_IN || '7d',
-    } as jwt.SignOptions
-  );
+  return jwt.sign(payload, REFRESH_JWT_SECRET, {
+    expiresIn: REFRESH_JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
 }
 
 export async function verifyPassword(hashedPassword: string, password: string) {

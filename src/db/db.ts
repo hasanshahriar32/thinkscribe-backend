@@ -1,14 +1,8 @@
-import dotenv from 'dotenv';
+import { DATABASE_URL } from '../configs/envConfig';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
-// Load environment variables from .env file
-dotenv.config();
-
-// Use DATABASE_URL from environment or fallback
-const connectionString =
-  process.env.DATABASE_URL ||
-  'postgres://neondb_owner:npg_HCw7a6QAiJqM@ep-cold-salad-a1hblfyk-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+const connectionString = DATABASE_URL;
 const pool = new Pool({ connectionString });
 const db = drizzle(pool);
 

@@ -2,7 +2,9 @@
 
 Welcome to the **RBAC Express.js Starter Template** – a robust and scalable foundation for building secure RESTful APIs with **Role-Based Access Control (RBAC)**.
 
-This template is crafted with best practices in mind, using **Node.js**, **Express.js**, **TypeScript**, **MySQL**, and **Knex**, and is ideal for building admin panels, internal tools, or any application requiring fine-grained permission control.
+**Now powered by Drizzle ORM and PostgreSQL.**
+
+This template is crafted with best practices in mind, using **Node.js**, **Express.js**, **TypeScript**, **PostgreSQL**, and **Drizzle ORM**. It is ideal for building admin panels, internal tools, or any application requiring fine-grained permission control.
 
 This documentation includes the following key areas:
 
@@ -13,165 +15,102 @@ This documentation includes the following key areas:
 - [RBAC Implementation](#rbac-implementation)
 - [Logging](#logging)
 - [Integrating With External Service APIs](#integrating-with-external-service-apis)
+- [Environment Configuration](#environment-configuration)
 
 ---
 
 ## API Documentation
 
-Postman collection is provided in `src/docs/rbac_express.postman_collection.json`.
+- OpenAPI/Swagger docs are in `docs/swagger/` and served via Scalar UI at `/docs/scalar` (protected by basic auth).
+- Postman collection: `src/docs/rbac_express.postman_collection.json`.
 
 ## ERD
 
 🔗 [View on dbdiagram.io](https://dbdiagram.io/d/680675261ca52373f5c46e4d)
 
-🗃️ Get a SQL file named `rbac_express.sql` in `src/docs` folder.
+🗃️ SQL schema: `src/docs/rbac_express.sql`.
 
 ![ERD](./erd.png)
 
 ## Architecture
 
-This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.). You can find the folder structure in the [Folder Structure](#folder-structure) section.
+This project follows a **Feature-Based Architecture**, organizing code by business features rather than technical concerns (e.g., routes, controllers, models, etc.).
 
 ### Why Feature-Based?
 
-#### 📈 **High Scalability**
-
-- Easy to scale and manage large codebases.
-- Teams can work on separate features independently without conflicts.
-
-#### 🛠️ **Better Maintainability**
-
-- Easier to locate, update, and test business logic per domain.
-- Simplifies bug tracking and debugging.
-
-#### 🧱 **Separation of Concerns**
-
-- Reduces coupling between unrelated parts of the codebase.
-
-#### 🚀 **Improved Developer Productivity**
-
-- Developers can focus on isolated features.
-- Easier onboarding for new developers.
-
-#### 🧩 **Modularity & Reusability**
-
-- Promotes reusable and encapsulated modules.
-- Easier to extract features into packages or microservices.
+- **High Scalability:** Easy to scale and manage large codebases.
+- **Better Maintainability:** Easier to locate, update, and test business logic per domain.
+- **Separation of Concerns:** Reduces coupling between unrelated parts of the codebase.
+- **Improved Developer Productivity:** Developers can focus on isolated features.
+- **Modularity & Reusability:** Promotes reusable and encapsulated modules.
 
 ## Folder Structure
 
 ```
-📁 rbac-expressjs-starter
+📁 thinkscribe-backend
 ├── 📁 src
-│   ├── 📁 config
+│   ├── 📁 configs
+│   │   ├── envConfig.ts   # Centralized environment config
+│   │   ├── rbac.ts
+│   │   ├── messages.ts
+│   │   └── log-formats.ts
 │   ├── 📁 cron-jobs
+│   ├── 📁 db
+│   │   ├── db.ts          # Drizzle ORM/Postgres connection
+│   │   └── schema/
 │   ├── 📁 docs
+│   │   ├── tech_docs.md   # This file
+│   │   └── swagger/
 │   ├── 📁 external-services
-│   ├── 📁 middlewares
-│   │   ├── 📝 audit-log.ts
-│   │   ├── 📝 error-handler.ts
-│   │   ├── 📝 jwt.ts
-│   │   ├── 📝 multer-upload.ts
-│   │   ├── 📝 rbac.ts
-│   │   ├── 📝 validation.ts
 │   ├── 📁 features
-│   │   ├── 📁 product
-│   │   │   ├── 📝 route.ts
-│   │   │   ├── 📝 controller.ts
-│   │   │   ├── 📝 service.ts
-│   │   │   ├── 📝 validator.ts
-│   │   ├── 📁 ...
+│   ├── 📁 middlewares
 │   ├── 📁 storage
-│   │   ├── 📁 logs
-│   │   │   ├── 📝 audit.log
-│   │   ├── 📁 uploads
 │   ├── 📁 types
 │   ├── 📁 utils
-│   │   ├── 📝 common.ts
-│   │   ├── 📝 http.ts
-│   │   ├── 📝 log.ts
-│   │   ├── 📝 node-mailer.ts
-│   ├── 📝 app.ts
-│   ├── 📝 api-client.ts
-│   ├── 📝 routes.ts
-│   └── 📝 server.ts
-├── 📝 .dockerignore
-├── 📝 .env
-├── 📝 .gitignore
-├── 📝 .prettierrc.json
-├── 📝 Dockerfile
-├── 📝 eslint.config.cjs
-├── 📝 nodemon.json
-├── 📝 package.json
-├── 📝 tsconfig.json
-└── 📝 README.md
-
+│   ├── app.ts
+│   ├── api-client.ts
+│   ├── routes.ts
+│   └── server.ts
+├── drizzle/
+├── package.json
+├── tsconfig.json
+├── eslint.config.cjs
+└── ...
 ```
 
 ## RBAC Implementation
 
-This project implements **Role-Based Access Control (RBAC)** to ensure users only access what they are authorized for.
-
-RBAC is structured around **Roles**, **Modules**, **Sub-Modules**, **Actions**, and **Channels**, enabling fine-grained control across features.
-
-🟢 On login, the user’s configured permissions are included in the response.
-
-### 🔍 RBAC Middleware
-
-- Located in: `src/middlewares/rbac.ts`
-- Apply it to each protected route.
-
-### ⚙️ RBAC Configs
-
-- Found in: `src/configs/rbac.ts`
-
-### ✏️ Updating User Permissions
-
-To update user permissions, call the `/api/permissions` endpoint using the **PATCH** method with a predefined payload structure.
-
-> ⚠️ CRUD operations can be performed on roles, modules, sub-modules, channels, and actions – but remember to update the configurations accordingly afterward.
+- **RBAC is enforced at all layers** using a normalized Postgres schema and Drizzle ORM.
+- Main RBAC schema: `src/db/schema/rbac.ts`
+- RBAC middleware: `src/middlewares/rbac.ts`
+- RBAC config: `src/configs/rbac.ts`
+- Update permissions via `/api/permissions` (PATCH).
 
 ## Logging
 
-This project uses **two types of logging**:
-
-### 1. 🛣️ Access Logging (via Morgan)
-
-- **Purpose:** Automatically records all incoming HTTP requests.
-- **Setup:** Standard Morgan.
-- **Output:** Console logs.
-
-### 2. 🧾 Audit Logging (Custom)
-
-- **Purpose:** Tracks sensitive or critical actions like:
-  - API calls
-  - User logins
-  - Data changes
-
-#### 📁 File Location
-
-- Stored in: `src/storage/logs/audit.log`
-
-#### 🧱 Format Definition
-
-- Defined in: `config/log-format.ts`
-
-#### ⚙️ How It Works
-
-- Custom middleware captures audit logs.
-- Use `logAudit` (from `utils/log.ts`) to manually log events.
+- **Access Logging:** via Morgan (console output).
+- **Audit Logging:** custom middleware, logs to `src/storage/logs/audit.log`.
+- Log format: `src/configs/log-formats.ts`.
+- Use `logAudit` from `src/utils/log.ts` for manual audit events.
 
 ## Integrating With External Service APIs
 
-- Uses a custom **Axios instance**: `apiClient` (in `src/api-client.ts`)
-- Already integrated with **audit logging**.
-- Ensures all external API interactions are traceable.
+- Uses a custom Axios instance: `src/api-client.ts`.
+- Integrated with audit logging.
+- Example: SMS via `src/external-services/sms-poh.ts` (uses envConfig for secrets).
+
+## Environment Configuration
+
+- All environment variables are managed in `src/configs/envConfig.ts`.
+- On startup, required variables are checked and missing ones are warned/thrown.
+- Secrets are exposed as constants (e.g., `DATABASE_URL`, `JWT_SECRET`, `DOC_USER`, etc.).
+- See `.env.example` for all required variables.
 
 ## 👨‍💻 Author
 
 **Sai Min Pyae Kyaw**
 
-💼 Passionate Full Stack Developer | Node.js | TypeScript | React | MySQL  
+💼 Passionate Full Stack Developer | Node.js | TypeScript | React | PostgreSQL  
 📍 Based in Myanmar
 
 ### 🌐 Connect with me

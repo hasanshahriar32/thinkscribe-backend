@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { MESSAGES } from '../configs/messages';
 import { AppError } from '../utils/http';
+import { JWT_SECRET, REFRESH_JWT_SECRET } from '../configs/envConfig';
 
 // Load environment variables from a .env file
 dotenv.config();
@@ -26,7 +27,7 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
   // Verify the token using the secret key
   jwt.verify(
     token,
-    process.env.JWT_SECRET || 'smsk-jwt-secret', // Fallback secret if env variable is missing
+    JWT_SECRET,
     (
       err: jwt.VerifyErrors | null,
       decoded: jwt.JwtPayload | string | undefined
@@ -62,7 +63,7 @@ export function verifyRefreshToken(
   // Verify the refresh token using the secret key
   jwt.verify(
     refreshToken,
-    process.env.REFRESH_JWT_SECRET || 'smsk-refresh-jwt-secret', // Fallback secret if env variable is missing
+    REFRESH_JWT_SECRET,
     (
       err: jwt.VerifyErrors | null,
       decoded: jwt.JwtPayload | string | undefined
