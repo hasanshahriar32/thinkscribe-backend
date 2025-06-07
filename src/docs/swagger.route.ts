@@ -1,14 +1,35 @@
 import express from 'express';
-import YAML from 'yamljs';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
-import { DOC_USER, DOC_PASS } from '../configs/envConfig';
+import { DOC_USER, DOC_PASS, BASE_URL } from '../configs/envConfig';
 
 const router = express.Router();
 
-// Scalar API doc config (from YAML)
-const swaggerPath = path.join(__dirname, '../../docs/swagger/openapi.yml');
-const swaggerDocument = YAML.load(swaggerPath);
+// Swagger JSDoc setup
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'API documentation for the project.',
+    },
+    servers: [
+      {
+        url: `${BASE_URL}/api/v1`,
+        description: 'Base server',
+      },
+      {
+        url: 'http://localhost:3001/api/v1',
+        description: 'Development server',
+      },
+    ],
+  },
+  apis: [path.join(__dirname, '../../docs/swagger/*.yml')],
+};
+const swaggerSpec = swaggerJsdoc(options);
 
 // Basic Auth Middleware for docs
 const docAuth = (req: Request, res: Response, next: NextFunction) => {
@@ -27,15 +48,7 @@ const docAuth = (req: Request, res: Response, next: NextFunction) => {
   res.status(401).send('Authentication required.');
 };
 
-// Use dynamic import for ESM Scalar API Reference
-router.use('/', docAuth, async (req, res, next) => {
-  try {
-    const { apiReference } = await import('@scalar/express-api-reference');
-    // apiReference expects (req, res), not (req, res, next)
-    return apiReference({ spec: { content: swaggerDocument } })(req, res);
-  } catch (err) {
-    next(err);
-  }
-});
+// Serve Swagger UI at /docs
+router.use('/', docAuth, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default router;

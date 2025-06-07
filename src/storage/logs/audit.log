@@ -14,3 +14,10 @@ GET /favicon.ico 404 7.149 ms - 150 {}
 GET /docs/ 500 7.903 ms - 465 {}
 GET /docs/ 500 2.718 ms - 465 {}
 GET /docs/ 500 9.822 ms - 465 {}
+GET /docs/ 404 8.430 ms - 144 {}
+GET /docs/ 200 13.271 ms - 3106 {}
+GET /docs/swagger-ui.css 304 6.394 ms - - {}
+GET /docs/swagger-ui-init.js 304 0.783 ms - - {}
+GET /docs/swagger-ui-bundle.js 304 8.800 ms - - {}
+GET /docs/swagger-ui-standalone-preset.js 304 10.508 ms - - {}
+GET /docs/favicon-32x32.png 200 6.347 ms - 628 {}
