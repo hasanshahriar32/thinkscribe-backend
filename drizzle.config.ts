@@ -1,14 +1,21 @@
+import { channels } from './src/db/schema/channels';
 import type { Config } from 'drizzle-kit';
+import { DATABASE_DIALECT, DATABASE_URL } from './src/configs/envConfig';
 
 export default {
-  schema: './src/db/schema/rbac.ts',
-  out: './drizzle/meta',
-  dialect: 'postgresql',
+  schema: [
+    './dist/src/db/schema/rbac.js',
+    './dist/src/db/schema/users.js',
+    './dist/src/db/schema/products.js',
+    './dist/src/db/schema/channels.js',
+    './dist/src/db/schema/embedDataSchema.js',
+    './dist/src/db/schema/fileUploadSchema.js',
+  ],
+  out: './drizzle',
+  dialect: DATABASE_DIALECT,
   dbCredentials: {
-    host: 'ep-cold-salad-a1hblfyk-pooler.ap-southeast-1.aws.neon.tech',
-    user: 'neondb_owner',
-    password: 'npg_HCw7a6QAiJqM',
-    database: 'neondb',
-    ssl: 'require',
+    url: DATABASE_URL,
   },
+  verbose: true,
+  strict: true,
 } satisfies Config;

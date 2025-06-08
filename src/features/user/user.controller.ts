@@ -6,11 +6,9 @@ import {
   deleteUser,
   getUser,
   getUsers,
-  hashPassword,
   updateUser,
 } from './user.service';
 import { ListQuery } from '../../types/types';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function getAllUsers(
   req: Request,
@@ -19,7 +17,6 @@ export async function getAllUsers(
 ) {
   try {
     const result = await getUsers(req.query as unknown as ListQuery);
-
     responseData({
       res,
       status: 200,
@@ -38,7 +35,6 @@ export async function getOneUser(
 ) {
   try {
     const user = await getUser(req.params.id);
-
     responseData({
       res,
       status: 200,
@@ -56,27 +52,27 @@ export async function createOneUser(
   next: NextFunction
 ) {
   try {
-    if (!req.file) {
-      throw new AppError(`File is required!`, 400);
+    // Accepts: firstName, lastName, emails (array of { email, type })
+    const { firstName, lastName, emails } = req.body;
+    if (
+      !firstName ||
+      !lastName ||
+      !emails ||
+      !Array.isArray(emails) ||
+      emails.length === 0
+    ) {
+      throw new AppError('firstName, lastName, and at least one email are required', 400);
     }
-
-    const password = await hashPassword(req.body.password);
     const payload = {
-      username: req.body.username,
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      email: req.body.email,
-      phone1: req.body.phone1,
-      phone2: req.body.phone2,
-      phone3: req.body.phone3,
-      password: password,
-      address1: req.body.address1,
-      address2: req.body.address2,
-      img: req.file.path,
-      created_by: req.body.user.id,
+      firstName,
+      lastName,
+      emails,
+      isActive: true,
+      isDeleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     const createdUser = await createUser(payload);
-
     responseData({
       res,
       status: 200,
@@ -94,16 +90,17 @@ export async function updateOneUser(
   next: NextFunction
 ) {
   try {
-    const payload = {
-      name: req.body.name,
-      price: req.body.price,
-      updated_by: req.body.user.id,
-    };
+    // Accepts: firstName, lastName, emails (array of { email, type })
+    const { firstName, lastName, emails } = req.body;
+    const payload: any = {};
+    if (firstName) payload.firstName = firstName;
+    if (lastName) payload.lastName = lastName;
+    if (emails && Array.isArray(emails)) payload.emails = emails;
+    payload.updatedAt = new Date();
     const updatedUser = await updateUser({
       id: req.params.id,
       data: payload,
     });
-
     responseData({
       res,
       status: 200,
@@ -122,7 +119,6 @@ export async function deleteOneUser(
 ) {
   try {
     const deletedUser = await deleteUser(req.params.id);
-
     responseData({
       res,
       status: 200,

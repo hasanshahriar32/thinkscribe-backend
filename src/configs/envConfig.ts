@@ -6,10 +6,9 @@ dotenv.config();
 const REQUIRED_ENV_VARS = [
   'PORT',
   'DATABASE_URL',
-  'DB_USER',
-  'DB_PASSWORD',
-  'DB_NAME',
-  'DB_HOST',
+  'DATABASE_DIALECT',
+  'JWT_SECRET',
+  'JWT_EXPIRES_IN',
   'JWT_SECRET',
   'JWT_EXPIRES_IN',
   'REFRESH_JWT_SECRET',
@@ -45,10 +44,14 @@ export function checkMissingEnvVars() {
 // Export all env vars as consts (with fallback defaults if needed)
 export const PORT = process.env.PORT || 2000;
 export const DATABASE_URL = process.env.DATABASE_URL || '';
-export const DB_USER = process.env.DB_USER || '';
-export const DB_PASSWORD = process.env.DB_PASSWORD || '';
-export const DB_NAME = process.env.DB_NAME || '';
-export const DB_HOST = process.env.DB_HOST || '';
+export const DATABASE_DIALECT =
+  (process.env.DATABASE_DIALECT as
+    | 'postgresql'
+    | 'mysql'
+    | 'sqlite'
+    | 'turso'
+    | 'singlestore'
+    | 'gel') || 'postgresql';
 export const JWT_SECRET = process.env.JWT_SECRET || 'smsk-jwt-secret';
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 export const REFRESH_JWT_SECRET =

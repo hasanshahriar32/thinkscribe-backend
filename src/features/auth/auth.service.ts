@@ -21,18 +21,23 @@ import {
 } from '../../configs/envConfig';
 
 export async function getUser(conds: Record<string, unknown>) {
-  // Only support username or id lookup for login
+  // Support lookup by id or by email (in emails JSONB array)
   let userRows: any[] = [];
-  if (conds.username) {
-    userRows = await db
-      .select()
-      .from(users)
-      .where(eq(users.username, conds.username as string));
-  } else if (conds.id) {
+  if (conds.id) {
     userRows = await db
       .select()
       .from(users)
       .where(eq(users.id, Number(conds.id)));
+  } else if (conds.email) {
+    // emails is a JSONB array of objects, e.g. [{ email: 'foo@bar.com', ... }]
+    // Use Postgres JSONB containment operator via Drizzle ORM
+    userRows = await db
+      .select()
+      .from(users)
+      .where(
+        // @ts-expect-error: Drizzle ORM may not have perfect types for JSONB ops
+        users.emails.contains([{ email: conds.email }])
+      );
   }
   const user = userRows[0];
   if (!user) return null;

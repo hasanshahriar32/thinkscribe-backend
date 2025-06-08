@@ -4,14 +4,17 @@ import {
   varchar,
   boolean,
   timestamp,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  username: varchar('username', { length: 64 }).notNull().unique(),
-  name: varchar('name', { length: 128 }),
-  email: varchar('email', { length: 128 }).unique(),
-  password: varchar('password', { length: 255 }).notNull(),
+  firstName: varchar('first_name', { length: 64 }).notNull(),
+  lastName: varchar('last_name', { length: 64 }).notNull(),
+  emails: jsonb('emails').notNull(), // [{ email: string, type: 'primary' | 'additional' }]
+  isActive: boolean('is_active').default(true),
   isDeleted: boolean('is_deleted').default(false),
+  lastLogin: timestamp('last_login'),
   createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });

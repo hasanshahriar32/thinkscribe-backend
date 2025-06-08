@@ -9,6 +9,7 @@ import {
   unique,
   timestamp,
 } from 'drizzle-orm/pg-core';
+import { users } from './users.js';
 
 export const roles = pgTable('roles', {
   id: serial('id').primaryKey(),
@@ -79,7 +80,7 @@ export const userRoles = pgTable(
   'user_roles',
   {
     id: serial('id').primaryKey(),
-    userId: integer('user_id').notNull(), // You may want to add a foreign key to your users table
+    userId: integer('user_id').references(() => users.id).notNull(),
     roleId: integer('role_id').references(() => roles.id),
     createdAt: timestamp('created_at').defaultNow(),
   },

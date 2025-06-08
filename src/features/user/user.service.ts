@@ -1,27 +1,31 @@
-import { eq, ilike, and } from 'drizzle-orm';
-// You need to create this schema file for users if not present
+import { eq, and, or, sql } from 'drizzle-orm';
 import db from '../../db/db';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
-import bcrypt from 'bcrypt';
 import { users } from '../../db/schema/users';
+
+// Helper: filter users by keyword (firstName, lastName, or primary email)
+function buildUserKeywordFilter(keyword: string) {
+  if (!keyword) return undefined;
+  return or(
+    sql`LOWER(${users.firstName}) LIKE LOWER('%' || ${keyword} || '%')`,
+    sql`LOWER(${users.lastName}) LIKE LOWER('%' || ${keyword} || '%')`,
+    sql`EXISTS (SELECT 1 FROM jsonb_array_elements(${users.emails}) elem WHERE LOWER(elem->>'email') LIKE LOWER('%' || ${keyword} || '%') AND elem->>'type' = 'primary')`
+  );
+}
 
 export async function getUsers(filters: ListQuery) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
   });
-  let whereClause = undefined;
-  if (filters.keyword) {
-    whereClause = ilike(users.name, `%${filters.keyword}%`);
-  }
+  const whereClause = buildUserKeywordFilter(filters.keyword || '');
   const data = await db
     .select()
     .from(users)
     .where(whereClause)
     .limit(pagination.limit)
     .offset(pagination.offset);
-  // You may want to implement total count with a separate query if needed
   return data;
 }
 
@@ -61,24 +65,11 @@ export async function deleteUser(id: string | number) {
   return deleted;
 }
 
-export async function getExistingUser(
-  data: Partial<typeof users.$inferInsert>
-) {
-  // Example: find by email or username
+// Find user by primary email in emails JSONB
+export async function getUserByPrimaryEmail(email: string) {
   const user = await db
     .select()
     .from(users)
-    .where(
-      and(
-        data.email ? eq(users.email, data.email) : undefined,
-        data.username ? eq(users.username, data.username) : undefined
-      )
-    );
+    .where(sql`${users.emails} @> '[{"email": "${email}", "type": "primary"}]'`);
   return user[0] || null;
 }
-
-export const hashPassword = async (password: string) => {
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  return hashedPassword;
-};
