@@ -53,7 +53,7 @@ export async function createOneUser(
 ) {
   try {
     // Accepts: firstName, lastName, emails (array of { email, type })
-    const { firstName, lastName, emails } = req.body;
+    const { firstName, lastName, emails, clerkUID } = req.body;
     if (
       !firstName ||
       !lastName ||
@@ -67,6 +67,7 @@ export async function createOneUser(
       firstName,
       lastName,
       emails,
+      clerkUID,
       isActive: true,
       isDeleted: false,
       createdAt: new Date(),

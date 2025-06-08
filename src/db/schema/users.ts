@@ -6,6 +6,7 @@ import {
   timestamp,
   jsonb,
 } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -17,4 +18,8 @@ export const users = pgTable('users', {
   lastLogin: timestamp('last_login'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  clerkUID: varchar('clerk_uid', { length: 128 }).notNull().unique(),
 });
+
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createSelectSchema(users);
