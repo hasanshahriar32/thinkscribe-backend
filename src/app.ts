@@ -41,7 +41,7 @@ morgan.token('body', (req) => JSON.stringify((req as express.Request).body));
 app.use(morgan(auditLogFormat, { stream: auditLogStream }));
 
 // Register all application routes
-app.use('/api/v1',routes);
+app.use('/',routes);
 
 // Register Swagger/OpenAPI documentation route
 app.use('/docs', swaggerDocsRoute);
