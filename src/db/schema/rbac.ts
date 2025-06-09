@@ -9,7 +9,7 @@ import {
   unique,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { users } from './users.js';
+import { users } from './users';
 
 export const roles = pgTable('roles', {
   id: serial('id').primaryKey(),
