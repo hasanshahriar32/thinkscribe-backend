@@ -1,5 +1,5 @@
 paths:
-  /api/v1/roles:
+  /roles:
     get:
       summary: Get all roles
       tags: [Roles]
@@ -32,7 +32,7 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Role'
-  /api/v1/roles/{id}:
+  /roles/{id}:
     get:
       summary: Get a role by ID
       tags: [Roles]
@@ -97,7 +97,7 @@ paths:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Role'
 
-  /api/v1/modules:
+  /modules:
     get:
       summary: Get all modules
       tags: [Modules]
@@ -130,7 +130,7 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Module'
-  /api/v1/modules/{id}:
+  /modules/{id}:
     get:
       summary: Get a module by ID
       tags: [Modules]
@@ -195,7 +195,7 @@ paths:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Module' # Or a success message schema
 
-  /api/v1/sub-modules:
+  /sub-modules:
     get:
       summary: Get all sub-modules
       tags: [SubModules]
@@ -228,7 +228,7 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/SubModule'
-  /api/v1/sub-modules/{id}:
+  /sub-modules/{id}:
     get:
       summary: Get a sub-module by ID
       tags: [SubModules]
@@ -293,7 +293,7 @@ paths:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/SubModule' # Or a success message
 
-  /api/v1/permissions:
+  /permissions:
     get:
       summary: Get all permissions
       tags: [Permissions]
@@ -326,7 +326,7 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Permission'
-  /api/v1/permissions/{id}:
+  /permissions/{id}:
     get:
       summary: Get a permission by ID
       tags: [Permissions]
@@ -391,7 +391,7 @@ paths:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Permission' # Or a success message
 
-  /api/v1/actions:
+  /actions:
     get:
       summary: Get all actions
       tags: [Actions]
@@ -424,7 +424,7 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Action'
-  /api/v1/actions/{id}:
+  /actions/{id}:
     get:
       summary: Get an action by ID
       tags: [Actions]
@@ -489,7 +489,7 @@ paths:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Action' # Or a success message
 
-  /api/v1/channels:
+  /channels:
     get:
       summary: Get all channels
       tags: [Channels]
@@ -522,7 +522,7 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Channel'
-  /api/v1/channels/{id}:
+  /channels/{id}:
     get:
       summary: Get a channel by ID
       tags: [Channels]

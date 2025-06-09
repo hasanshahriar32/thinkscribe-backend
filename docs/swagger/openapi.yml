@@ -191,7 +191,7 @@ security:
   - bearerAuth: []
 
 paths:
-  /api/v1/users:
+  /users:
     get:
       summary: Get all users
       tags: [Users]
@@ -224,7 +224,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /api/v1/users/{id}:
+  /users/{id}:
     get:
       summary: Get a user by ID
       tags: [Users]
@@ -288,7 +288,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /api/v1/roles:
+  /roles:
     get:
       summary: Get all roles
       tags: [Roles]
@@ -321,7 +321,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
-  /api/v1/roles/{id}:
+  /roles/{id}:
     get:
       summary: Get a role by ID
       tags: [Roles]
@@ -382,7 +382,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
-  /api/v1/modules:
+  /modules:
     get:
       summary: Get all modules
       tags: [Modules]
@@ -415,7 +415,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Module'
-  /api/v1/modules/{id}:
+  /modules/{id}:
     get:
       summary: Get a module by ID
       tags: [Modules]
@@ -476,7 +476,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Module'
-  /api/v1/sub-modules:
+  /sub-modules:
     get:
       summary: Get all sub-modules
       tags: [SubModules]
@@ -509,7 +509,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubModule'
-  /api/v1/sub-modules/{id}:
+  /sub-modules/{id}:
     get:
       summary: Get a sub-module by ID
       tags: [SubModules]
@@ -570,7 +570,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubModule'
-  /api/v1/permissions:
+  /permissions:
     get:
       summary: Get all permissions
       tags: [Permissions]
@@ -603,7 +603,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
-  /api/v1/permissions/{id}:
+  /permissions/{id}:
     get:
       summary: Get a permission by ID
       tags: [Permissions]
@@ -664,7 +664,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
-  /api/v1/actions:
+  /actions:
     get:
       summary: Get all actions
       tags: [Actions]
@@ -697,7 +697,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Action'
-  /api/v1/actions/{id}:
+  /actions/{id}:
     get:
       summary: Get an action by ID
       tags: [Actions]
@@ -758,7 +758,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Action'
-  /api/v1/channels:
+  /channels:
     get:
       summary: Get all channels
       tags: [Channels]
@@ -791,7 +791,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Channel'
-  /api/v1/channels/{id}:
+  /channels/{id}:
     get:
       summary: Get a channel by ID
       tags: [Channels]
@@ -852,7 +852,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Channel'
-  /api/v1/products:
+  /products:
     get:
       summary: Get all products
       tags: [Products]
@@ -885,7 +885,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-  /api/v1/products/{id}:
+  /products/{id}:
     get:
       summary: Get a product by ID
       tags: [Products]
@@ -946,7 +946,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-  /api/v1/product-categories:
+  /product-categories:
     get:
       summary: Get all product categories
       tags: [ProductCategories]
@@ -979,7 +979,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductCategory'
-  /api/v1/product-categories/{id}:
+  /product-categories/{id}:
     get:
       summary: Get a product category by ID
       tags: [ProductCategories]
