@@ -19,6 +19,7 @@ import {
   REFRESH_JWT_SECRET,
   REFRESH_JWT_EXPIRES_IN,
 } from '../../configs/envConfig';
+import clerkClient from '@clerk/backend';
 
 export async function getUser(conds: Record<string, unknown>) {
   // Support lookup by id or by email (in emails JSONB array)
@@ -92,4 +93,49 @@ export async function getRefreshToken(payload: Record<string, unknown>) {
 
 export async function verifyPassword(hashedPassword: string, password: string) {
   return bcrypt.compare(password, hashedPassword);
+}
+
+/**
+ * Generate a new access token using a verified Clerk refresh token payload.
+ * Calls Clerk's session API to issue a new JWT for the user.
+ */
+
+export async function generateAccessTokenFromRefresh(userPayload: any): Promise<string> {
+  // Clerk's user ID is typically in sub or userId
+  const clerkUserId = userPayload.sub || userPayload.userId;
+  if (!clerkUserId) throw new Error('Invalid Clerk user payload');
+
+  // Use Clerk's backend SDK to create a new session token
+  // (You must have CLERK_SECRET_KEY set in your env)
+  const sessionId = userPayload.sid;
+  if (!sessionId) {
+    // clerkUserId is available from the outer scope and can be used for context in the error message.
+    throw new Error(`Invalid Clerk user payload for user ${clerkUserId}: Missing session ID (sid).`);
+  }
+
+  try {
+    // This assumes 'clerkClient.default' holds the actual SDK instance,
+    // maintaining consistency with the access pattern observed in the original selection 
+    // (e.g., (clerkClient as any).default.users.getUser(...)).
+    // If 'clerkClient' is directly the SDK instance, this would be 'clerkClient.sessions.getToken(...)'.
+    const newSessionToken = await (clerkClient as any).default.sessions.getToken(sessionId);
+    return newSessionToken;
+  } catch (error: any) {
+    // Log the detailed error for server-side debugging.
+    console.error(`Clerk SDK error while attempting to get a new session token for session ${sessionId} (user ${clerkUserId}):`, error);
+    
+    // Provide a more user-friendly error message or handle specific Clerk errors.
+    // Example: Check for common HTTP status codes that might indicate an invalid/expired session.
+    if (error.status === 401 || error.status === 404) { 
+        throw new Error(`Failed to generate new session token: The session (SID: ${sessionId}) may be invalid or expired.`);
+    }
+    // You might want to check for Clerk's specific error structures if available, e.g., error.errors array.
+    // if (Array.isArray(error.errors) && error.errors.length > 0) {
+    //   const clerkErr = error.errors[0];
+    //   throw new Error(`Clerk API Error (${clerkErr.code || 'unknown_code'}): ${clerkErr.message || 'Failed to refresh token.'}`);
+    // }
+
+    // Fallback generic error message.
+    throw new Error(`An unexpected error occurred while communicating with Clerk to generate a new session token for user ${clerkUserId}.`);
+  }
 }

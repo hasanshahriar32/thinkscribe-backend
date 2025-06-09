@@ -17,39 +17,55 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: |
+        This JWT is issued and validated by Clerk. To authenticate, use the access token provided by Clerk in the Authorization header:
+        
+        Authorization: Bearer <clerk_jwt_token>
+        
+        The token must be a valid Clerk session or access token. See https://clerk.com/docs/authentication/tokens for details.
   schemas:
     User:
       type: object
       properties:
         id:
-          type: integer
-        username:
           type: string
-        first_name:
+          format: uuid
+        firstName:
           type: string
-        last_name:
+        lastName:
           type: string
-        email:
-          type: string
-        phone1:
-          type: string
-        phone2:
-          type: string
-        phone3:
-          type: string
-        address1:
-          type: string
-        address2:
-          type: string
-        img:
-          type: string
-        created_by:
-          type: integer
+        emails:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              type:
+                type: string
+                enum: [primary, additional]
         isActive:
           type: boolean
+        isDeleted:
+          type: boolean
+        lastLogin:
+          type: string
+          format: date-time
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        clerkUID:
+          type: string
+      required:
+        - id
+        - firstName
+        - lastName
+        - emails
+        - clerkUID
     Role:
       type: object
       properties:
@@ -175,7 +191,7 @@ security:
   - bearerAuth: []
 
 paths:
-  /api/users:
+  /api/v1/users:
     get:
       summary: Get all users
       tags: [Users]
@@ -208,7 +224,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /api/users/{id}:
+  /api/v1/users/{id}:
     get:
       summary: Get a user by ID
       tags: [Users]
@@ -218,7 +234,8 @@ paths:
         - in: path
           name: id
           schema:
-            type: integer
+            type: string
+            format: uuid
           required: true
       responses:
         '200':
@@ -236,7 +253,8 @@ paths:
         - in: path
           name: id
           schema:
-            type: integer
+            type: string
+            format: uuid
           required: true
       requestBody:
         required: true
@@ -260,7 +278,8 @@ paths:
         - in: path
           name: id
           schema:
-            type: integer
+            type: string
+            format: uuid
           required: true
       responses:
         '200':
@@ -269,7 +288,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-  /api/roles:
+  /api/v1/roles:
     get:
       summary: Get all roles
       tags: [Roles]
@@ -302,7 +321,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
-  /api/roles/{id}:
+  /api/v1/roles/{id}:
     get:
       summary: Get a role by ID
       tags: [Roles]
@@ -363,7 +382,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Role'
-  /api/modules:
+  /api/v1/modules:
     get:
       summary: Get all modules
       tags: [Modules]
@@ -396,7 +415,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Module'
-  /api/modules/{id}:
+  /api/v1/modules/{id}:
     get:
       summary: Get a module by ID
       tags: [Modules]
@@ -457,7 +476,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Module'
-  /api/sub-modules:
+  /api/v1/sub-modules:
     get:
       summary: Get all sub-modules
       tags: [SubModules]
@@ -490,7 +509,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubModule'
-  /api/sub-modules/{id}:
+  /api/v1/sub-modules/{id}:
     get:
       summary: Get a sub-module by ID
       tags: [SubModules]
@@ -551,7 +570,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubModule'
-  /api/permissions:
+  /api/v1/permissions:
     get:
       summary: Get all permissions
       tags: [Permissions]
@@ -584,7 +603,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
-  /api/permissions/{id}:
+  /api/v1/permissions/{id}:
     get:
       summary: Get a permission by ID
       tags: [Permissions]
@@ -645,7 +664,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Permission'
-  /api/actions:
+  /api/v1/actions:
     get:
       summary: Get all actions
       tags: [Actions]
@@ -678,7 +697,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Action'
-  /api/actions/{id}:
+  /api/v1/actions/{id}:
     get:
       summary: Get an action by ID
       tags: [Actions]
@@ -739,7 +758,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Action'
-  /api/channels:
+  /api/v1/channels:
     get:
       summary: Get all channels
       tags: [Channels]
@@ -772,7 +791,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Channel'
-  /api/channels/{id}:
+  /api/v1/channels/{id}:
     get:
       summary: Get a channel by ID
       tags: [Channels]
@@ -833,7 +852,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Channel'
-  /api/products:
+  /api/v1/products:
     get:
       summary: Get all products
       tags: [Products]
@@ -866,7 +885,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-  /api/products/{id}:
+  /api/v1/products/{id}:
     get:
       summary: Get a product by ID
       tags: [Products]
@@ -927,7 +946,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-  /api/product-categories:
+  /api/v1/product-categories:
     get:
       summary: Get all product categories
       tags: [ProductCategories]
@@ -960,7 +979,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductCategory'
-  /api/product-categories/{id}:
+  /api/v1/product-categories/{id}:
     get:
       summary: Get a product category by ID
       tags: [ProductCategories]

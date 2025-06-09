@@ -1,19 +1,19 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { MESSAGES } from '../configs/messages';
 import { AppError } from '../utils/http';
-import { JWT_SECRET, REFRESH_JWT_SECRET } from '../configs/envConfig';
+import { verifyToken as verifyClerkToken } from '@clerk/backend';
+import { CLERK_SECRET_KEY } from '../configs/envConfig';
 
 // Load environment variables from a .env file
 dotenv.config();
 
 /**
- * Middleware to verify access token
+ * Middleware to verify access token using Clerk's official JWT validator
  * This function checks for the presence of a Bearer token in the Authorization header.
  * If valid, it decodes the token and attaches the payload to the request body.
  */
-export function verifyToken(req: Request, res: Response, next: NextFunction) {
+export async function verifyToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   // Check if the Authorization header is present and correctly formatted
@@ -24,57 +24,35 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
   // Extract the token from the Authorization header
   const token = authHeader.split(' ')[1];
 
-  // Verify the token using the secret key
-  jwt.verify(
-    token,
-    JWT_SECRET,
-    (
-      err: jwt.VerifyErrors | null,
-      decoded: jwt.JwtPayload | string | undefined
-    ) => {
-      if (err) {
-        throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
-      }
-
-      // Attach decoded token payload to request body
-      req.body.user = decoded;
-      next();
-    }
-  );
+  try {
+    // Use Clerk's official JWT validator
+    const payload = await verifyClerkToken(
+      token,
+      { secretKey: CLERK_SECRET_KEY }
+    );
+    req.body.user = payload;
+    next();
+  } catch (err) {
+    throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
+  }
 }
 
 /**
- * Middleware to verify refresh token
- * This function checks for the presence of a refresh token in the 'x-refresh-token' header.
- * If valid, it decodes the token and attaches the payload to the request body.
+ * Middleware to verify Clerk refresh token (just verifies, does not generate new token)
+ * Checks for the presence of a refresh token in the 'x-refresh-token' header.
+ * If valid, attaches the payload to req.body.user and calls next().
  */
-export function verifyRefreshToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function verifyRefreshToken(req: Request, res: Response, next: NextFunction) {
   const refreshToken = req.headers['x-refresh-token'] as string | undefined;
-
-  // Check if the refresh token is present
   if (!refreshToken) {
-    throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
+    return next(new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401));
   }
-
-  // Verify the refresh token using the secret key
-  jwt.verify(
-    refreshToken,
-    REFRESH_JWT_SECRET,
-    (
-      err: jwt.VerifyErrors | null,
-      decoded: jwt.JwtPayload | string | undefined
-    ) => {
-      if (err) {
-        throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
-      }
-
-      // Attach decoded token payload to request body
-      req.body.user = decoded;
-      next();
-    }
-  );
+  try {
+    const payload = await verifyClerkToken(refreshToken, { secretKey: CLERK_SECRET_KEY });
+    req.body.user = payload;
+    next();
+  } catch (err) {
+    next(new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401));
+  }
 }
+

@@ -24,6 +24,7 @@ const REQUIRED_ENV_VARS = [
   'DOC_USER',
   'DOC_PASS',
   'BASE_URL',
+  'CLERK_SECRET_KEY', 
 ];
 
 // Helper to check for missing env vars (checks .env and .env.example)
@@ -69,6 +70,7 @@ export const SMS_API_SECRET = process.env.SMS_API_SECRET || '';
 export const DOC_USER = process.env.DOC_USER || 'password';
 export const DOC_PASS = process.env.DOC_PASS || 'admin';
 export const BASE_URL = process.env.BASE_URL || 'http://localhost:2000';
+export const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 
 // Run check on import (can be disabled in prod if needed)
 checkMissingEnvVars();

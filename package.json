@@ -25,6 +25,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@clerk/backend": "^2.0.0",
     "@scalar/express-api-reference": "^0.8.3",
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
