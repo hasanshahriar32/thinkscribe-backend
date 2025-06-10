@@ -66,7 +66,7 @@ export async function createOneProductCategory(
       name: req.body.name,
     });
     if (existingProductCategory)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
 
     const payload = {
       name: req.body.name,
@@ -189,8 +189,7 @@ export async function softDeleteOneProductCategory(
       name: req.body.name,
     });
 
-    if (!isExistedProductCategory)
-      throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedProductCategory) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedProductCategory = await softDeleteProductCategory(
       Number(req.params.id)

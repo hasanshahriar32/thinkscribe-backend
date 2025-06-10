@@ -63,7 +63,7 @@ export async function createOneProduct(
   try {
     const existingProduct = await getExistingProduct({ name: req.body.name });
     if (existingProduct)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
 
     const payload = {
       name: req.body.name,
@@ -185,7 +185,7 @@ export async function softDeleteOneProduct(
       id: Number(req.params.id),
     });
 
-    if (!isExistedProduct) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedProduct) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedProduct = await softDeleteProduct(req.params.id);
 

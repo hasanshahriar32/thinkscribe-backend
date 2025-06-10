@@ -63,7 +63,7 @@ export async function createOneAction(
   try {
     const existingAction = await getExistingAction({ name: req.body.name });
     if (existingAction)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
 
     const payload = {
       name: req.body.name,
@@ -139,7 +139,7 @@ export async function deleteOneAction(
   try {
     const isExistedAction = await getAction(Number(req.params.id));
 
-    if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedAction) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedAction = await deleteAction(Number(req.params.id));
 
@@ -181,7 +181,7 @@ export async function softDeleteOneAction(
   try {
     const isExistedAction = await getAction(Number(req.params.id));
 
-    if (!isExistedAction) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedAction) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedAction = await softDeleteAction(Number(req.params.id));
 
