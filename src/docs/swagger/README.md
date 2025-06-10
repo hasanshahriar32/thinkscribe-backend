@@ -1,23 +1,47 @@
-# Scalar API Documentation
+# Thinkscribe Backend Swagger API Documentation
 
-This project serves OpenAPI documentation using Scalar UI, powered by the OpenAPI YAML files in this folder.
+This folder contains the OpenAPI 3.0 (Swagger) documentation for the Thinkscribe backend, fully migrated to Postgres/Drizzle ORM with robust, normalized RBAC. All endpoints enforce RBAC and use the new Postgres schema. Legacy MySQL/Knex code has been removed.
 
-- **Docs route:** `/docs/scalar` (protected by basic auth, see `envConfig.ts` for credentials)
-- **OpenAPI spec:** `openapi.yml`, `tags.yml`, `rbac_endpoints.yml`
-- **How it works:**
-  - The route is implemented in `src/docs/swagger.route.ts` using Scalar's ESM API Reference component.
-  - All documentation is generated from YAML and served as a modern, interactive browser UI.
+## Structure
 
-## How to Update
+- `openapi.yml`: Main OpenAPI 3.0 spec, including global components, security, and core endpoints (users, etc.)
+- `tags.yml`: Tag definitions for grouping endpoints in Swagger UI
+- `rbac_endpoints.yml`: Detailed RBAC endpoints (roles, modules, sub-modules, permissions, actions, channels, etc.)
 
-- Edit the YAML files in this folder to update the API docs.
-- The docs are automatically copied to the production build output.
+## Usage
 
-## Legacy Note
+- Import `openapi.yml` into Swagger UI, Redoc, or any OpenAPI-compatible tool.
+- You can reference or merge `rbac_endpoints.yml` and `tags.yml` for a complete API explorer experience.
 
-- Swagger UI and swagger-jsdoc are no longer used. All documentation is now served via Scalar.
-- The API docs are fully in sync with the Drizzle ORM/Postgres backend and RBAC structure.
+## RBAC & Security
 
----
+- All endpoints are protected by JWT bearer authentication.
+- RBAC is enforced at all layers, using the new normalized Postgres schema and Drizzle ORM.
 
-For more details, see the main technical documentation in `src/docs/tech_docs.md`.
+## Error Response Format
+
+All error responses use the following format (via the sendResponse utility):
+
+```json
+{
+  "success": false,
+  "statusCode": 401,
+  "message": "Unauthorized Access!",
+  "data": [
+    {
+      "path": "/api/v1/users",
+      "message": "Unauthorized Access!"
+    }
+  ],
+  "meta": null
+}
+```
+
+- `statusCode`: HTTP status code (e.g., 401, 404, 500)
+- `message`: Human-readable error message
+- `data`: Array of error details (each with `path` and `message`)
+- `meta`: Optional metadata (usually null for errors)
+
+## Maintainers
+
+- Thinkscribe Dev Team

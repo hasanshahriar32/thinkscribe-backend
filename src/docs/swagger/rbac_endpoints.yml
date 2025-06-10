@@ -52,6 +52,24 @@ paths:
             application/json:
               schema:
                 $ref: '../swagger/openapi.yml#/components/schemas/Role'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/responses/4XX'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/responses/4XX'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '../swagger/openapi.yml#/components/responses/4XX'
     put:
       summary: Update a role
       tags: [Roles]

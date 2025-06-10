@@ -31,7 +31,7 @@ const options = {
       },
     ],
   },
-  apis: [path.join(__dirname, '../../docs/swagger/*.yml')],
+  apis: [path.join(__dirname, './swagger/*.yml')],
 };
 const swaggerSpec = swaggerJsdoc(options);
 
@@ -52,7 +52,48 @@ const docAuth = (req: Request, res: Response, next: NextFunction) => {
   res.status(401).send('Authentication required.');
 };
 
-// Serve Swagger UI at /docs
-router.use('/', docAuth, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// --- Swagger Domain Spec Helper ---
+function createDomainSpec(yamlFile: string) {
+  return {
+    ...options,
+    apis: [path.join(__dirname, './swagger', yamlFile)],
+  };
+}
+
+const domainSpecs = {
+  auth: createDomainSpec('auth.yml'),
+  products: createDomainSpec('products.yml'),
+  rbac: createDomainSpec('rbac_endpoints.yml'),
+  users: createDomainSpec('users.yml'),
+};
+
+const swaggerSpecs = {
+  auth: swaggerJsdoc(domainSpecs.auth),
+  products: swaggerJsdoc(domainSpecs.products),
+  rbac: swaggerJsdoc(domainSpecs.rbac),
+  users: swaggerJsdoc(domainSpecs.users),
+};
+
+// --- Swagger UI Routers ---
+function mountSwaggerDocs(route: string, spec: object) {
+  router.use(route, docAuth, swaggerUi.serveFiles(spec), swaggerUi.setup(spec));
+}
+
+// Dynamically mount all domain docs and collect for navigation
+const docNavLinks: { label: string; href: string }[] = [];
+Object.entries(swaggerSpecs).forEach(([key, spec]) => {
+  const route = `/${key}`; // Fix: mount at /products, /auth, etc. (relative to /docs)
+  mountSwaggerDocs(route, spec);
+  docNavLinks.push({
+    label: `${key.charAt(0).toUpperCase() + key.slice(1)} API Docs`,
+    href: `/docs${route}`,
+  });
+});
+
+
+// Navigation page for docs
+router.get('/', docAuth, (req, res) => {
+  res.render('docs-nav', { docNavLinks });
+});
 
 export default router;

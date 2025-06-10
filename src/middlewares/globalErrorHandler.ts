@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import ApiErrors from '../errorsHandler/ApiErrors';
 import { AppError } from '../utils/http';
+import sendResponse from '../utils/sendResponse';
 
 const globalErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   let status = 500;
@@ -30,11 +31,13 @@ const globalErrorHandler = (error: any, req: Request, res: Response, next: NextF
       : [];
   }
 
-  res.status(status).json({
-    success: false,
+  sendResponse(res, {
     statusCode: status,
+    success: false,
     message,
-    errorMessages,
+    data: errorMessages,
+    meta: undefined,
+
   });
 };
 
