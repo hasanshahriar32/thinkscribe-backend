@@ -1,24 +1,5 @@
+import sendResponse from './sendResponse';
 import { Response } from 'express';
-
-interface ResponseData {
-  res: Response;
-  status: number;
-  message: string;
-  data: any;
-}
-
-export const responseData = ({
-  res,
-  status = 200,
-  message,
-  data,
-}: ResponseData) => {
-  res.status(status).json({
-    status,
-    message,
-    data,
-  });
-};
 
 export class AppError extends Error {
   status: string | number;
@@ -27,3 +8,26 @@ export class AppError extends Error {
     this.status = status;
   }
 }
+
+// Wrapper to keep old responseData signature but delegate to sendResponse
+export const responseData = <T>({
+  res,
+  status = 200,
+  message,
+  data,
+  meta,
+}: {
+  res: Response;
+  status?: number;
+  message: string;
+  data: T;
+  meta?: Record<string, any>;
+}) => {
+  sendResponse<T>(res, {
+    statusCode: status,
+    success: true,
+    message,
+    data,
+    meta,
+  });
+};
