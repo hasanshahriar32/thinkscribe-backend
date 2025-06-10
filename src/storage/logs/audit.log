@@ -21,3 +21,16 @@ GET /docs/swagger-ui-init.js 304 0.783 ms - - {}
 GET /docs/swagger-ui-bundle.js 304 8.800 ms - - {}
 GET /docs/swagger-ui-standalone-preset.js 304 10.508 ms - - {}
 GET /docs/favicon-32x32.png 200 6.347 ms - 628 {}
+GET / 500 27.005 ms - 1293 {}
+GET /favicon.ico 404 3.171 ms - 133 {}
+GET / 200 38.967 ms - 1249 {}
+GET /docs 401 8.762 ms - 24 {}
+GET /docs 301 4.366 ms - 154 {}
+GET /docs/ 200 6.308 ms - 3106 {}
+GET /docs/swagger-ui-init.js 200 12.984 ms - 50518 {}
+GET /docs/swagger-ui.css 200 94.806 ms - 154986 {}
+GET /docs/swagger-ui-standalone-preset.js 200 273.220 ms - 229223 {}
+GET /docs/swagger-ui-bundle.js 200 292.656 ms - 1485258 {}
+GET /docs/swagger-ui-init.js 200 9.920 ms - 50518 {}
+GET /docs/swagger-ui-standalone-preset.js 200 16.659 ms - 229223 {}
+GET /docs/swagger-ui-bundle.js 200 15.799 ms - 1485258 {}
