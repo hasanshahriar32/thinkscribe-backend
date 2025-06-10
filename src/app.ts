@@ -3,7 +3,6 @@ import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import routes from './routes';
-import { errorHandler } from './middlewares/error-handler';
 import helmet from 'helmet';
 import './cron-jobs/sample-cron';
 import { accessLogFormat, auditLogFormat } from './configs/log-formats';
@@ -62,7 +61,6 @@ app.get('/', (req, res) => {
   
 // Register custom error handling middleware at the end
 // This ensures it catches errors from previous middlewares or routes
-// app.use(errorHandler);
 app.use(express.static('public'));
 app.use(globalErrorHandler);
 app.use(noRouteFound);

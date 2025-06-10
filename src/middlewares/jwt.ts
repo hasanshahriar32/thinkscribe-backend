@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import dotenv from 'dotenv';
 import { MESSAGES } from '../configs/messages';
 import { AppError } from '../utils/http';
 import { verifyToken as verifyClerkToken } from '@clerk/backend';
 import { CLERK_SECRET_KEY } from '../configs/envConfig';
 
 // Load environment variables from a .env file
-dotenv.config();
 
 /**
  * Middleware to verify access token using Clerk's official JWT validator

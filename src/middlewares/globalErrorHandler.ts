@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import ApiErrors from '../errorsHandler/ApiErrors';
+import { AppError } from '../utils/http';
 
 const globalErrorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
   let status = 500;
   let message = 'something is not right';
   let errorMessages: { path: string; message: string }[] = [];
 
-  if (error instanceof ApiErrors) {
-    status = error.status;
+  if (error instanceof ApiErrors || error instanceof AppError) {
+    status = Number(error.status) || 500;
     message = error.message;
     errorMessages = error?.message
       ? [
