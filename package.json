@@ -12,7 +12,7 @@
     "prepare": "husky",
     "release": "standard-version",
     "docs": "echo Documentation available at: file://%cd%/docs/swagger/openapi.yml && echo Documentation available at: file://%cd%/docs/swagger/README.md",
-    "postbuild": "copyfiles -u 1 \"views/**/*\" dist/views",
+    "postbuild": "copyfiles -u 1 \"src/docs/**/*\" dist/src/docs && copyfiles -u 1 \"views/**/*\" dist/views",
     "db:generate": "npm run build && node ./scripts/generate-migration.mjs",
     "db:migrate": "npm run build && drizzle-kit migrate",
     "db:studio": "npm run build && drizzle-kit studio --port 4000",
