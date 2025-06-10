@@ -63,7 +63,7 @@ export async function createOneChannel(
   try {
     const existingChannel = await getExistingChannel({ name: req.body.name });
     if (existingChannel)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
 
     const payload = {
       name: req.body.name,
@@ -139,7 +139,7 @@ export async function deleteOneChannel(
   try {
     const isExistedChannel = await getChannel(Number(req.params.id));
 
-    if (!isExistedChannel) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedChannel) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedChannel = await deleteChannel(Number(req.params.id));
 
@@ -181,7 +181,7 @@ export async function softDeleteOneChannel(
   try {
     const isExistedChannel = await getChannel(Number(req.params.id));
 
-    if (!isExistedChannel) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedChannel) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedChannel = await softDeleteChannel(Number(req.params.id));
 

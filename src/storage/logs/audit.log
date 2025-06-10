@@ -34,3 +34,13 @@ GET /docs/swagger-ui-bundle.js 200 292.656 ms - 1485258 {}
 GET /docs/swagger-ui-init.js 200 9.920 ms - 50518 {}
 GET /docs/swagger-ui-standalone-preset.js 200 16.659 ms - 229223 {}
 GET /docs/swagger-ui-bundle.js 200 15.799 ms - 1485258 {}
+GET / 304 4.576 ms - - {}
+GET /docs/ 304 2.692 ms - - {}
+GET /docs/swagger-ui.css 304 3.266 ms - - {}
+GET /docs/swagger-ui-bundle.js 304 5.811 ms - - {}
+GET /docs/swagger-ui-init.js 304 12.136 ms - - {}
+GET /docs/swagger-ui-standalone-preset.js 304 20.556 ms - - {}
+GET /docs/swagger-ui-init.js 304 4.109 ms - - {}
+GET /docs/swagger-ui-bundle.js 304 16.166 ms - - {}
+GET /docs/swagger-ui-standalone-preset.js 304 4.298 ms - - {}
+GET /api/v1/users 500 28.923 ms - 143 {}

@@ -18,7 +18,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
 
   // Check if the Authorization header is present and correctly formatted
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
+    return next(new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401));
   }
 
   // Extract the token from the Authorization header
@@ -33,7 +33,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
     req.body.user = payload;
     next();
   } catch (err) {
-    throw new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401);
+    return next(new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401));
   }
 }
 

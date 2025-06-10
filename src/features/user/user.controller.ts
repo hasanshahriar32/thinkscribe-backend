@@ -61,7 +61,7 @@ export async function createOneUser(
       !Array.isArray(emails) ||
       emails.length === 0
     ) {
-      throw new AppError('firstName, lastName, and at least one email are required', 400);
+      return next(new AppError('firstName, lastName, and at least one email are required', 400));
     }
     const payload = {
       firstName,

@@ -60,7 +60,7 @@ export async function createOneModule(
   try {
     const existingModule = await getExistingModule({ name: req.body.name });
     if (existingModule)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
     const payload = {
       name: req.body.name,
       created_by: req.body.user.id,
@@ -131,7 +131,7 @@ export async function deleteOneModule(
 ) {
   try {
     const isExistedModule = await getModule(Number(req.params.id));
-    if (!isExistedModule) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedModule) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
     const deletedModule = await deleteModule(Number(req.params.id));
     responseData({
       res,
@@ -169,7 +169,7 @@ export async function softDeleteOneModule(
 ) {
   try {
     const isExistedModule = await getModule(Number(req.params.id));
-    if (!isExistedModule) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedModule) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
     const deletedModule = await softDeleteModule(Number(req.params.id));
     responseData({
       res,

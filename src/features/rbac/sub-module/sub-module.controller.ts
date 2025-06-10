@@ -68,7 +68,7 @@ export async function createOneSubModule(
       name: req.body.name,
     });
     if (existingSubModule)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
     const payload = {
       name: req.body.name,
       moduleId: Number(req.body.module_id),
@@ -156,7 +156,7 @@ export async function deleteOneSubModule(
     });
 
     if (!isExistedSubModule)
-      throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+      return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedSubModule = await deleteSubModule(Number(req.params.id));
 
@@ -202,7 +202,7 @@ export async function softDeleteOneSubModule(
     });
 
     if (!isExistedSubModule)
-      throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+      return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
 
     const deletedSubModule = await softDeleteSubModule(Number(req.params.id));
 

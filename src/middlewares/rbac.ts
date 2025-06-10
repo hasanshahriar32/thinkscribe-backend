@@ -34,7 +34,7 @@ const verifyRBAC = ({
     try {
       // Step 1: Get userId from request (adjust as per your auth logic)
       const userId = req.body.user?.id;
-      if (!userId) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+      if (!userId) return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
 
       // Step 2: Get all roles assigned to the user
       const userRoleRows = await db
@@ -45,7 +45,7 @@ const verifyRBAC = ({
         .map((ur) => ur.roleId)
         .filter((id): id is number => id !== null && id !== undefined);
       if (!userRoleIds.length)
-        throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+        return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
 
       // Step 3: Get role names and check if any are allowed
       const userRoleNameRows = await db
@@ -54,7 +54,7 @@ const verifyRBAC = ({
         .where(inArray(roles.id, userRoleIds));
       const userRoleNames = userRoleNameRows.map((r) => r.name);
       if (!userRoleNames.some((r) => allowedRoles.includes(r))) {
-        throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+        return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
       }
 
       // Step 4: Check permissions for the action/module/subModule
@@ -81,7 +81,7 @@ const verifyRBAC = ({
             eq(subModules.name, subModule ?? '')
           )
         );
-      if (!perms.length) throw new AppError(MESSAGES.ERROR.NO_PERMISSION, 403);
+      if (!perms.length) return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
       next();
     } catch (err) {
       next(err);

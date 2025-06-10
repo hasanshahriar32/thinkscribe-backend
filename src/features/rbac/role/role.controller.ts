@@ -59,7 +59,7 @@ export async function createOneRole(
   try {
     const existingRole = await getExistingRole({ name: req.body.name });
     if (existingRole)
-      throw new AppError(`${req.body.name} is already existed!`, 400);
+      return next(new AppError(`${req.body.name} is already existed!`, 400));
     const payload = {
       name: req.body.name,
       description: req.body.description,
@@ -135,7 +135,7 @@ export async function deleteOneRole(
 ) {
   try {
     const isExistedRole = await getExistingRole({ name: req.body.name });
-    if (!isExistedRole) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedRole) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
     const deletedRole = await deleteRole(Number(req.params.id));
     responseData({
       res,
@@ -174,7 +174,7 @@ export async function softDeleteOneRole(
 ) {
   try {
     const isExistedRole = await getExistingRole({ name: req.body.name });
-    if (!isExistedRole) throw new AppError(MESSAGES.ERROR.BAD_REQUEST, 400);
+    if (!isExistedRole) return next(new AppError(MESSAGES.ERROR.BAD_REQUEST, 400));
     const deletedRole = await softDeleteRole(Number(req.params.id));
     responseData({
       res,
