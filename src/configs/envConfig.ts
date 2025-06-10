@@ -25,6 +25,9 @@ const REQUIRED_ENV_VARS = [
   'DOC_PASS',
   'BASE_URL',
   'CLERK_SECRET_KEY', 
+  'RATE_LIMIT_WINDOW_MS',
+  'RATE_LIMIT_MAX',
+  'RATE_LIMIT_MESSAGE',
 ];
 
 // Helper to check for missing env vars (checks .env and .env.example)
@@ -71,6 +74,15 @@ export const DOC_USER = process.env.DOC_USER || 'password';
 export const DOC_PASS = process.env.DOC_PASS || 'admin';
 export const BASE_URL = process.env.BASE_URL || 'http://localhost:2000';
 export const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+export const RATE_LIMIT_WINDOW_MS = parseInt(
+  process.env.RATE_LIMIT_WINDOW_MS || '900000',
+  10
+);
+export const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '100', 10);
+export const RATE_LIMIT_MESSAGE =
+  process.env.RATE_LIMIT_MESSAGE ||
+  'Too many requests from this IP, please try again later.';
+
 
 // Run check on import (can be disabled in prod if needed)
 checkMissingEnvVars();

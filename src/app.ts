@@ -10,6 +10,10 @@ import { accessLogFormat, auditLogFormat } from './configs/log-formats';
 import auditLogStream from './middlewares/audit-log';
 import { upload } from './middlewares/multer-upload';
 import swaggerDocsRoute from './docs/swagger.route';
+import noRouteFound from './middlewares/noRouteFound';
+import globalErrorHandler from './middlewares/globalErrorHandler';
+import apiLimiter from './middlewares/rateLimitMiddleware';
+import path from 'path';
 
 // Initialize the Express application
 const app = express();
@@ -40,15 +44,27 @@ app.use(morgan(accessLogFormat));
 morgan.token('body', (req) => JSON.stringify((req as express.Request).body));
 app.use(morgan(auditLogFormat, { stream: auditLogStream }));
 
+app.use(apiLimiter);
 // Register all application routes
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
+
+// Serve static files from the 'views' directory (for images, etc.)
+app.use(express.static(path.join(__dirname, '../views')));
+
 app.use('/',routes);
 
 // Register Swagger/OpenAPI documentation route
 app.use('/docs', swaggerDocsRoute);
-
+app.get('/', (req, res) => {
+  res.render('index.ejs', { title: 'Welcome to the API' });
+});
+  
 // Register custom error handling middleware at the end
 // This ensures it catches errors from previous middlewares or routes
-app.use(errorHandler);
-
+// app.use(errorHandler);
+app.use(express.static('public'));
+app.use(globalErrorHandler);
+app.use(noRouteFound);
 // Export the configured Express app for use (e.g., in server.ts)
 export default app;
