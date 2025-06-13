@@ -114,3 +114,7 @@ GET / 200 6.593 ms - 5404 {}
 GET /favicon.ico 304 15.017 ms - - {}
 GET / 200 9.173 ms - 2813 {}
 GET /favicon.ico 304 3.053 ms - - {}
+GET /.well-known/appspecific/com.chrome.devtools.json 404 19.658 ms - 170 {}
+GET /docs/ 304 7113.665 ms - - {}
+GET / 304 84.229 ms - - {}
+GET / 304 12.994 ms - - {}
