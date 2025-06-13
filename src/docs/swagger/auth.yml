@@ -1,8 +1,58 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
-  title: Auth API
+  title: Thinkscribe Auth API
   version: 1.0.0
-  description: Endpoints for authentication (login, register, refresh, etc.)
+  description: Endpoints for authentication (login, register, etc.)
+tags:
+  - name: Auth
+    description: Authentication related endpoints
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        This JWT is issued and validated by Clerk. To authenticate, use the access token provided by Clerk in the Authorization header:
+        Authorization: Bearer <clerk_jwt_token>
+        The token must be a valid Clerk session or access token. See https://clerk.com/docs/authentication/tokens for details.
+  responses:
+    '4XX':
+      description: Error response (client error)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              statusCode:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: Unauthorized Access!
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      example: /api/v1/users
+                    message:
+                      type: string
+                      example: Unauthorized Access!
+              meta:
+                type: object
+                nullable: true
+                example: null
+
+security:
+  - bearerAuth: []
+
 paths:
   /auth/login:
     post:

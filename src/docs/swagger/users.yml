@@ -1,13 +1,19 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
-  title: Users API
+  title: Thinkscribe Users API
   version: 1.0.0
-  description: Endpoints for user management
+  description: User management endpoints
+tags:
+  - name: Users
+    description: User management operations
+
 paths:
   /users:
     get:
       summary: Get all users
       tags: [Users]
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: List of users
@@ -16,27 +22,35 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: './openapi.yml#/components/schemas/User'
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/4XX'
     post:
       summary: Create a new user
       tags: [Users]
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: './openapi.yml#/components/schemas/User'
+              $ref: '#/components/schemas/User'
       responses:
-        '201':
+        '200':
           description: User created
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/User'
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/4XX'
   /users/{id}:
     get:
       summary: Get a user by ID
       tags: [Users]
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -50,10 +64,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/User'
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/4XX'
     put:
       summary: Update a user
       tags: [Users]
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -66,17 +84,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './openapi.yml#/components/schemas/User'
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: User updated
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/User'
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/4XX'
     delete:
       summary: Delete a user
       tags: [Users]
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -90,4 +112,95 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './openapi.yml#/components/schemas/User'
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/4XX'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emails:
+          type: array
+          items:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              type:
+                type: string
+                enum: [primary, additional]
+        isActive:
+          type: boolean
+        isDeleted:
+          type: boolean
+        lastLogin:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        clerkUID:
+          type: string
+      required:
+        - id
+        - firstName
+        - lastName
+        - emails
+        - clerkUID
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        This JWT is issued and validated by Clerk. To authenticate, use the access token provided by Clerk in the Authorization header:
+        Authorization: Bearer <clerk_jwt_token>
+        The token must be a valid Clerk session or access token. See https://clerk.com/docs/authentication/tokens for details.
+  responses:
+    '4XX':
+      description: Error response (client error)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              statusCode:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: Unauthorized Access!
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      example: /api/v1/users
+                    message:
+                      type: string
+                      example: Unauthorized Access!
+              meta:
+                type: object
+                nullable: true
+                example: null
+
+security:
+  - bearerAuth: []
