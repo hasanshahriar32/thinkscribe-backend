@@ -3,6 +3,7 @@ import { MESSAGES } from '../configs/messages';
 import { AppError } from '../utils/http';
 import { verifyToken as verifyClerkToken } from '@clerk/backend';
 import { CLERK_SECRET_KEY } from '../configs/envConfig';
+import axios from 'axios';
 
 // Load environment variables from a .env file
 
@@ -28,7 +29,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
       token,
       { secretKey: CLERK_SECRET_KEY }
     );
-    req.body.user = payload;
+    (req as any).user = payload; // Type-safe assertion to silence TS error
     next();
   } catch (err) {
     return next(new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401));
@@ -47,7 +48,6 @@ export async function verifyRefreshToken(req: Request, res: Response, next: Next
   }
   try {
     const payload = await verifyClerkToken(refreshToken, { secretKey: CLERK_SECRET_KEY });
-    req.body.user = payload;
     next();
   } catch (err) {
     next(new AppError(MESSAGES.ERROR.UNAUTHORIZED, 401));

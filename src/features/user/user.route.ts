@@ -56,19 +56,7 @@ userRoutes.get(
 // =========================
 userRoutes.post(
   '/users',
-  verifyRBAC({
-    action: ACTIONS.CREATE,
-    roles: [ROLES.ADMIN],
-    module: MODULES.USER_MANAGEMENT,
-    subModule: SUB_MODULES.USER,
-  }),
   validateRequest(validator.create),
-  (req, res, next) => {
-    console.log('req.body', req.body);
-    console.log('req.file', req.file);
-    next();
-  },
-  // upload.single('file'),
   createOneUser
 );
 

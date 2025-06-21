@@ -3,12 +3,17 @@ import { AppError, responseData } from '../../utils/http';
 import { MESSAGES } from '../../configs/messages';
 import {
   createUser,
+  createUserFromClerk,
   deleteUser,
   getUser,
   getUsers,
   updateUser,
 } from './user.service';
 import { ListQuery } from '../../types/types';
+import { Request as ExpressRequest } from 'express';
+import { JwtPayload } from '../../types/express';
+
+export type AuthedRequest = ExpressRequest & { user?: JwtPayload };
 
 export async function getAllUsers(
   req: Request,
@@ -52,33 +57,37 @@ export async function createOneUser(
   next: NextFunction
 ) {
   try {
-    // Accepts: firstName, lastName, emails (array of { email, type })
-    const { firstName, lastName, emails, clerkUID } = req.body;
-    if (
-      !firstName ||
-      !lastName ||
-      !emails ||
-      !Array.isArray(emails) ||
-      emails.length === 0
-    ) {
-      return next(new AppError('firstName, lastName, and at least one email are required', 400));
+    // Clerk user details should be attached by JWT middleware
+    let clerkUID = undefined;
+    // Use req.user (set by JWT middleware)
+    if (req.user?.sub) {
+      clerkUID = req.user.sub;
+    } else if (req.user?.id || req.user?.clerkUID) {
+      clerkUID = req.user.id || req.user.clerkUID;
     }
-    const payload = {
-      firstName,
-      lastName,
-      emails,
-      clerkUID,
-      isActive: true,
-      isDeleted: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const createdUser = await createUser(payload);
+    if (!clerkUID) {
+      return next(
+        new AppError(
+          'Clerk user ID not found in request. Make sure JWT middleware is applied.',
+          400
+        )
+      );
+    }
+    // Use service to create or fetch user from Clerk
+    const { user, alreadyExists } = await createUserFromClerk(clerkUID);
+    if (alreadyExists) {
+      return responseData({
+        res,
+        status: 409,
+        message: 'User already exists',
+        data: user,
+      });
+    }
     responseData({
       res,
-      status: 200,
+      status: 201,
       message: MESSAGES.SUCCESS.CREATE,
-      data: createdUser,
+      data: user,
     });
   } catch (error) {
     next(error);

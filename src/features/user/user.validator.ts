@@ -16,18 +16,8 @@ const validator = {
     }),
   },
   create: {
-    body: Joi.object({
-      username: Joi.string().trim().required(),
-      first_name: Joi.string().trim().required(),
-      last_name: Joi.string().trim().required(),
-      email: Joi.string().trim().email().required(),
-      phone1: Joi.string().trim().required(),
-      phone2: Joi.string().trim().allow('').optional(),
-      phone3: Joi.string().trim().allow('').optional(),
-      password: Joi.string().trim().min(6).required(),
-      address1: Joi.string().trim().required(),
-      address2: Joi.string().trim().allow('').optional(),
-    }),
+    // For Clerk-based user creation, no body fields are required
+    body: Joi.object({}).optional(),
   },
   update: {
     params: Joi.object({
