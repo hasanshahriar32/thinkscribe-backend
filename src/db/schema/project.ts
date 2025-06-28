@@ -1,4 +1,5 @@
-import { pgTable, serial, text, varchar, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, jsonb, integer } from 'drizzle-orm/pg-core';
+import { users } from './users';
 
 interface ResearchPaper {
   id: number;
@@ -25,6 +26,9 @@ interface ResearchPaper {
 
 export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
   searchId: varchar('search_id', { length: 255 }),

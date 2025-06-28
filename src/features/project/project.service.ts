@@ -59,12 +59,19 @@ async function searchThinkSourceAPI(query: string) {
   }
 }
 
-export async function getProjects(filters: ListQuery) {
+export async function getProjects(filters: ListQuery, userId?: number) {
   const pagination = getPagination({
     page: filters.page as number,
     size: filters.size as number,
   });
-  const whereClause = buildProjectKeywordFilter(filters.keyword || '');
+  
+  // Build where clause with keyword filter and optional userId filter
+  const keywordFilter = buildProjectKeywordFilter(filters.keyword || '');
+  const userFilter = userId ? eq(projects.userId, userId) : undefined;
+  
+  const whereClause = keywordFilter && userFilter 
+    ? and(keywordFilter, userFilter)
+    : keywordFilter || userFilter;
   
   const dataQuery = db
     .select()
@@ -81,15 +88,19 @@ export async function getProjects(filters: ListQuery) {
   return getPaginatedData(dataQuery, countQuery, filters, pagination);
 }
 
-export async function getProject(id: string | number) {
+export async function getProject(id: string | number, userId?: number) {
+  const whereClause = userId 
+    ? and(eq(projects.id, Number(id)), eq(projects.userId, userId))
+    : eq(projects.id, Number(id));
+    
   const project = await db
     .select()
     .from(projects)
-    .where(eq(projects.id, Number(id)));
+    .where(whereClause);
   return project[0] || null;
 }
 
-export async function createProject(data: { title: string; description: string }) {
+export async function createProject(data: { title: string; description: string; userId: number }) {
   // Create search query by combining title and description
   const searchQuery = `${data.title} ${data.description}`.trim();
   
@@ -125,6 +136,7 @@ export async function createProject(data: { title: string; description: string }
 
   // Create project with API data
   const [created] = await db.insert(projects).values({
+    userId: data.userId,
     title: data.title,
     description: data.description,
     searchId: searchId,

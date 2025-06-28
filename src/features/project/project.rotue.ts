@@ -10,16 +10,18 @@ import {
 } from './project.controller';
 import verifyRBAC from '../../middlewares/rbac';
 import { ACTIONS, MODULES, ROLES, SUB_MODULES } from '../../configs/rbac';
+import { verifyToken } from '../../middlewares/jwt';
 
 const projectRoutes = Router();
 
 // =========================
 // GET /projects
 // - Get all projects with pagination and search
-// - RBAC will be configured later
+// - Requires JWT authentication to filter by user
 // =========================
 projectRoutes.get(
   '/projects',
+  verifyToken, // JWT authentication
   // verifyRBAC({
   //   action: ACTIONS.VIEW,
   //   roles: [ROLES.ADMIN, ROLES.USER], // Configure as needed
@@ -33,10 +35,11 @@ projectRoutes.get(
 // =========================
 // GET /projects/:id
 // - Get a single project by ID
-// - RBAC will be configured later
+// - Requires JWT authentication to check ownership
 // =========================
 projectRoutes.get(
   '/projects/:id',
+  verifyToken, // JWT authentication
   // verifyRBAC({
   //   action: ACTIONS.VIEW,
   //   roles: [ROLES.ADMIN, ROLES.USER],
@@ -50,10 +53,11 @@ projectRoutes.get(
 // =========================
 // POST /projects
 // - Create a new project
-// - RBAC will be configured later
+// - Requires JWT authentication
 // =========================
 projectRoutes.post(
   '/projects',
+  verifyToken, // JWT authentication
   // verifyRBAC({
   //   action: ACTIONS.CREATE,
   //   roles: [ROLES.ADMIN, ROLES.USER],
@@ -67,10 +71,11 @@ projectRoutes.post(
 // =========================
 // PUT /projects/:id
 // - Update an existing project
-// - RBAC will be configured later
+// - Requires JWT authentication
 // =========================
 projectRoutes.put(
   '/projects/:id',
+  verifyToken, // JWT authentication
   // verifyRBAC({
   //   action: ACTIONS.UPDATE,
   //   roles: [ROLES.ADMIN, ROLES.USER],
@@ -84,10 +89,11 @@ projectRoutes.put(
 // =========================
 // DELETE /projects/:id
 // - Delete a project
-// - RBAC will be configured later
+// - Requires JWT authentication
 // =========================
 projectRoutes.delete(
   '/projects/:id',
+  verifyToken, // JWT authentication
   // verifyRBAC({
   //   action: ACTIONS.DELETE,
   //   roles: [ROLES.ADMIN], // Only admin can delete
