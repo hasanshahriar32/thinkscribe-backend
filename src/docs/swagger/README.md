@@ -4,9 +4,40 @@ This folder contains the OpenAPI 3.0 (Swagger) documentation for the Thinkscribe
 
 ## Structure
 
-- `openapi.yml`: Main OpenAPI 3.0 spec, including global components, security, and core endpoints (users, etc.)
-- `tags.yml`: Tag definitions for grouping endpoints in Swagger UI
+- `auth.yml`: Authentication endpoints (login, JWT validation, etc.)
+- `users.yml`: User management endpoints with Clerk integration
+- `products.yml`: Product and product category management endpoints
+- `projects.yml`: Project management endpoints with PDF list support
 - `rbac_endpoints.yml`: Detailed RBAC endpoints (roles, modules, sub-modules, permissions, actions, channels, etc.)
+
+## API Modules
+
+### Authentication (`auth.yml`)
+
+- JWT-based authentication with Clerk integration
+- Token validation and refresh endpoints
+
+### Users (`users.yml`)
+
+- User CRUD operations with Clerk synchronization
+- Profile management and user search
+
+### Products (`products.yml`)
+
+- Product and category management
+- Inventory and pricing operations
+
+### Projects (`projects.yml`)
+
+- Project lifecycle management
+- PDF document association and management
+- Search and filtering capabilities
+- Full CRUD operations with pagination
+
+### RBAC (`rbac_endpoints.yml`)
+
+- Role-based access control endpoints
+- Permission and module management
 
 ## Usage
 

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import authRoutes from './features/auth/auth.route';
 import productRoutes from './features/product/product.route';
 import userRoutes from './features/user/user.route';
+import projectRoutes from './features/project/project.rotue';
 import { verifyToken } from './middlewares/jwt';
 import actionRoutes from './features/rbac/action/action.route';
 import permissionRoutes from './features/rbac/permission/permission.route';
@@ -25,6 +26,7 @@ routes.use('/api/v1', verifyToken, actionRoutes);
 routes.use('/api/v1', verifyToken, permissionRoutes);
 routes.use('/api/v1', verifyToken, productCategoryRoutes);
 routes.use('/api/v1', verifyToken, productRoutes);
+routes.use('/api/v1', verifyToken, projectRoutes);
 routes.use('/api/v1', verifyToken, userRoutes);
 
 export default routes;

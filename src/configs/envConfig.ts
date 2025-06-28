@@ -25,6 +25,7 @@ const REQUIRED_ENV_VARS = [
   'DOC_PASS',
   'BASE_URL',
   'CLERK_SECRET_KEY', 
+  'THINKSOURCE_API_TOKEN',
   'RATE_LIMIT_WINDOW_MS',
   'RATE_LIMIT_MAX',
   'RATE_LIMIT_MESSAGE',
@@ -74,6 +75,7 @@ export const DOC_USER = process.env.DOC_USER || 'password';
 export const DOC_PASS = process.env.DOC_PASS || 'admin';
 export const BASE_URL = process.env.BASE_URL || 'http://localhost:2000';
 export const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+export const THINKSOURCE_API_TOKEN = process.env.THINKSOURCE_API_TOKEN;
 export const RATE_LIMIT_WINDOW_MS = parseInt(
   process.env.RATE_LIMIT_WINDOW_MS || '900000',
   10
