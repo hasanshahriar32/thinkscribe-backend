@@ -26,51 +26,63 @@ async function seed() {
   ]).returning();
 
   // --- ROLES ---
-  const [adminRole, userRole] = await db.insert(roles).values([
-    { name: 'admin', description: 'Administrator', isActive: true },
-    { name: 'user', description: 'Regular User', isActive: true },
+  const [adminRole, userRole, devRole] = await db.insert(roles).values([
+    { name: 'ADMIN', description: 'Administrator', isActive: true },
+    { name: 'USER', description: 'Regular User', isActive: true },
+    { name: 'DEVELOPER', description: 'Developer', isActive: true },
   ]).returning();
 
   // --- MODULES ---
-  const [mod1] = await db.insert(modules).values([
-    { name: 'User Management', description: 'Manage users', isActive: true },
+  const [modUserMgmt, modProduct] = await db.insert(modules).values([
+    { name: 'USER_MANAGEMENT', description: 'User management module', isActive: true },
+    { name: 'PRODUCT', description: 'Product module', isActive: true },
   ]).returning();
 
   // --- SUBMODULES ---
-  const [subMod1] = await db.insert(subModules).values([
-    { moduleId: mod1.id, name: 'User List', description: 'List users', isActive: true },
+  const [subUser, subUserRoleAssign, subProductCategory, subProduct] = await db.insert(subModules).values([
+    { moduleId: modUserMgmt.id, name: 'USER', description: 'User submodule', isActive: true },
+    { moduleId: modUserMgmt.id, name: 'USER_ROLE_ASSIGN', description: 'User role assignment', isActive: true },
+    { moduleId: modProduct.id, name: 'PRODUCT_CATEGORY', description: 'Product category', isActive: true },
+    { moduleId: modProduct.id, name: 'PRODUCT', description: 'Product submodule', isActive: true },
   ]).returning();
 
   // --- ACTIONS ---
-  const [actionView, actionEdit] = await db.insert(actions).values([
-    { name: 'view', description: 'View resource' },
-    { name: 'edit', description: 'Edit resource' },
+  const [actionCreate, actionView, actionUpdate, actionDelete] = await db.insert(actions).values([
+    { name: 'CREATE', description: 'Create resource' },
+    { name: 'VIEW', description: 'View resource' },
+    { name: 'UPDATE', description: 'Update resource' },
+    { name: 'DELETE', description: 'Delete resource' },
   ]).returning();
 
   // --- PERMISSIONS ---
-  const [permView, permEdit] = await db.insert(permissions).values([
-    {
-      actionId: actionView.id,
-      moduleId: mod1.id,
-      subModuleId: subMod1.id,
-      name: 'user:view',
-      description: 'View users',
-    },
-    {
-      actionId: actionEdit.id,
-      moduleId: mod1.id,
-      subModuleId: subMod1.id,
-      name: 'user:edit',
-      description: 'Edit users',
-    },
-  ]).returning();
+  // Example: grant all actions on all submodules to ADMIN
+  type PermissionInsert = {
+    actionId: number;
+    moduleId: number | null;
+    subModuleId: number;
+    name: string;
+    description: string;
+  };
+  const perms: PermissionInsert[] = [];
+  for (const action of [actionCreate, actionView, actionUpdate, actionDelete]) {
+    for (const sub of [subUser, subUserRoleAssign, subProductCategory, subProduct]) {
+      perms.push({
+        actionId: action.id,
+        moduleId: sub.moduleId,
+        subModuleId: sub.id,
+        name: `${sub.name}:${action.name}`,
+        description: `${action.name} on ${sub.name}`,
+      });
+    }
+  }
+  const insertedPerms = await db.insert(permissions).values(perms).returning();
 
   // --- ROLE PERMISSIONS ---
-  await db.insert(rolePermissions).values([
-    { roleId: adminRole.id, permissionId: permView.id },
-    { roleId: adminRole.id, permissionId: permEdit.id },
-    { roleId: userRole.id, permissionId: permView.id },
-  ]);
+  // Grant all permissions to ADMIN, VIEW to USER, CREATE/VIEW to DEVELOPER
+  const adminPerms = insertedPerms.map((p) => ({ roleId: adminRole.id, permissionId: p.id }));
+  const userPerms = insertedPerms.filter((p) => p.name.endsWith(':VIEW')).map((p) => ({ roleId: userRole.id, permissionId: p.id }));
+  const devPerms = insertedPerms.filter((p) => p.name.endsWith(':CREATE') || p.name.endsWith(':VIEW')).map((p) => ({ roleId: devRole.id, permissionId: p.id }));
+  await db.insert(rolePermissions).values([...adminPerms, ...userPerms, ...devPerms]);
 
   // --- USER ROLES ---
   await db.insert(userRoles).values([

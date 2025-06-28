@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon --ext ts --exec ts-node src/server.ts",
+    "dev": "npm run clerk:token && nodemon --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/src/server.js",
     "lint": "eslint src --ext .ts",
@@ -22,7 +22,8 @@
     "db:studio": "npm run build && drizzle-kit studio --port 4000",
     "db:studio:prod": "cross-env drizzle-kit studio --host 0.0.0.0 --port $PORT",
     "db:seed": "npx tsx ./drizzle/seed-initial-data.ts",
-    "db:drop": "drizzle-kit drop"
+    "db:drop": "drizzle-kit drop",
+    "clerk:token": "node ./scripts/generate-clerk-session-token.mjs"
   },
   "keywords": [],
   "author": "",
@@ -76,6 +77,7 @@
     "@types/yamljs": "^0.2.34",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
+    "clipboardy": "^4.0.0",
     "copyfiles": "^2.4.1",
     "drizzle-kit": "^0.31.1",
     "eslint": "^9.22.0",

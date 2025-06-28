@@ -24,6 +24,19 @@ paths:
       tags: [Roles]
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: size
+          schema:
+            type: integer
+          required: true
+          description: Number of items per page
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: false
+          description: Page number (optional)
       responses:
         '200':
           description: List of roles

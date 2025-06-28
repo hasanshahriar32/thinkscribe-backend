@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import db from '../db/db';
 import { AppError } from '../utils/http';
 import { MESSAGES } from '../configs/messages';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import {
   userRoles,
   roles,
@@ -12,18 +12,15 @@ import {
   modules,
   subModules,
 } from '../db/schema/rbac';
+import { getLocalUserIdFromClerkUID } from '../utils/common';
 
 interface RBACParams {
-  roles: string[]; // Allowed roles for access
-  action: string; // Required action (e.g., 'Create', 'Delete')
-  module?: string; // Optional module name (e.g., 'User')
-  subModule?: string; // Optional sub-module name (e.g., 'Profile')
+  roles: string[];
+  action: string;
+  module?: string;
+  subModule?: string;
 }
 
-/**
- * Middleware to verify if a user has permission to perform a specific action
- * based on their role and assigned permissions in the database.
- */
 const verifyRBAC = ({
   roles: allowedRoles,
   action,
@@ -32,11 +29,14 @@ const verifyRBAC = ({
 }: RBACParams) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Step 1: Get userId from request (adjust as per your auth logic)
-      const userId = req.body.user?.id;
+      const userFromJwt = (req as any).user;
+      const userFromBody = req.body.user;
+      let userId = userFromJwt?.id || userFromJwt?.sub || userFromBody?.id;
+      if (typeof userId === 'string' && userId.startsWith('user_')) {
+        userId = await getLocalUserIdFromClerkUID(userId);
+      }
       if (!userId) return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
 
-      // Step 2: Get all roles assigned to the user
       const userRoleRows = await db
         .select({ roleId: userRoles.roleId })
         .from(userRoles)
@@ -47,18 +47,18 @@ const verifyRBAC = ({
       if (!userRoleIds.length)
         return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
 
-      // Step 3: Get role names and check if any are allowed
       const userRoleNameRows = await db
         .select({ name: roles.name })
         .from(roles)
         .where(inArray(roles.id, userRoleIds));
       const userRoleNames = userRoleNameRows.map((r) => r.name);
-      if (!userRoleNames.some((r) => allowedRoles.includes(r))) {
+      const userRoleNamesLower = userRoleNames.map((r) => r.toLowerCase());
+      const allowedRolesLower = allowedRoles.map((r) => r.toLowerCase());
+      if (!userRoleNamesLower.some((r) => allowedRolesLower.includes(r))) {
         return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
       }
 
-      // Step 4: Check permissions for the action/module/subModule
-      const perms = await db
+      const allPerms = await db
         .select({
           permissionId: permissions.id,
           actionName: actions.name,
@@ -73,15 +73,20 @@ const verifyRBAC = ({
         .innerJoin(actions, eq(permissions.actionId, actions.id))
         .innerJoin(modules, eq(permissions.moduleId, modules.id))
         .innerJoin(subModules, eq(permissions.subModuleId, subModules.id))
-        .where(
-          and(
-            inArray(rolePermissions.roleId, userRoleIds),
-            eq(actions.name, action),
-            eq(modules.name, module ?? ''),
-            eq(subModules.name, subModule ?? '')
-          )
-        );
-      if (!perms.length) return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
+        .where(inArray(rolePermissions.roleId, userRoleIds));
+
+      const norm = (val: string | undefined) => (val || '').toLowerCase().replace(/_/g, ' ').trim();
+      const normAction = norm(action);
+      const normModule = norm(module);
+      const normSubModule = norm(subModule);
+
+      const hasPerm = allPerms.some(
+        (perm: any) =>
+          norm(perm.actionName) === normAction &&
+          norm(perm.moduleName) === normModule &&
+          norm(perm.subModuleName) === normSubModule
+      );
+      if (!hasPerm) return next(new AppError(MESSAGES.ERROR.NO_PERMISSION, 403));
       next();
     } catch (err) {
       next(err);
