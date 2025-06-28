@@ -505,3 +505,12 @@ GET /docs/rbac/swagger-ui-init.js 200 1.318 ms - 33774 {}
 GET /docs/ 401 11.076 ms - 24 {}
 GET /docs/ 200 78.111 ms - 1746 {}
 GET /favicon.ico 200 61.164 ms - 331115 {}
+GET /docs/rbac 301 25.166 ms - 159 {}
+GET /docs/rbac/ 200 12.358 ms - 3106 {}
+GET /docs/rbac/swagger-ui-init.js 200 5.227 ms - 33774 {}
+GET /docs/rbac/swagger-ui-init.js 200 1.433 ms - 33774 {}
+GET /docs/rbac/swagger-ui.css 200 103.916 ms - 154986 {}
+GET /docs/rbac/swagger-ui-standalone-preset.js 200 217.691 ms - 229223 {}
+GET /docs/rbac/swagger-ui-standalone-preset.js 200 4.999 ms - 229223 {}
+GET /docs/rbac/swagger-ui-bundle.js 200 222.670 ms - 1485258 {}
+GET /docs/rbac/swagger-ui-bundle.js 200 6.250 ms - 1485258 {}

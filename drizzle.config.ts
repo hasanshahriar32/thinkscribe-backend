@@ -10,6 +10,7 @@ export default {
     './dist/src/db/schema/channels.js',
     './dist/src/db/schema/embedDataSchema.js',
     './dist/src/db/schema/fileUploadSchema.js',
+    './dist/src/db/schema/projects.js',
   ],
   out: './drizzle',
   dialect: DATABASE_DIALECT,
