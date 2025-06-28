@@ -2,16 +2,21 @@ openapi: 3.1.0
 info:
   title: Thinkscribe Projects API
   version: 1.0.0
-  description: Project management endpoints for handling project data including PDF lists and search functionality
+  description: |
+    Project management endpoints for handling project data including PDF lists and search functionality.
+    All endpoints require JWT authentication and projects are scoped to the authenticated user.
 tags:
   - name: Projects
-    description: Project management operations
+    description: Project management operations with user authentication and ownership
 
 paths:
   /projects:
     get:
-      summary: Get all projects with pagination and search
+      summary: Get all projects for the authenticated user
       tags: [Projects]
+      description: |
+        Retrieves all projects belonging to the authenticated user with pagination and search functionality.
+        Projects are automatically filtered by the user ID extracted from the JWT token.
       security:
         - bearerAuth: []
       parameters:
@@ -86,7 +91,16 @@ paths:
       summary: Create a new project with automatic research paper discovery
       tags: [Projects]
       description: |
-        Creates a new project by taking a title and description, then automatically searches for relevant research papers using the ThinkSource API. The external API call combines the title and description as a search query and returns up to 100 research papers from openalex, arxiv, and pubmed sources.
+        Creates a new project for the authenticated user by taking a title and description, then automatically searches for relevant research papers using the ThinkSource API. 
+        
+        **Process:**
+        1. Accepts only title and description from the request body
+        2. Automatically extracts user ID from JWT token
+        3. Combines title and description as a search query
+        4. Calls ThinkSource API to fetch relevant research papers
+        5. Creates project with fetched papers and associates it with the authenticated user
+        
+        The external API returns up to 100 research papers from openalex, arxiv, and pubmed sources.
       security:
         - bearerAuth: []
       requestBody:
@@ -131,8 +145,11 @@ paths:
 
   /projects/{id}:
     get:
-      summary: Get a project by ID
+      summary: Get a project by ID for the authenticated user
       tags: [Projects]
+      description: |
+        Retrieves a specific project by ID. The project must belong to the authenticated user.
+        Returns 404 if the project doesn't exist or doesn't belong to the user.
       security:
         - bearerAuth: []
       parameters:
@@ -169,8 +186,11 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
     put:
-      summary: Update a project
+      summary: Update a project for the authenticated user
       tags: [Projects]
+      description: |
+        Updates an existing project that belongs to the authenticated user. 
+        Only the project owner can update their projects. Returns 404 if the project doesn't exist or doesn't belong to the user.
       security:
         - bearerAuth: []
       parameters:
@@ -227,8 +247,11 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
     delete:
-      summary: Delete a project
+      summary: Delete a project for the authenticated user
       tags: [Projects]
+      description: |
+        Deletes an existing project that belongs to the authenticated user. 
+        Only the project owner can delete their projects. Returns 404 if the project doesn't exist or doesn't belong to the user.
       security:
         - bearerAuth: []
       parameters:
@@ -278,6 +301,10 @@ components:
           type: integer
           description: Unique identifier for the project
           example: 1
+        userId:
+          type: integer
+          description: ID of the user who owns this project
+          example: 42
         title:
           type: string
           maxLength: 255
@@ -292,8 +319,8 @@ components:
           type: string
           maxLength: 255
           nullable: true
-          description: Unique search identifier for the project
-          example: "ai-research-2024"
+          description: Unique search identifier returned by ThinkSource API
+          example: "47"
         pdfList:
           type: array
           description: List of research papers automatically fetched from ThinkSource API
@@ -312,6 +339,7 @@ components:
               matchScore: 100
       required:
         - id
+        - userId
         - title
         - pdfList
 

@@ -12,6 +12,7 @@ import {
 import { ListQuery } from '../../types/types';
 import { Request as ExpressRequest } from 'express';
 import { JwtPayload } from '../../types/express';
+import { getAuthenticatedUserId, getClerkUID } from '../../utils/auth';
 
 export type AuthedRequest = ExpressRequest & { user?: JwtPayload };
 
@@ -57,22 +58,9 @@ export async function createOneUser(
   next: NextFunction
 ) {
   try {
-    // Clerk user details should be attached by JWT middleware
-    let clerkUID = undefined;
-    // Use req.user (set by JWT middleware)
-    if (req.user?.sub) {
-      clerkUID = req.user.sub;
-    } else if (req.user?.id || req.user?.clerkUID) {
-      clerkUID = req.user.id || req.user.clerkUID;
-    }
-    if (!clerkUID) {
-      return next(
-        new AppError(
-          'Clerk user ID not found in request. Make sure JWT middleware is applied.',
-          400
-        )
-      );
-    }
+    // Get Clerk UID from JWT middleware
+    const clerkUID = getClerkUID(req);
+    
     // Use service to create or fetch user from Clerk
     const { user, alreadyExists } = await createUserFromClerk(clerkUID);
     if (alreadyExists) {

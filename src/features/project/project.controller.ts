@@ -12,6 +12,7 @@ import {
 import { ListQuery } from '../../types/types';
 import { Request as ExpressRequest } from 'express';
 import { JwtPayload } from '../../types/express';
+import { getAuthenticatedUserId } from '../../utils/auth';
 
 export type AuthedRequest = ExpressRequest & { user?: JwtPayload };
 
@@ -21,27 +22,11 @@ export async function getAllProjects(
   next: NextFunction
 ) {
   try {
-    // Get userId from JWT middleware
-    const userFromJwt = (req as any).user;
-    let userId = userFromJwt?.id || userFromJwt?.sub;
-    
-    if (!userId) {
-      return next(new AppError('User authentication required', 401));
-    }
-
-    // If userId is a Clerk UID (starts with 'user_'), convert to local user ID
-    if (typeof userId === 'string' && userId.startsWith('user_')) {
-      const { getLocalUserIdFromClerkUID } = await import('../../utils/common');
-      userId = await getLocalUserIdFromClerkUID(userId);
-    }
-
-    if (!userId) {
-      return next(new AppError('User not found', 404));
-    }
+    const userId = await getAuthenticatedUserId(req, next);
 
     const result = await getProjects(
       req.query as unknown as ListQuery,
-      Number(userId) // Pass userId as separate parameter
+      userId
     );
     responseData({
       res,
@@ -60,25 +45,9 @@ export async function getOneProject(
   next: NextFunction
 ) {
   try {
-    // Get userId from JWT middleware
-    const userFromJwt = (req as any).user;
-    let userId = userFromJwt?.id || userFromJwt?.sub;
-    
-    if (!userId) {
-      return next(new AppError('User authentication required', 401));
-    }
+    const userId = await getAuthenticatedUserId(req, next);
 
-    // If userId is a Clerk UID (starts with 'user_'), convert to local user ID
-    if (typeof userId === 'string' && userId.startsWith('user_')) {
-      const { getLocalUserIdFromClerkUID } = await import('../../utils/common');
-      userId = await getLocalUserIdFromClerkUID(userId);
-    }
-
-    if (!userId) {
-      return next(new AppError('User not found', 404));
-    }
-
-    const project = await getProject(req.params.id, Number(userId));
+    const project = await getProject(req.params.id, userId);
     if (!project) {
       throw new AppError('Project not found', 404);
     }
@@ -100,26 +69,9 @@ export async function createOneProject(
 ) {
   try {
     const { title, description } = req.body;
-    
-    // Get userId from JWT middleware
-    const userFromJwt = (req as any).user;
-    let userId = userFromJwt?.id || userFromJwt?.sub;
-    
-    if (!userId) {
-      return next(new AppError('User authentication required', 401));
-    }
+    const userId = await getAuthenticatedUserId(req, next);
 
-    // If userId is a Clerk UID (starts with 'user_'), convert to local user ID
-    if (typeof userId === 'string' && userId.startsWith('user_')) {
-      const { getLocalUserIdFromClerkUID } = await import('../../utils/common');
-      userId = await getLocalUserIdFromClerkUID(userId);
-    }
-
-    if (!userId) {
-      return next(new AppError('User not found', 404));
-    }
-
-    const result = await createProject({ title, description, userId: Number(userId) });
+    const result = await createProject({ title, description, userId });
     responseData({
       res,
       status: 201,
@@ -138,27 +90,10 @@ export async function updateOneProject(
 ) {
   try {
     const projectId = req.params.id;
-    
-    // Get userId from JWT middleware
-    const userFromJwt = (req as any).user;
-    let userId = userFromJwt?.id || userFromJwt?.sub;
-    
-    if (!userId) {
-      return next(new AppError('User authentication required', 401));
-    }
-
-    // If userId is a Clerk UID (starts with 'user_'), convert to local user ID
-    if (typeof userId === 'string' && userId.startsWith('user_')) {
-      const { getLocalUserIdFromClerkUID } = await import('../../utils/common');
-      userId = await getLocalUserIdFromClerkUID(userId);
-    }
-
-    if (!userId) {
-      return next(new AppError('User not found', 404));
-    }
+    const userId = await getAuthenticatedUserId(req, next);
     
     // Check if project exists and belongs to user
-    const existingProject = await getProject(projectId, Number(userId));
+    const existingProject = await getProject(projectId, userId);
     if (!existingProject) {
       throw new AppError('Project not found or you do not have permission to update it', 404);
     }
@@ -186,27 +121,10 @@ export async function deleteOneProject(
 ) {
   try {
     const projectId = req.params.id;
-    
-    // Get userId from JWT middleware
-    const userFromJwt = (req as any).user;
-    let userId = userFromJwt?.id || userFromJwt?.sub;
-    
-    if (!userId) {
-      return next(new AppError('User authentication required', 401));
-    }
-
-    // If userId is a Clerk UID (starts with 'user_'), convert to local user ID
-    if (typeof userId === 'string' && userId.startsWith('user_')) {
-      const { getLocalUserIdFromClerkUID } = await import('../../utils/common');
-      userId = await getLocalUserIdFromClerkUID(userId);
-    }
-
-    if (!userId) {
-      return next(new AppError('User not found', 404));
-    }
+    const userId = await getAuthenticatedUserId(req, next);
     
     // Check if project exists and belongs to user
-    const existingProject = await getProject(projectId, Number(userId));
+    const existingProject = await getProject(projectId, userId);
     if (!existingProject) {
       throw new AppError('Project not found or you do not have permission to delete it', 404);
     }

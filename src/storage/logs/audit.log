@@ -554,3 +554,16 @@ GET /docs/projects/favicon-32x32.png 304 15.787 ms - - {}
 POST /api/v1/projects 401 2.650 ms - 137 {"title":"AI Research Project","description":"A comprehensive study on AI applications","searchId":"ai-research-2024","pdfList":[]}
 POST /api/v1/projects 400 807.071 ms - 167 {"title":"AI Research Project","description":"A comprehensive study on AI applications","searchId":"ai-research-2024","pdfList":[]}
 POST /api/v1/projects 201 48509.765 ms - 116331 {"title":"AI Research Project","description":"A comprehensive study on AI applications"}
+GET /docs 401 7.583 ms - 24 {}
+POST /api/v1/projects 201 5072.475 ms - 17942 {"title":"AI Research Project","description":"A comprehensive study on AI applications"}
+GET /docs/projects/ 401 9.073 ms - 24 {}
+GET /docs/projects/ 304 4.713 ms - - {}
+GET /docs/projects/swagger-ui.css 304 7.318 ms - - {}
+GET /docs/projects/swagger-ui-init.js 200 11.306 ms - 30787 {}
+GET /docs/projects/swagger-ui-bundle.js 304 8.537 ms - - {}
+GET /docs/projects/swagger-ui-standalone-preset.js 304 6.067 ms - - {}
+GET /docs/projects/swagger-ui-init.js 200 1.836 ms - 30787 {}
+GET /docs/projects/swagger-ui-standalone-preset.js 304 10.398 ms - - {}
+GET /docs/projects/swagger-ui-bundle.js 304 4.329 ms - - {}
+GET /docs/projects/favicon-32x32.png 304 1.332 ms - - {}
+POST /api/v1/projects 201 6164.695 ms - 17505 {"title":"Machine Learning Neural Networks","description":"Research on deep learning architectures and neural network optimization techniques"}
