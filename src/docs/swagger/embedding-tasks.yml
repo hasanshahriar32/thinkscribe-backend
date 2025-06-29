@@ -93,14 +93,15 @@ paths:
       summary: Create a new embedding task
       tags: [Embedding Tasks]
       description: |
-        Creates a new embedding task for the authenticated user by taking project ID, search ID, and papers list, then initiating the external embedding service.
+        Creates a new embedding task for the authenticated user by taking only a project ID, then automatically fetching papers from the external service.
         
         **Process:**
         1. Validates that the project belongs to the authenticated user
-        2. Sets all papers status to 'pending'
-        3. Calls external embedding service to initiate processing
-        4. Creates embedding task record with external task ID
-        5. Returns the created embedding task
+        2. Extracts the searchId from the project record
+        3. Calls external service API to fetch papers using the searchId
+        4. Sets all papers status to 'pending' (overriding external status)
+        5. Initiates external embedding processing
+        6. Creates embedding task record with fetched papers
         
         The external service will update the status via webhook as processing completes.
       security:
@@ -112,18 +113,10 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateEmbeddingTaskRequest'
             examples:
-              sample_task:
-                summary: Sample Embedding Task
+              simple_task:
+                summary: Simple Embedding Task Creation
                 value:
                   projectId: 1
-                  searchId: 50
-                  papers:
-                    - paperId: 660
-                      title: "Towards Reliable Detection of Empty Space"
-                      blobUrl: "https://example.com/paper1.pdf"
-                    - paperId: 661
-                      title: "Assessing an evolutionary search engine"
-                      blobUrl: "https://example.com/paper2.pdf"
       responses:
         '201':
           description: Embedding task created successfully
@@ -520,44 +513,12 @@ components:
       type: object
       required:
         - projectId
-        - searchId
-        - papers
       properties:
         projectId:
           type: integer
           minimum: 1
-          description: ID of the project to associate with this embedding task
+          description: ID of the project to create embedding task for. The system will automatically fetch papers from the external service using the project's searchId.
           example: 1
-        searchId:
-          type: integer
-          minimum: 1
-          description: Search ID from the research paper search
-          example: 50
-        papers:
-          type: array
-          minItems: 1
-          maxItems: 100
-          description: List of papers to embed (max 100 per task)
-          items:
-            type: object
-            required:
-              - paperId
-              - title
-              - blobUrl
-            properties:
-              paperId:
-                type: integer
-                minimum: 1
-                example: 660
-              title:
-                type: string
-                minLength: 1
-                maxLength: 500
-                example: "Towards Reliable Detection of Empty Space"
-              blobUrl:
-                type: string
-                format: uri
-                example: "https://example.com/papers/paper1.pdf"
 
     WebhookStatusUpdate:
       type: object

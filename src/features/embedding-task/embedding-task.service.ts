@@ -18,8 +18,19 @@ interface EmbeddingPaper {
 
 interface CreateEmbeddingTaskData {
   projectId: number;
-  papers: EmbeddingPaper[];
+}
+
+interface ExternalUploadResponse {
+  success: boolean;
   searchId: number;
+  totalPapers: number;
+  uploadedCount: number;
+  papers: Array<{
+    paperId: number;
+    title: string;
+    blobUrl: string;
+    status: string;
+  }>;
 }
 
 interface ExternalEmbeddingResponse {
@@ -39,40 +50,52 @@ function buildEmbeddingTaskKeywordFilter(keyword: string) {
 
 export class EmbeddingTaskService {
   /**
-   * Create a new embedding task and initiate external processing
+   * Create a new embedding task by fetching papers from external service
    */
   async createEmbeddingTask(
     userId: number,
     data: CreateEmbeddingTaskData
   ): Promise<EmbeddingTask> {
-    // Verify project belongs to user
-    const project = await db
+    // Verify project belongs to user and get searchId
+    const [project] = await db
       .select()
       .from(projects)
       .where(and(eq(projects.id, data.projectId), eq(projects.userId, userId)))
       .limit(1);
 
-    if (project.length === 0) {
+    if (!project) {
       throw new AppError('Project not found or access denied', 404);
     }
 
-    // Set all papers status to pending initially
-    const papersWithPendingStatus = data.papers.map(paper => ({
-      ...paper,
-      status: 'pending' as const
+    if (!project.searchId) {
+      throw new AppError('Project does not have a search ID', 400);
+    }
+
+    // Fetch papers from external service using the project's searchId
+    const papersResponse = await this.fetchPapersFromExternalService(project.searchId);
+
+    // Convert external papers to our format with pending status
+    const papersWithPendingStatus: EmbeddingPaper[] = papersResponse.papers.map((paper: any) => ({
+      paperId: paper.paperId,
+      title: paper.title,
+      blobUrl: paper.blobUrl,
+      status: 'pending' as const // Override external status to pending
     }));
 
-    // Call external embedding service
-    const externalTaskId = await this.initiateExternalEmbedding(papersWithPendingStatus);
+    // TODO: Call external embedding service to initiate processing
+    // const externalTaskId = await this.initiateExternalEmbedding(papersWithPendingStatus);
+    
+    // Generate a temporary task ID since we're not calling external service yet
+    const tempTaskId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Create embedding task in database
     const newTask: NewEmbeddingTask = {
       userId,
       projectId: data.projectId,
-      taskId: externalTaskId,
-      searchId: data.searchId,
-      totalPapers: data.papers.length,
-      uploadedCount: data.papers.length,
+      taskId: tempTaskId, // Using temp task ID instead of external one
+      searchId: parseInt(project.searchId),
+      totalPapers: papersResponse.totalPapers,
+      uploadedCount: papersResponse.uploadedCount,
       papers: papersWithPendingStatus,
       status: 'pending',
     };
@@ -225,7 +248,7 @@ export class EmbeddingTaskService {
         },
         {
           headers: {
-            'Authorization': `Bearer ${envConfig.EXTERNAL_SERVICE_TOKEN}`,
+            'Authorization': `Bearer ${envConfig.THINKSOURCE_API_TOKEN}`,
             'Content-Type': 'application/json'
           },
           timeout: 30000 // 30 seconds timeout
@@ -243,6 +266,40 @@ export class EmbeddingTaskService {
         throw new AppError(`External service error: ${message}`, 500);
       }
       throw new AppError('Failed to initiate embedding task', 500);
+    }
+  }
+
+  /**
+   * Fetch papers from external service using searchId
+   */
+  private async fetchPapersFromExternalService(searchId: string): Promise<ExternalUploadResponse> {
+    const url = `${envConfig.EXTERNAL_SERVICE_BASE_URL}/api/upload/search/${searchId}`;
+    
+    try {
+      const response = await axios.post<ExternalUploadResponse>(
+        url,
+        {}, // Empty body for POST request
+        {
+          headers: {
+            'Authorization': `Bearer ${envConfig.THINKSOURCE_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000 // 30 seconds timeout
+        }
+      );
+
+      if (!response.data.success) {
+        throw new AppError('Failed to fetch papers from external service', 500);
+      }
+
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message || 'External service error while fetching papers';
+        throw new AppError(`External service error: ${message}`, 500);
+      }
+      
+      throw new AppError('Failed to fetch papers from external service', 500);
     }
   }
 

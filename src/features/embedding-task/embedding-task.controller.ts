@@ -14,12 +14,10 @@ export class EmbeddingTaskController {
    */
   createEmbeddingTask = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = await getAuthenticatedUserId(req, next);
-    const { projectId, papers, searchId } = req.body;
+    const { projectId } = req.body;
 
     const embeddingTask = await embeddingTaskService.createEmbeddingTask(userId, {
-      projectId,
-      papers,
-      searchId
+      projectId
     });
 
     sendResponse(res, {

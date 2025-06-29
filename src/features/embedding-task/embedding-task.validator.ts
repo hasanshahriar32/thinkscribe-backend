@@ -8,54 +8,6 @@ export const createEmbeddingTaskSchema = Joi.object({
       'number.integer': 'Project ID must be an integer',  
       'number.positive': 'Project ID must be positive',
       'any.required': 'Project ID is required'
-    }),
-  
-  searchId: Joi.number().integer().positive().required()
-    .messages({
-      'number.base': 'Search ID must be a number',
-      'number.integer': 'Search ID must be an integer',
-      'number.positive': 'Search ID must be positive', 
-      'any.required': 'Search ID is required'
-    }),
-
-  papers: Joi.array().items(
-    Joi.object({
-      paperId: Joi.number().integer().positive().required()
-        .messages({
-          'number.base': 'Paper ID must be a number',
-          'number.integer': 'Paper ID must be an integer',
-          'number.positive': 'Paper ID must be positive',
-          'any.required': 'Paper ID is required'
-        }),
-      
-      title: Joi.string().trim().min(1).max(500).required()
-        .messages({
-          'string.base': 'Paper title must be a string',
-          'string.empty': 'Paper title cannot be empty',
-          'string.min': 'Paper title must have at least 1 character',
-          'string.max': 'Paper title cannot exceed 500 characters',
-          'any.required': 'Paper title is required'
-        }),
-      
-      blobUrl: Joi.string().uri().required()
-        .messages({
-          'string.base': 'Blob URL must be a string',
-          'string.uri': 'Blob URL must be a valid URL',
-          'any.required': 'Blob URL is required'
-        }),
-      
-      status: Joi.string().valid('pending', 'processing', 'success', 'failed').optional()
-        .messages({
-          'string.base': 'Status must be a string',
-          'any.only': 'Status must be one of: pending, processing, success, failed'
-        })
-    })
-  ).min(1).max(100).required()
-    .messages({
-      'array.base': 'Papers must be an array',
-      'array.min': 'At least 1 paper is required',
-      'array.max': 'Cannot exceed 100 papers per task',
-      'any.required': 'Papers list is required'
     })
 });
 
