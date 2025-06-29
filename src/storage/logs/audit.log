@@ -783,3 +783,16 @@ POST /api/v1/embedding-tasks/webhook/status-update 200 711.749 ms - 359 {"pdfUrl
 POST /api/v1/embedding-tasks/webhook/status-update 200 554.150 ms - 367 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Assessing_an_evolutionary_search_engine_for_small__1751221235093.pdf","status":"success","message":"PDF processed successfully"}
 POST /api/v1/embedding-tasks/webhook/status-update 400 7.589 ms - 216 {"pdfUrl":"","status":"success","message":"PDF processed successfully"}
 POST /api/v1/embedding-tasks/webhook/status-update 200 630.622 ms - 367 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751221235090.pdf","status":"success","message":"PDF processed successfully"}
+GET /docs/projects 401 89.540 ms - 24 {}
+GET /docs/projects 301 14.136 ms - 163 {}
+GET /docs/projects/ 200 9.481 ms - 3106 {}
+GET /docs/projects/swagger-ui-init.js 200 5.868 ms - 30787 {}
+GET /docs/projects/swagger-ui.css 200 149.487 ms - 154986 {}
+GET /docs/projects/swagger-ui-standalone-preset.js 200 205.897 ms - 229223 {}
+GET /docs/projects/swagger-ui-bundle.js 200 235.473 ms - 1485258 {}
+GET /docs/projects/favicon-32x32.png 200 6.677 ms - 628 {}
+GET /docs/projects/favicon-32x32.png 304 16.132 ms - - {}
+POST /api/v1/projects 201 5903.121 ms - 6017 {"title":"Machine Learning Neural Networks","description":"Research on deep learning architectures and neural network optimization techniques"}
+GET /docs/embeddingTasks/favicon-32x32.png 304 3.135 ms - - {}
+POST /api/v1/embedding-tasks 500 16281.617 ms - 334 {"projectId":6}
+POST /api/v1/embedding-tasks 500 16202.855 ms - 334 {"projectId":6}
