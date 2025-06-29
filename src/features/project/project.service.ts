@@ -31,7 +31,7 @@ async function searchThinkSourceAPI(query: string) {
       yearFrom: 0,
       yearTo: 0,
       language: 'string',
-      limit: 15
+      limit: 5
     },
     sources: [
       'openalex',

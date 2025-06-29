@@ -4,7 +4,7 @@ import { projects } from '../../db/schema/project';
 import { eq, and, desc, sql, or } from 'drizzle-orm';
 import { AppError } from '../../utils/http';
 import axios from 'axios';
-import { envConfig } from '../../configs/envConfig';
+import { envConfig, WORKER_SERVER_TOKEN } from '../../configs/envConfig';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
 
@@ -39,6 +39,45 @@ interface ExternalEmbeddingResponse {
   message: string;
 }
 
+// Worker server interfaces
+interface WorkerBatchRequest {
+  pdfUrls: string[];
+  metadata: {
+    source: string;
+    category: string;
+  };
+  concurrency: number;
+}
+
+interface WorkerBatchResponse {
+  batchId: string;
+  status: string;
+  totalTasks: number;
+  taskIds: string[];
+  message: string;
+  estimatedProcessingTime: string;
+  concurrency: number;
+}
+
+interface WorkerServerRequest {
+  pdfUrls: string[];
+  metadata: {
+    source: string;
+    category: string;
+  };
+  concurrency: number;
+}
+
+interface WorkerServerResponse {
+  batchId: string;
+  status: string;
+  totalTasks: number;
+  taskIds: string[];
+  message: string;
+  estimatedProcessingTime: string;
+  concurrency: number;
+}
+
 // Helper: filter embedding tasks by keyword (taskId or status)
 function buildEmbeddingTaskKeywordFilter(keyword: string) {
   if (!keyword) return undefined;
@@ -50,12 +89,12 @@ function buildEmbeddingTaskKeywordFilter(keyword: string) {
 
 export class EmbeddingTaskService {
   /**
-   * Create a new embedding task by fetching papers from external service
+   * Create a new embedding task by fetching PDFs and calling worker server
    */
   async createEmbeddingTask(
     userId: number,
     data: CreateEmbeddingTaskData
-  ): Promise<EmbeddingTask> {
+  ): Promise<any> {
     // Verify project belongs to user and get searchId
     const [project] = await db
       .select()
@@ -71,33 +110,56 @@ export class EmbeddingTaskService {
       throw new AppError('Project does not have a search ID', 400);
     }
 
-    // Fetch papers from external service using the project's searchId
+    // Fetch PDF URLs from external service using the project's searchId
     const papersResponse = await this.fetchPapersFromExternalService(project.searchId);
+    
+    // Extract PDF URLs from the response
+    const pdfUrls = papersResponse.papers.map((paper: any) => paper.blobUrl);
 
-    // Convert external papers to our format with pending status
+    // Call worker server to start batch job
+    const batchJobRequest: WorkerBatchRequest = {
+      pdfUrls: pdfUrls,
+      metadata: {
+        source: 'thinkscribe',
+        category: 'project-documents',
+      },
+      concurrency: 3, // Process 3 PDFs concurrently
+    };
+
+    const workerResponse = await fetch('https://thinkscribe-worker.onrender.com/api/tasks/batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${WORKER_SERVER_TOKEN}`,
+      },
+      body: JSON.stringify(batchJobRequest),
+    });
+
+    if (!workerResponse.ok) {
+      const errorText = await workerResponse.text();
+      throw new AppError(`Failed to start batch job with worker server: ${errorText}`, 500);
+    }
+
+    const workerData: WorkerBatchResponse = await workerResponse.json();
+
+    // Convert papers to embedding format with pending status
     const papersWithPendingStatus: EmbeddingPaper[] = papersResponse.papers.map((paper: any) => ({
       paperId: paper.paperId,
       title: paper.title,
       blobUrl: paper.blobUrl,
-      status: 'pending' as const // Override external status to pending
+      status: 'pending' as const
     }));
 
-    // TODO: Call external embedding service to initiate processing
-    // const externalTaskId = await this.initiateExternalEmbedding(papersWithPendingStatus);
-    
-    // Generate a temporary task ID since we're not calling external service yet
-    const tempTaskId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Create embedding task in database
+    // Create embedding task in database with worker batch job data
     const newTask: NewEmbeddingTask = {
       userId,
       projectId: data.projectId,
-      taskId: tempTaskId, // Using temp task ID instead of external one
+      taskId: workerData.batchId, // Use batchId as taskId
       searchId: parseInt(project.searchId),
-      totalPapers: papersResponse.totalPapers,
+      totalPapers: workerData.totalTasks,
       uploadedCount: papersResponse.uploadedCount,
       papers: papersWithPendingStatus,
-      status: 'pending',
+      status: workerData.status || 'pending',
     };
 
     const [createdTask] = await db
@@ -105,7 +167,19 @@ export class EmbeddingTaskService {
       .values(newTask)
       .returning();
 
-    return createdTask;
+    return {
+      id: createdTask.id,
+      projectId: createdTask.projectId,
+      status: createdTask.status,
+      message: workerData.message || `Embedding task created for project ${data.projectId}. Processing ${workerData.totalTasks} PDF files.`,
+      batchId: workerData.batchId,
+      taskIds: workerData.taskIds,
+      totalTasks: workerData.totalTasks,
+      concurrency: workerData.concurrency,
+      estimatedProcessingTime: workerData.estimatedProcessingTime,
+      pdfUrlsCount: pdfUrls.length,
+      createdAt: createdTask.createdAt,
+    };
   }
 
   /**

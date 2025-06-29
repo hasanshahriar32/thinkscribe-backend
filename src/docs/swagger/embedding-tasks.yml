@@ -93,17 +93,17 @@ paths:
       summary: Create a new embedding task
       tags: [Embedding Tasks]
       description: |
-        Creates a new embedding task for the authenticated user by taking only a project ID, then automatically fetching papers from the external service.
+        Creates a new embedding task for the authenticated user by taking only a project ID, then automatically fetching PDF URLs and calling the worker server.
         
         **Process:**
         1. Validates that the project belongs to the authenticated user
         2. Extracts the searchId from the project record
-        3. Calls external service API to fetch papers using the searchId
-        4. Sets all papers status to 'pending' (overriding external status)
-        5. Initiates external embedding processing
-        6. Creates embedding task record with fetched papers
+        3. Calls external service API to fetch PDF URLs using the searchId
+        4. Structures the batch job request for the worker server
+        5. Calls worker server to start embedding batch job
+        6. Creates embedding task record with worker server response data
         
-        The external service will update the status via webhook as processing completes.
+        The worker server will process the PDFs and the status can be monitored via the API.
       security:
         - bearerAuth: []
       requestBody:
@@ -132,7 +132,44 @@ paths:
                     type: string
                     example: "Embedding task created successfully!"
                   data:
-                    $ref: '#/components/schemas/EmbeddingTask'
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 123
+                      projectId:
+                        type: integer
+                        example: 456
+                      status:
+                        type: string
+                        example: "pending"
+                      message:
+                        type: string
+                        example: "Embedding task created for project 456. Processing 15 PDF files."
+                      batchId:
+                        type: string
+                        example: "batch_67890abcdef"
+                      taskIds:
+                        type: array
+                        items:
+                          type: string
+                        example: ["task_1", "task_2", "task_3"]
+                      totalTasks:
+                        type: integer
+                        example: 15
+                      concurrency:
+                        type: integer
+                        example: 3
+                      estimatedProcessingTime:
+                        type: string
+                        example: "5-10 minutes"
+                      pdfUrlsCount:
+                        type: integer
+                        example: 15
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2024-01-15T10:30:00Z"
         '400':
           $ref: '#/components/responses/ValidationError'
         '401':
