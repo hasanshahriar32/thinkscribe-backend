@@ -7,6 +7,7 @@ import axios from 'axios';
 import { envConfig, WORKER_SERVER_TOKEN, WORKER_SERVER_URL } from '../../configs/envConfig';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
+import { logAudit } from '../../utils/log';
 
 interface EmbeddingPaper {
   paperId: number;
@@ -113,8 +114,28 @@ export class EmbeddingTaskService {
     // Fetch PDF URLs from external service using the project's searchId
     const papersResponse = await this.fetchPapersFromExternalService(project.searchId);
     
-    // Extract PDF URLs from the response
-    const pdfUrls = papersResponse.papers.map((paper: any) => paper.blobUrl);
+    // Extract and validate PDF URLs from the response
+    const validPapers = papersResponse.papers.filter((paper: any) => {
+      const isValid = paper && 
+                     typeof paper.blobUrl === 'string' && 
+                     paper.blobUrl.trim().length > 0 &&
+                     typeof paper.title === 'string' &&
+                     paper.title.trim().length > 0;
+      
+      if (!isValid) {
+        console.warn('Invalid paper data:', paper);
+      }
+      
+      return isValid;
+    });
+
+    if (validPapers.length === 0) {
+      throw new AppError('No valid PDF URLs found in external service response', 400);
+    }
+
+    const pdfUrls = validPapers.map((paper: any) => paper.blobUrl);
+    
+    console.log(`Sending ${pdfUrls.length} valid PDF URLs to worker server:`, pdfUrls.slice(0, 3));
 
     // Call worker server to start batch job
     const batchJobRequest: WorkerBatchRequest = {
@@ -125,6 +146,9 @@ export class EmbeddingTaskService {
       },
       concurrency: 3, // Process 3 PDFs concurrently
     };
+
+    console.log(`Sending batch request to worker server: ${WORKER_SERVER_URL}/api/tasks/batch`);
+    console.log('Request payload:', JSON.stringify(batchJobRequest, null, 2));
 
     const workerResponse = await fetch(`${WORKER_SERVER_URL}/api/tasks/batch`, {
       method: 'POST',
@@ -137,13 +161,14 @@ export class EmbeddingTaskService {
 
     if (!workerResponse.ok) {
       const errorText = await workerResponse.text();
+      console.error('Worker server error response:', errorText);
       throw new AppError(`Failed to start batch job with worker server: ${errorText}`, 500);
     }
 
     const workerData: WorkerBatchResponse = await workerResponse.json();
 
     // Convert papers to embedding format with pending status
-    const papersWithPendingStatus: EmbeddingPaper[] = papersResponse.papers.map((paper: any) => ({
+    const papersWithPendingStatus: EmbeddingPaper[] = validPapers.map((paper: any) => ({
       paperId: paper.paperId,
       title: paper.title,
       blobUrl: paper.blobUrl,
@@ -244,84 +269,125 @@ export class EmbeddingTaskService {
     status: 'success' | 'failed',
     errorMessage?: string
   ): Promise<EmbeddingTask> {
-    // Find ALL embedding tasks (not just pending/processing)
-    // This allows updating PDFs regardless of task status
-    const allTasks = await db
-      .select()
-      .from(embeddingTasks);
-
-    // Find the task that contains this PDF URL
-    const task = allTasks.find((task) => 
-      task.papers.some((paper: EmbeddingPaper) => paper.blobUrl === pdfUrl)
-    );
-
-    if (!task) {
-      // Log for debugging
-      console.log(`No task found for PDF URL: ${pdfUrl}`);
-      console.log(`Available tasks: ${allTasks.length}`);
-      allTasks.forEach((t, index) => {
-        console.log(`Task ${index + 1} (${t.status}) papers:`, t.papers.map((p: EmbeddingPaper) => p.blobUrl));
-      });
-      throw new AppError('No embedding task found for this PDF URL', 404);
-    }
-
-    // Update the task status based on current status and PDF processing
-    let shouldUpdateTaskStatus = false;
-    let newTaskStatus = task.status;
+    const serviceRequestId = `pdf_update_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    if (task.status === 'pending') {
-      // If task was pending, move to processing when first PDF update comes
-      shouldUpdateTaskStatus = true;
-      newTaskStatus = 'processing';
-    }
+    logAudit(`[PDF-UPDATE-${serviceRequestId}] Starting PDF status update - URL: ${pdfUrl}, Status: ${status}, Error: ${errorMessage || 'none'}`);
+    
+    try {
+      // Find ALL embedding tasks (not just pending/processing)
+      // This allows updating PDFs regardless of task status
+      const allTasks = await db
+        .select()
+        .from(embeddingTasks);
 
-    const updatedPapers = task.papers.map((paper: EmbeddingPaper) => {
-      if (paper.blobUrl === pdfUrl) {
-        return {
-          ...paper,
-          status: status,
-          errorMessage: status === 'failed' ? errorMessage : undefined
-        };
-      }
-      return paper;
-    });
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] Found ${allTasks.length} total embedding tasks to search through`);
 
-    // Check if all papers are completed (either success or failed)
-    const allCompleted = updatedPapers.every((paper: EmbeddingPaper) => 
-      paper.status === 'success' || paper.status === 'failed'
-    );
-
-    // Determine final task status
-    if (allCompleted) {
-      // All papers are done - mark as completed
-      newTaskStatus = 'completed';
-      shouldUpdateTaskStatus = true;
-    } else if (task.status === 'completed') {
-      // Task was completed but now has pending papers - move back to processing
-      const hasPendingPapers = updatedPapers.some((paper: EmbeddingPaper) => 
-        paper.status === 'pending' || paper.status === 'processing'
+      // Find the task that contains this PDF URL
+      const task = allTasks.find((task) => 
+        task.papers.some((paper: EmbeddingPaper) => paper.blobUrl === pdfUrl)
       );
-      if (hasPendingPapers) {
+
+      if (!task) {
+        // Enhanced debugging logs
+        logAudit(`[PDF-UPDATE-${serviceRequestId}] ERROR - No task found for PDF URL: ${pdfUrl}`);
+        logAudit(`[PDF-UPDATE-${serviceRequestId}] Available tasks: ${allTasks.length}`);
+        
+        allTasks.forEach((t, index) => {
+          const paperUrls = t.papers.map((p: EmbeddingPaper) => p.blobUrl);
+          logAudit(`[PDF-UPDATE-${serviceRequestId}] Task ${index + 1} (ID: ${t.id}, Status: ${t.status}) has ${t.papers.length} papers: ${JSON.stringify(paperUrls)}`);
+        });
+        
+        throw new AppError('No embedding task found for this PDF URL', 404);
+      }
+
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] Found matching task - ID: ${task.id}, Status: ${task.status}, Total papers: ${task.papers.length}`);
+
+      // Log current state of the paper being updated
+      const targetPaper = task.papers.find((paper: EmbeddingPaper) => paper.blobUrl === pdfUrl);
+      if (targetPaper) {
+        logAudit(`[PDF-UPDATE-${serviceRequestId}] Target paper current status: ${targetPaper.status}, Title: ${targetPaper.title}`);
+      }
+
+      // Update the task status based on current status and PDF processing
+      let shouldUpdateTaskStatus = false;
+      let newTaskStatus = task.status;
+      
+      if (task.status === 'pending') {
+        // If task was pending, move to processing when first PDF update comes
+        shouldUpdateTaskStatus = true;
+        newTaskStatus = 'processing';
+        logAudit(`[PDF-UPDATE-${serviceRequestId}] Task status change: pending -> processing (first PDF update)`);
+      }
+
+      const updatedPapers = task.papers.map((paper: EmbeddingPaper) => {
+        if (paper.blobUrl === pdfUrl) {
+          return {
+            ...paper,
+            status: status,
+            errorMessage: status === 'failed' ? errorMessage : undefined
+          };
+        }
+        return paper;
+      });
+
+      // Check if all papers are completed (either success or failed)
+      const allCompleted = updatedPapers.every((paper: EmbeddingPaper) => 
+        paper.status === 'success' || paper.status === 'failed'
+      );
+
+      const successfulPapers = updatedPapers.filter((paper: EmbeddingPaper) => paper.status === 'success').length;
+      const failedPapers = updatedPapers.filter((paper: EmbeddingPaper) => paper.status === 'failed').length;
+      const pendingPapers = updatedPapers.filter((paper: EmbeddingPaper) => 
+        paper.status === 'pending' || paper.status === 'processing'
+      ).length;
+
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] Paper status breakdown - Success: ${successfulPapers}, Failed: ${failedPapers}, Pending: ${pendingPapers}`);
+
+      // Determine final task status
+      if (allCompleted) {
+        // All papers are done - mark as completed
+        newTaskStatus = 'completed';
+        shouldUpdateTaskStatus = true;
+        logAudit(`[PDF-UPDATE-${serviceRequestId}] All papers completed - marking task as completed`);
+      } else if (task.status === 'completed') {
+        // Task was completed but now has pending papers - move back to processing
+        const hasPendingPapers = updatedPapers.some((paper: EmbeddingPaper) => 
+          paper.status === 'pending' || paper.status === 'processing'
+        );
+        if (hasPendingPapers) {
+          newTaskStatus = 'processing';
+          shouldUpdateTaskStatus = true;
+          logAudit(`[PDF-UPDATE-${serviceRequestId}] Task status change: completed -> processing (has pending papers)`);
+        }
+      } else if (task.status !== 'processing') {
+        // Any other status should become processing when PDFs are being updated
         newTaskStatus = 'processing';
         shouldUpdateTaskStatus = true;
+        logAudit(`[PDF-UPDATE-${serviceRequestId}] Task status change: ${task.status} -> processing`);
       }
-    } else if (task.status !== 'processing') {
-      // Any other status should become processing when PDFs are being updated
-      newTaskStatus = 'processing';
-      shouldUpdateTaskStatus = true;
+
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] Updating database - Task ID: ${task.id}, New Status: ${newTaskStatus}`);
+
+      const [updatedTask] = await db
+        .update(embeddingTasks)
+        .set({
+          papers: updatedPapers,
+          status: newTaskStatus,
+          updatedAt: new Date(),
+        })
+        .where(eq(embeddingTasks.id, task.id))
+        .returning();
+
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] SUCCESS - PDF status updated successfully`);
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] Final task state - ID: ${updatedTask.id}, Status: ${updatedTask.status}, Updated at: ${updatedTask.updatedAt}`);
+
+      return updatedTask;
+
+    } catch (error: any) {
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] ERROR - Failed to update PDF status: ${error.message}`);
+      logAudit(`[PDF-UPDATE-${serviceRequestId}] Error stack: ${error.stack}`);
+      throw error;
     }
-
-    const [updatedTask] = await db
-      .update(embeddingTasks)
-      .set({
-        papers: updatedPapers,
-        status: newTaskStatus,
-        updatedAt: new Date(),
-      })
-      .where(eq(embeddingTasks.id, task.id))
-      .returning();
-
-    return updatedTask;
   }
 
   /**
@@ -416,6 +482,14 @@ export class EmbeddingTaskService {
       if (!response.data.success) {
         throw new AppError('Failed to fetch papers from external service', 500);
       }
+
+      // Validate the response structure
+      if (!response.data.papers || !Array.isArray(response.data.papers)) {
+        throw new AppError('Invalid response format from external service: no papers array', 500);
+      }
+
+      console.log(`Fetched ${response.data.papers.length} papers from external service`);
+      console.log('Sample paper data:', response.data.papers.slice(0, 2));
 
       return response.data;
     } catch (error) {

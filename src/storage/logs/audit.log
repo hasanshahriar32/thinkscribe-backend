@@ -796,3 +796,13 @@ POST /api/v1/projects 201 5903.121 ms - 6017 {"title":"Machine Learning Neural N
 GET /docs/embeddingTasks/favicon-32x32.png 304 3.135 ms - - {}
 POST /api/v1/embedding-tasks 500 16281.617 ms - 334 {"projectId":6}
 POST /api/v1/embedding-tasks 500 16202.855 ms - 334 {"projectId":6}
+POST /api/v1/embedding-tasks 500 14406.059 ms - 726 {"projectId":6}
+POST /api/v1/embedding-tasks 500 13394.992 ms - 726 {"projectId":6}
+POST /api/v1/embedding-tasks 500 14787.735 ms - 726 {"projectId":6}
+POST /api/v1/embedding-tasks 500 12708.507 ms - 726 {"projectId":6}
+POST /api/v1/embedding-tasks 500 17608.317 ms - 726 {"projectId":6}
+POST /api/v1/embedding-tasks 400 15444.633 ms - 208 {"projectId":6}
+POST /api/v1/embedding-tasks 400 21090.392 ms - 208 {"projectId":4}
+POST /api/v1/projects 201 6793.841 ms - 6017 {"title":"Machine Learning Neural Networks","description":"Research on deep learning architectures and neural network optimization techniques"}
+GET /docs/projects/favicon-32x32.png 304 10.669 ms - - {}
+POST /api/v1/embedding-tasks 201 60581.232 ms - 561 {"projectId":7}

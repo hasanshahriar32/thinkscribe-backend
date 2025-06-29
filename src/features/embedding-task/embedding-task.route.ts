@@ -68,4 +68,10 @@ router.get(
   embeddingTaskController.debugTasks
 );
 
+// Debug endpoint for webhook activity
+router.get(
+  '/debug/webhook-activity',
+  embeddingTaskController.debugWebhookActivity
+);
+
 export default router;
