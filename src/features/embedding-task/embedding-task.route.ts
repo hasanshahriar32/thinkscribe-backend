@@ -62,4 +62,10 @@ router.get(
   embeddingTaskController.getTaskStatus
 );
 
+// Debug endpoint (for troubleshooting)
+router.get(
+  '/debug/tasks',
+  embeddingTaskController.debugTasks
+);
+
 export default router;

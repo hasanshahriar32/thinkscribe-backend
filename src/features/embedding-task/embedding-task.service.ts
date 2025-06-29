@@ -4,7 +4,7 @@ import { projects } from '../../db/schema/project';
 import { eq, and, desc, sql, or } from 'drizzle-orm';
 import { AppError } from '../../utils/http';
 import axios from 'axios';
-import { envConfig, WORKER_SERVER_TOKEN } from '../../configs/envConfig';
+import { envConfig, WORKER_SERVER_TOKEN, WORKER_SERVER_URL } from '../../configs/envConfig';
 import { getPaginatedData, getPagination } from '../../utils/common';
 import { ListQuery } from '../../types/types';
 
@@ -126,7 +126,7 @@ export class EmbeddingTaskService {
       concurrency: 3, // Process 3 PDFs concurrently
     };
 
-    const workerResponse = await fetch('https://thinkscribe-worker.onrender.com/api/tasks/batch', {
+    const workerResponse = await fetch(`${WORKER_SERVER_URL}/api/tasks/batch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -237,37 +237,88 @@ export class EmbeddingTaskService {
   }
 
   /**
-   * Update embedding task status via webhook
+   * Update individual PDF status via webhook
    */
-  async updateTaskStatus(
-    externalTaskId: string,
-    status: string,
-    papers?: EmbeddingPaper[]
+  async updatePdfStatus(
+    pdfUrl: string,
+    status: 'success' | 'failed',
+    errorMessage?: string
   ): Promise<EmbeddingTask> {
-    const [existingTask] = await db
+    // Find ALL embedding tasks (not just pending/processing)
+    // This allows updating PDFs regardless of task status
+    const allTasks = await db
       .select()
-      .from(embeddingTasks)
-      .where(eq(embeddingTasks.taskId, externalTaskId))
-      .limit(1);
+      .from(embeddingTasks);
 
-    if (!existingTask) {
-      throw new AppError('Embedding task not found', 404);
+    // Find the task that contains this PDF URL
+    const task = allTasks.find((task) => 
+      task.papers.some((paper: EmbeddingPaper) => paper.blobUrl === pdfUrl)
+    );
+
+    if (!task) {
+      // Log for debugging
+      console.log(`No task found for PDF URL: ${pdfUrl}`);
+      console.log(`Available tasks: ${allTasks.length}`);
+      allTasks.forEach((t, index) => {
+        console.log(`Task ${index + 1} (${t.status}) papers:`, t.papers.map((p: EmbeddingPaper) => p.blobUrl));
+      });
+      throw new AppError('No embedding task found for this PDF URL', 404);
     }
 
-    const updateData: Partial<EmbeddingTask> = {
-      status,
-      updatedAt: new Date(),
-    };
+    // Update the task status based on current status and PDF processing
+    let shouldUpdateTaskStatus = false;
+    let newTaskStatus = task.status;
+    
+    if (task.status === 'pending') {
+      // If task was pending, move to processing when first PDF update comes
+      shouldUpdateTaskStatus = true;
+      newTaskStatus = 'processing';
+    }
 
-    // Update papers if provided
-    if (papers) {
-      updateData.papers = papers;
+    const updatedPapers = task.papers.map((paper: EmbeddingPaper) => {
+      if (paper.blobUrl === pdfUrl) {
+        return {
+          ...paper,
+          status: status,
+          errorMessage: status === 'failed' ? errorMessage : undefined
+        };
+      }
+      return paper;
+    });
+
+    // Check if all papers are completed (either success or failed)
+    const allCompleted = updatedPapers.every((paper: EmbeddingPaper) => 
+      paper.status === 'success' || paper.status === 'failed'
+    );
+
+    // Determine final task status
+    if (allCompleted) {
+      // All papers are done - mark as completed
+      newTaskStatus = 'completed';
+      shouldUpdateTaskStatus = true;
+    } else if (task.status === 'completed') {
+      // Task was completed but now has pending papers - move back to processing
+      const hasPendingPapers = updatedPapers.some((paper: EmbeddingPaper) => 
+        paper.status === 'pending' || paper.status === 'processing'
+      );
+      if (hasPendingPapers) {
+        newTaskStatus = 'processing';
+        shouldUpdateTaskStatus = true;
+      }
+    } else if (task.status !== 'processing') {
+      // Any other status should become processing when PDFs are being updated
+      newTaskStatus = 'processing';
+      shouldUpdateTaskStatus = true;
     }
 
     const [updatedTask] = await db
       .update(embeddingTasks)
-      .set(updateData)
-      .where(eq(embeddingTasks.taskId, externalTaskId))
+      .set({
+        papers: updatedPapers,
+        status: newTaskStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(embeddingTasks.id, task.id))
       .returning();
 
     return updatedTask;
@@ -388,5 +439,30 @@ export class EmbeddingTaskService {
       .limit(1);
 
     return task || null;
+  }
+
+  /**
+   * Debug method to get all tasks for troubleshooting
+   */
+  async getAllTasksForDebug() {
+    const tasks = await db
+      .select()
+      .from(embeddingTasks)
+      .limit(10); // Limit to avoid too much data
+
+    return tasks.map(task => ({
+      id: task.id,
+      taskId: task.taskId,
+      status: task.status,
+      totalPapers: task.totalPapers,
+      papersCount: task.papers.length,
+      papers: task.papers.map((p: EmbeddingPaper) => ({
+        paperId: p.paperId,
+        title: p.title,
+        blobUrl: p.blobUrl,
+        status: p.status
+      })),
+      createdAt: task.createdAt
+    }));
   }
 }

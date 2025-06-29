@@ -745,3 +745,41 @@ GET /docs/embeddingTasks/favicon-32x32.png 304 3.847 ms - - {}
 GET /docs/embeddingTasks/favicon-32x32.png 304 2.029 ms - - {}
 GET /docs/embeddingTasks/favicon-32x32.png 304 2.605 ms - - {}
 POST /api/v1/embedding-tasks 201 32781.059 ms - 955 {"projectId":4}
+GET /docs/embeddingTasks/favicon-32x32.png 304 14.023 ms - - {}
+GET /docs/embeddingTasks/favicon-32x32.png 304 2.315 ms - - {}
+GET /docs/embeddingTasks/favicon-32x32.png 304 2.131 ms - - {}
+GET /docs/embeddingTasks/ 304 10.667 ms - - {}
+GET /docs/embeddingTasks/swagger-ui.css 304 8.049 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-bundle.js 304 9.037 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-init.js 200 7.753 ms - 33667 {}
+GET /docs/embeddingTasks/swagger-ui-standalone-preset.js 304 14.943 ms - - {}
+GET /docs/embeddingTasks/favicon-32x32.png 304 1.851 ms - - {}
+POST /api/v1/embedding-tasks/webhook/status-update 500 743.772 ms - 1008 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751220168367.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 500 478.162 ms - 1008 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 401 1.292 ms - 168 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 500 530.269 ms - 1008 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 401 16.550 ms - 168 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 401 6.020 ms - 168 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 401 1.095 ms - 168 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+GET /docs/embeddingTasks/ 401 2.235 ms - 24 {}
+GET /docs/embeddingTasks/ 304 5.476 ms - - {}
+GET /docs/embeddingTasks/swagger-ui.css 304 7.815 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-bundle.js 304 6.354 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-standalone-preset.js 304 3.158 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-init.js 304 3.151 ms - - {}
+GET /docs/embeddingTasks/favicon-32x32.png 304 2.297 ms - - {}
+POST /api/v1/embedding-tasks/webhook/status-update 401 1.029 ms - 168 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 404 565.759 ms - 206 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+GET /docs/embeddingTasks/ 304 10.523 ms - - {}
+GET /docs/embeddingTasks/swagger-ui.css 304 2.910 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-bundle.js 304 5.642 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-init.js 304 4.822 ms - - {}
+GET /docs/embeddingTasks/swagger-ui-standalone-preset.js 304 8.448 ms - - {}
+GET /docs/embeddingTasks/favicon-32x32.png 304 2.085 ms - - {}
+POST /api/v1/embedding-tasks/webhook/status-update 200 739.923 ms - 359 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751217994898.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 404 535.399 ms - 206 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751221235090.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 404 492.868 ms - 206 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Assessing_an_evolutionary_search_engine_for_small__1751221235093.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 200 711.749 ms - 359 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Assessing_an_evolutionary_search_engine_for_small__1751217994894.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 200 554.150 ms - 367 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Assessing_an_evolutionary_search_engine_for_small__1751221235093.pdf","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 400 7.589 ms - 216 {"pdfUrl":"","status":"success","message":"PDF processed successfully"}
+POST /api/v1/embedding-tasks/webhook/status-update 200 630.622 ms - 367 {"pdfUrl":"https://ym58rk9cpdeglu7z.public.blob.vercel-storage.com/papers/arxiv/2025/Towards_Reliable_Detection_of_Empty_Space_Conditio_1751221235090.pdf","status":"success","message":"PDF processed successfully"}

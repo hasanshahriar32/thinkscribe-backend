@@ -28,6 +28,7 @@ const REQUIRED_ENV_VARS = [
   'THINKSOURCE_API_TOKEN',
   'EXTERNAL_SERVICE_BASE_URL',
   'EXTERNAL_SERVICE_TOKEN',
+  'WORKER_SERVER_URL',
   'WORKER_SERVER_TOKEN',
   'WEBHOOK_SECRET_TOKEN',
   'RATE_LIMIT_WINDOW_MS',
@@ -81,6 +82,7 @@ export const BASE_URL = process.env.BASE_URL || 'http://localhost:2000';
 export const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 export const THINKSOURCE_API_TOKEN = process.env.THINKSOURCE_API_TOKEN;
 export const EXTERNAL_SERVICE_BASE_URL = process.env.EXTERNAL_SERVICE_BASE_URL || 'https://thinksource.onrender.com'; // Default to ThinkSource service URL
+export const WORKER_SERVER_URL = process.env.WORKER_SERVER_URL || 'https://thinkscribe-worker.onrender.com';
 export const WORKER_SERVER_TOKEN = process.env.WORKER_SERVER_TOKEN;
 
 export const WEBHOOK_SECRET_TOKEN = process.env.WEBHOOK_SECRET_TOKEN || '';
@@ -116,6 +118,7 @@ export const envConfig = {
   CLERK_SECRET_KEY,
   THINKSOURCE_API_TOKEN,
   EXTERNAL_SERVICE_BASE_URL,
+  WORKER_SERVER_URL,
   WORKER_SERVER_TOKEN,
   WEBHOOK_SECRET_TOKEN,
   RATE_LIMIT_WINDOW_MS,

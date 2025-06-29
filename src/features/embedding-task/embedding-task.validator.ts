@@ -52,32 +52,24 @@ export const paginationSchema = Joi.object({
 
 // Validation schema for webhook status updates
 export const webhookUpdateSchema = Joi.object({
-  taskId: Joi.string().trim().min(1).required()
+  pdfUrl: Joi.string().uri().required()
     .messages({
-      'string.base': 'Task ID must be a string',
-      'string.empty': 'Task ID cannot be empty', 
-      'string.min': 'Task ID must have at least 1 character',
-      'any.required': 'Task ID is required'
+      'string.base': 'PDF URL must be a string',
+      'string.uri': 'PDF URL must be a valid URL',
+      'any.required': 'PDF URL is required'
     }),
   
-  status: Joi.string().valid('pending', 'processing', 'completed', 'failed').required()
+  status: Joi.string().valid('success', 'failed').required()
     .messages({
       'string.base': 'Status must be a string',
-      'any.only': 'Status must be one of: pending, processing, completed, failed',
+      'any.only': 'Status must be either "success" or "failed"',
       'any.required': 'Status is required'
     }),
   
-  papers: Joi.array().items(
-    Joi.object({
-      paperId: Joi.number().integer().positive().required(),
-      title: Joi.string().trim().min(1).max(500).required(),
-      blobUrl: Joi.string().uri().required(),
-      status: Joi.string().valid('pending', 'processing', 'success', 'failed').required(),
-      errorMessage: Joi.string().trim().max(1000).optional()
-    })
-  ).optional()
+  errorMessage: Joi.string().trim().max(1000).optional()
     .messages({
-      'array.base': 'Papers must be an array'
+      'string.base': 'Error message must be a string',
+      'string.max': 'Error message cannot exceed 1000 characters'
     }),
   
   message: Joi.string().trim().max(500).optional()

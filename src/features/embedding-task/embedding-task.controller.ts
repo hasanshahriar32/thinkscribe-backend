@@ -4,6 +4,7 @@ import { getAuthenticatedUserId } from '../../utils/auth';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
 import { AppError } from '../../utils/http';
+import { WEBHOOK_SECRET_TOKEN } from '../../configs/envConfig';
 
 const embeddingTaskService = new EmbeddingTaskService();
 
@@ -109,27 +110,29 @@ export class EmbeddingTaskController {
   });
 
   /**
-   * Webhook endpoint for status updates from external embedding service
+   * Webhook endpoint for PDF status updates from external embedding service
    * POST /embedding-tasks/webhook/status-update
    */
   webhookStatusUpdate = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { taskId, status, papers, message } = req.body;
+    const { pdfUrl, status, errorMessage, message } = req.body;
 
-    // Verify webhook authenticity (you might want to add signature verification)
+    // Verify webhook authenticity
     const webhookToken = req.headers['x-webhook-token'];
-    if (webhookToken !== process.env.WEBHOOK_SECRET_TOKEN) {
+    if (webhookToken !== WEBHOOK_SECRET_TOKEN) {
       throw new AppError('Invalid webhook token', 401);
     }
 
-    const updatedTask = await embeddingTaskService.updateTaskStatus(taskId, status, papers);
+    const updatedTask = await embeddingTaskService.updatePdfStatus(pdfUrl, status, errorMessage);
 
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: 'Status updated successfully',
+      message: message || 'PDF status updated successfully',
       data: {
         taskId: updatedTask.taskId,
-        status: updatedTask.status,
+        pdfUrl: pdfUrl,
+        status: status,
+        taskStatus: updatedTask.status,
         updatedAt: updatedTask.updatedAt
       },
     });
@@ -162,6 +165,21 @@ export class EmbeddingTaskController {
         failedPapers: task.papers.filter((p: any) => p.status === 'failed').length,
         updatedAt: task.updatedAt
       },
+    });
+  });
+
+  /**
+   * Debug endpoint to check tasks and papers for webhook troubleshooting
+   * GET /embedding-tasks/debug/tasks
+   */
+  debugTasks = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const tasks = await embeddingTaskService.getAllTasksForDebug();
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Debug tasks retrieved successfully',
+      data: tasks,
     });
   });
 }

@@ -317,13 +317,15 @@ paths:
 
   /embedding-tasks/webhook/status-update:
     post:
-      summary: Webhook endpoint for external embedding service status updates
+      summary: Webhook endpoint for individual PDF processing status updates
       tags: [Embedding Tasks]
       description: |
-        Webhook endpoint called by the external embedding service to update the status of embedding tasks.
+        Webhook endpoint called by the external embedding service to update the processing status of individual PDF files.
+        The external service calls this endpoint for each PDF with either 'success' or 'failed' status.
         This endpoint requires a webhook secret token in the X-Webhook-Token header for authentication.
         
         **Authentication:** Uses webhook token instead of JWT authentication.
+        **Note:** The system automatically determines overall task completion when all PDFs are processed.
       parameters:
         - in: header
           name: X-Webhook-Token
@@ -338,30 +340,22 @@ paths:
             schema:
               $ref: '#/components/schemas/WebhookStatusUpdate'
             examples:
-              completed_task:
-                summary: Task Completed
+              pdf_success:
+                summary: PDF Processing Success
                 value:
-                  taskId: "ext-task-123"
-                  status: "completed"
-                  papers:
-                    - paperId: 660
-                      title: "Towards Reliable Detection of Empty Space"
-                      blobUrl: "https://example.com/paper1.pdf"
-                      status: "success"
-                    - paperId: 661
-                      title: "Assessing an evolutionary search engine"
-                      blobUrl: "https://example.com/paper2.pdf"
-                      status: "failed"
-                      errorMessage: "PDF processing failed"
-              failed_task:
-                summary: Task Failed
+                  pdfUrl: "https://example.com/paper1.pdf"
+                  status: "success"
+                  message: "PDF processed successfully"
+              pdf_failed:
+                summary: PDF Processing Failed
                 value:
-                  taskId: "ext-task-456"
+                  pdfUrl: "https://example.com/paper2.pdf"
                   status: "failed"
-                  message: "External service error"
+                  errorMessage: "Failed to extract text from PDF"
+                  message: "PDF processing failed"
       responses:
         '200':
-          description: Status updated successfully
+          description: PDF status updated successfully
           content:
             application/json:
               schema:
@@ -372,16 +366,22 @@ paths:
                     example: true
                   message:
                     type: string
-                    example: "Status updated successfully"
+                    example: "PDF status updated successfully"
                   data:
                     type: object
                     properties:
                       taskId:
                         type: string
-                        example: "ext-task-123"
+                        example: "batch-123"
+                      pdfUrl:
+                        type: string
+                        example: "https://example.com/paper1.pdf"
                       status:
                         type: string
-                        example: "completed"
+                        example: "success"
+                      taskStatus:
+                        type: string
+                        example: "processing"
                       updatedAt:
                         type: string
                         format: date-time
@@ -560,53 +560,29 @@ components:
     WebhookStatusUpdate:
       type: object
       required:
-        - taskId
+        - pdfUrl
         - status
       properties:
-        taskId:
+        pdfUrl:
           type: string
-          minLength: 1
-          description: External task identifier
-          example: "ext-task-123"
+          format: uri
+          description: URL of the PDF that was processed
+          example: "https://example.com/papers/paper1.pdf"
         status:
           type: string
-          enum: [pending, processing, completed, failed]
-          description: Updated task status
-          example: "completed"
-        papers:
-          type: array
-          description: Updated papers list with individual statuses (optional)
-          items:
-            type: object
-            required:
-              - paperId
-              - title
-              - blobUrl
-              - status
-            properties:
-              paperId:
-                type: integer
-                example: 660
-              title:
-                type: string
-                example: "Towards Reliable Detection of Empty Space"
-              blobUrl:
-                type: string
-                format: uri
-                example: "https://example.com/papers/paper1.pdf"
-              status:
-                type: string
-                enum: [pending, processing, success, failed]
-                example: "success"
-              errorMessage:
-                type: string
-                maxLength: 1000
-                example: "PDF processing failed"
+          enum: [success, failed]
+          description: Processing status of the PDF
+          example: "success"
+        errorMessage:
+          type: string
+          maxLength: 1000
+          description: Error message if status is 'failed' (optional)
+          example: "Failed to extract text from PDF"
         message:
           type: string
           maxLength: 500
           description: Optional status update message
-          example: "All papers processed successfully"
+          example: "PDF processed successfully"
 
     PaginationMeta:
       type: object
