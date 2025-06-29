@@ -3,6 +3,7 @@ import authRoutes from './features/auth/auth.route';
 import productRoutes from './features/product/product.route';
 import userRoutes from './features/user/user.route';
 import projectRoutes from './features/project/project.rotue';
+import embeddingTaskRoutes from './features/embedding-task/embedding-task.route';
 import { verifyToken } from './middlewares/jwt';
 import actionRoutes from './features/rbac/action/action.route';
 import permissionRoutes from './features/rbac/permission/permission.route';
@@ -16,6 +17,7 @@ const routes = Router();
 
 // Public routes (No authentication required)
 routes.use('/api/v1/auth', authRoutes);
+routes.use('/api/v1/embedding-tasks', embeddingTaskRoutes); // Some endpoints are public (webhook)
 
 // Protected routes (Require JWT authentication)
 routes.use('/api/v1', verifyToken, moduleRoutes);

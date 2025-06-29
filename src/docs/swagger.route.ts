@@ -5,6 +5,7 @@ import path from 'path';
 import { Request, Response, NextFunction } from 'express';
 import { DOC_USER, DOC_PASS, BASE_URL } from '../configs/envConfig';
 import { projects } from '../db/schema/project';
+import { embeddingTasks } from '../db/schema/embedding.task';
 
 const router = express.Router();
 
@@ -66,7 +67,8 @@ const domainSpecs = {
   products: createDomainSpec('products.yml'),
   rbac: createDomainSpec('rbac_endpoints.yml'),
   users: createDomainSpec('users.yml'),
-  projects: createDomainSpec('projects.yml'), // Added projects domain spec
+  projects: createDomainSpec('projects.yml'),
+  embeddingTasks: createDomainSpec('embedding-tasks.yml'), // Added embedding tasks domain spec
 };
 
 const swaggerSpecs = {
@@ -74,7 +76,8 @@ const swaggerSpecs = {
   products: swaggerJsdoc(domainSpecs.products),
   rbac: swaggerJsdoc(domainSpecs.rbac),
   users: swaggerJsdoc(domainSpecs.users),
-  projects: swaggerJsdoc(domainSpecs.projects), // Added projects domain spec
+  projects: swaggerJsdoc(domainSpecs.projects), 
+  embeddingTasks: swaggerJsdoc(domainSpecs.embeddingTasks), // Added embedding tasks spec
 };
 
 // --- Swagger UI Routers ---

@@ -26,6 +26,9 @@ const REQUIRED_ENV_VARS = [
   'BASE_URL',
   'CLERK_SECRET_KEY', 
   'THINKSOURCE_API_TOKEN',
+  'EXTERNAL_SERVICE_BASE_URL',
+  'EXTERNAL_SERVICE_TOKEN',
+  'WEBHOOK_SECRET_TOKEN',
   'RATE_LIMIT_WINDOW_MS',
   'RATE_LIMIT_MAX',
   'RATE_LIMIT_MESSAGE',
@@ -76,6 +79,9 @@ export const DOC_PASS = process.env.DOC_PASS || 'admin';
 export const BASE_URL = process.env.BASE_URL || 'http://localhost:2000';
 export const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 export const THINKSOURCE_API_TOKEN = process.env.THINKSOURCE_API_TOKEN;
+export const EXTERNAL_SERVICE_BASE_URL = process.env.EXTERNAL_SERVICE_BASE_URL || '';
+export const EXTERNAL_SERVICE_TOKEN = process.env.EXTERNAL_SERVICE_TOKEN || '';
+export const WEBHOOK_SECRET_TOKEN = process.env.WEBHOOK_SECRET_TOKEN || '';
 export const RATE_LIMIT_WINDOW_MS = parseInt(
   process.env.RATE_LIMIT_WINDOW_MS || '900000',
   10
@@ -85,6 +91,35 @@ export const RATE_LIMIT_MESSAGE =
   process.env.RATE_LIMIT_MESSAGE ||
   'Too many requests from this IP, please try again later.';
 
+// Centralized config object
+export const envConfig = {
+  PORT,
+  DATABASE_URL,
+  DATABASE_DIALECT,
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+  REFRESH_JWT_SECRET,
+  REFRESH_JWT_EXPIRES_IN,
+  FROM_EMAIL,
+  PASSWORD,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_BUCKET_NAME,
+  SMS_SENDER_ID,
+  SMS_API_KEY,
+  SMS_API_SECRET,
+  DOC_USER,
+  DOC_PASS,
+  BASE_URL,
+  CLERK_SECRET_KEY,
+  THINKSOURCE_API_TOKEN,
+  EXTERNAL_SERVICE_BASE_URL,
+  EXTERNAL_SERVICE_TOKEN,
+  WEBHOOK_SECRET_TOKEN,
+  RATE_LIMIT_WINDOW_MS,
+  RATE_LIMIT_MAX,
+  RATE_LIMIT_MESSAGE,
+};
 
 // Run check on import (can be disabled in prod if needed)
 checkMissingEnvVars();

@@ -11,6 +11,7 @@ export default {
     './dist/src/db/schema/embedDataSchema.js',
     './dist/src/db/schema/fileUploadSchema.js',
     './dist/src/db/schema/project.js',
+    './dist/src/db/schema/embedding.task.js',
   ],
   out: './drizzle',
   dialect: DATABASE_DIALECT,

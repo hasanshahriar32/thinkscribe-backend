@@ -36,6 +36,13 @@
       "when": 1751142185877,
       "tag": "0004_polite_cloak",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1751211768476,
+      "tag": "0005_moaning_goliath",
+      "breakpoints": true
     }
   ]
 }
